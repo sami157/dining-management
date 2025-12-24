@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Tiro+Bangla:ital@0;1&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+@import "tailwindcss";
+@plugin "daisyui";
+
+.title-font {
+  font-family: "Zalando Sans Expanded", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+}
+
+* {
+  font-family: "Google Sans Flex", sans-serif;
+  font-variation-settings:
+    "wdth" 100,
+    "ROND" 25;
+}
+
+a.active {
+  background-color: aliceblue;
+  color: #000;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
