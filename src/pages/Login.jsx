@@ -1,10 +1,21 @@
 import React from 'react'
 import { useForm } from "react-hook-form"
+import useAuth from '../hooks/useAuth'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router'
 
 const Login = () => {
+    const navigate = useNavigate()
+    const { signInUser } = useAuth()
     const { register, formState: { errors }, handleSubmit } = useForm()
-    const onSubmit = (data) => {
-        
+    const onSubmit = async(data) => {
+        try {
+            await signInUser(data.email, data.password)
+            await toast.success('Logged in successfully')
+            navigate('/')
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
 
     return (

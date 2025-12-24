@@ -1,10 +1,18 @@
 import React from 'react'
 import { useForm } from "react-hook-form"
+import useAuth from '../hooks/useAuth'
+import toast from 'react-hot-toast'
 
 const Registration = () => {
+    const { createUser } = useAuth()
     const { register, formState: { errors }, handleSubmit } = useForm()
-    const onSubmit = (data) => {
-        
+    const onSubmit = async(data) => {
+        try {
+            await createUser(data.email, data.password)
+            toast.success('Registered Successfully')
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
 
     return (
