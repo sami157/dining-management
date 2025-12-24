@@ -2,17 +2,24 @@ import React from 'react'
 import { useForm } from "react-hook-form"
 import useAuth from '../hooks/useAuth'
 import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router'
 
 const Registration = () => {
+    const navigate = useNavigate()
     const { createUser } = useAuth()
     const { register, formState: { errors }, handleSubmit } = useForm()
-    const onSubmit = async(data) => {
-        try {
-            await createUser(data.email, data.password)
-            toast.success('Registered Successfully')
-        } catch (error) {
-            toast.error(error.message)
-        }
+    const onSubmit = (data) => {
+        toast.promise(
+            async () => {
+                await createUser(data.email, data.password)
+            },
+            {
+                loading: 'Registration in progress',
+                success: 'Registered successfully',
+                error: 'Registration failed',
+            }
+        )
+        navigate('/')
     }
 
     return (
@@ -26,7 +33,7 @@ const Registration = () => {
                             <label className="label">Name</label>
                             <input {...register("name", { required: "Name is required" })} type="text" className="input" placeholder="Name" />
                             {errors.name && <p className='text-error font-semibold' role="alert">{errors.name.message}</p>}
-                            
+
                             {/* Email */}
                             <label className="label">Email</label>
                             <input {...register("email", { required: "Email Address is required" })} type="email" className="input" placeholder="Email " />
@@ -38,7 +45,8 @@ const Registration = () => {
                             {errors.password && <p className='text-error font-semibold' role="alert">{errors.password.message}</p>}
 
 
-                            <div><a className="link link-hover">Forgot password?</a></div>
+                            <div><a onClick={() => navigate('/login')} className="link link-hover">Already registered? Click here to Login</a></div>
+
                             <button type='submit' className="btn btn-primary mt-4">Register</button>
 
                             {/* Designation

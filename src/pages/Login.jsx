@@ -8,14 +8,18 @@ const Login = () => {
     const navigate = useNavigate()
     const { signInUser } = useAuth()
     const { register, formState: { errors }, handleSubmit } = useForm()
-    const onSubmit = async(data) => {
-        try {
-            await signInUser(data.email, data.password)
-            await toast.success('Logged in successfully')
-            navigate('/')
-        } catch (error) {
-            toast.error(error.message)
-        }
+    const onSubmit = (data) => {
+        toast.promise(
+            async () => {
+                await signInUser(data.email, data.password)
+            },
+            {
+                loading: 'Logging in',
+                success: 'Logged in successfully',
+                error: 'Login failed',
+            }
+        )
+        navigate('/')
     }
 
     return (
@@ -35,8 +39,7 @@ const Login = () => {
                             <input {...register("password", { required: "Password is required" })} type="password" className="input" placeholder="Password" />
                             {errors.password && <p className='text-error font-semibold' role="alert">{errors.password.message}</p>}
 
-
-                            <div><a className="link link-hover">Forgot password?</a></div>
+                            <div><a onClick={() => navigate('/register')} className="link link-hover">Not regitered yet? Click here</a></div>
                             <button type='submit' className="btn btn-primary mt-4">Login</button>
 
                             {/* Designation

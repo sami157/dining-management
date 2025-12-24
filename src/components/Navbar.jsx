@@ -4,7 +4,7 @@ import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 
 const Navbar = () => {
-    const { signOutUser } = useAuth()
+    const { user, loading, signOutUser } = useAuth()
     const logOut = async() => {
         await signOutUser()
         toast.success('Logged out')
@@ -12,9 +12,6 @@ const Navbar = () => {
     const [isdark, setIsdark] = useState(
         JSON.parse(localStorage.getItem('isdark'))
     );
-
-    const { user, loading } = useAuth()
-    console.log(user)
 
     useEffect(() => {
         localStorage.setItem('isdark', JSON.stringify(isdark));
@@ -63,10 +60,13 @@ const Navbar = () => {
                 <NavLink to='/'>Home</NavLink>
             </div>
 
-            <div className='flex gap-3 items-center'>
-                <NavLink to='/register'>Register</NavLink>
-                <NavLink to='/login'>Login</NavLink>
-                <button onClick={logOut} className='btn btn-primary'>Log Out</button>
+            <div className='flex gap-5 items-center'>
+                <p className=''>{user?.email}</p>
+
+                {user
+                ? <button onClick={logOut} className='btn btn-primary'>Log Out</button>
+                : <NavLink to='/login'>Login</NavLink>
+                }
             </div>
         </div>
     )
