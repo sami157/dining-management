@@ -52,7 +52,7 @@ const Navbar = () => {
 
                 <NavLink to='/'>Home</NavLink>
             </div>
-            <NavLink to='/login'>Login</NavLink>
+            <NavLink to='/register'>Register</NavLink>
         </div>
     )
 }
