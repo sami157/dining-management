@@ -1,7 +1,7 @@
 import React from 'react'
 import { useForm } from "react-hook-form"
 
-const Registration = () => {
+const Login = () => {
     const { register, formState: { errors }, handleSubmit } = useForm()
     const onSubmit = (data) => {
         
@@ -9,16 +9,11 @@ const Registration = () => {
 
     return (
         <div className='flex flex-col gap-4 m-10 items-center'>
-            <p className='text-3xl font-semibold'>Registration</p>
+            <p className='text-3xl font-semibold'>Login</p>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
                     <div className="card-body">
                         <fieldset className="fieldset">
-                            {/* Name */}
-                            <label className="label">Name</label>
-                            <input {...register("name", { required: "Name is required" })} type="text" className="input" placeholder="Name" />
-                            {errors.name && <p className='text-error font-semibold' role="alert">{errors.name.message}</p>}
-                            
                             {/* Email */}
                             <label className="label">Email</label>
                             <input {...register("email", { required: "Email Address is required" })} type="email" className="input" placeholder="Email " />
@@ -31,7 +26,7 @@ const Registration = () => {
 
 
                             <div><a className="link link-hover">Forgot password?</a></div>
-                            <button type='submit' className="btn btn-primary mt-4">Register</button>
+                            <button type='submit' className="btn btn-primary mt-4">Login</button>
 
                             {/* Designation
                             <label className="label">Designation</label>
@@ -53,4 +48,4 @@ const Registration = () => {
     )
 }
 
-export default Registration
+export default Login
