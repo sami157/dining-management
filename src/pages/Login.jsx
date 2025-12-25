@@ -12,6 +12,7 @@ const Login = () => {
         toast.promise(
             async () => {
                 await signInUser(data.email, data.password)
+                navigate('/')
             },
             {
                 loading: 'Logging in',
@@ -19,7 +20,6 @@ const Login = () => {
                 error: 'Login failed',
             }
         )
-        navigate('/')
     }
 
     return (

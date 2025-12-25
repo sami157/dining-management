@@ -20,7 +20,7 @@ const Registration = () => {
                     email: data.email,
                     mobile: data.mobile
                 })
-
+                navigate('/')
             },
             {
                 loading: 'Registration in progress',
@@ -28,7 +28,6 @@ const Registration = () => {
                 error: 'Registration failed',
             }
         )
-        navigate('/')
     }
 
     return (

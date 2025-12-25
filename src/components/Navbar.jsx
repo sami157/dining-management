@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 const Navbar = () => {
     const { user, loading, signOutUser } = useAuth()
-    const logOut = async() => {
+    const logOut = async () => {
         await signOutUser()
         toast.success('Logged out')
     }
@@ -47,7 +47,7 @@ const Navbar = () => {
             </svg>
         </label>
     return (
-        <div className='flex items-center justify-between px-[1.5vw] py-[1.5vw] bg-base-100'>
+        <div className='flex items-center justify-between px-4 py-4 bg-base-100'>
             <div className='flex gap-4 items-center'>
                 <div>
                     Logo
@@ -60,14 +60,18 @@ const Navbar = () => {
                 <NavLink to='/'>Home</NavLink>
             </div>
 
-            <div className='flex gap-5 items-center'>
-                <p className=''>{user?.email}</p>
+            {
+                loading
+                    ? <div className="skeleton rounded-lg h-10 w-50"></div>
+                    : <div className='flex gap-5 items-center'>
+                        <p className=''>{user?.email}</p>
 
-                {user
-                ? <button onClick={logOut} className='btn btn-primary'>Log Out</button>
-                : <NavLink to='/login'>Login</NavLink>
-                }
-            </div>
+                        {user
+                            ? <button onClick={logOut} className='btn btn-primary'>Log Out</button>
+                            : <NavLink to='/login'>Login</NavLink>
+                        }
+                    </div>
+            }
         </div>
     )
 }
