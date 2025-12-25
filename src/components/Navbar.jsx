@@ -64,6 +64,7 @@ const Navbar = () => {
                 loading
                     ? <div className="skeleton rounded-lg h-10 w-50"></div>
                     : <div className='flex gap-5 items-center'>
+                        <NavLink to='/meal-schedule'>Meal Schedule</NavLink>
                         <p className=''>{user?.email}</p>
 
                         {user
