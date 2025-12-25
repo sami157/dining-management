@@ -3,8 +3,11 @@ import { useForm } from "react-hook-form"
 import useAuth from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
+import { registerUser } from '../utils/registerUser'
+import useAxiosSecure from '../hooks/useAxiosSecure'
 
 const Registration = () => {
+    const axiosSecure = useAxiosSecure()
     const navigate = useNavigate()
     const { createUser } = useAuth()
     const { register, formState: { errors }, handleSubmit } = useForm()
@@ -12,6 +15,12 @@ const Registration = () => {
         toast.promise(
             async () => {
                 await createUser(data.email, data.password)
+                await registerUser(axiosSecure, {
+                    name: data.name,
+                    email: data.email,
+                    mobile: data.mobile
+                })
+
             },
             {
                 loading: 'Registration in progress',
@@ -33,6 +42,18 @@ const Registration = () => {
                             <label className="label">Name</label>
                             <input {...register("name", { required: "Name is required" })} type="text" className="input" placeholder="Name" />
                             {errors.name && <p className='text-error font-semibold' role="alert">{errors.name.message}</p>}
+
+                            {/* Mobile */}
+                            <label className="label">Mobile Number</label>
+                            <input {...register("mobile", {
+                                required: "Phone Number is required",
+                                maxLength: 11,
+                                minLength: 11
+                            }
+                            )
+                            } type="text" className="input" placeholder="11 digit phone number" />
+                            {errors.name && <p className='text-error font-semibold' role="alert">{errors.mobile.message}</p>}
+                            {errors.mobile && <p className='text-error font-semibold' role="alert">{errors.mobile.message}</p>}
 
                             {/* Email */}
                             <label className="label">Email</label>
