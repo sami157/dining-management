@@ -65,11 +65,14 @@ const Navbar = () => {
                     ? <div className="skeleton rounded-lg h-10 w-50"></div>
                     : <div className='flex gap-5 items-center'>
                         <NavLink to='/meal-schedule'>Meal Schedule</NavLink>
+                        <NavLink to='/user-dashboard'>User Dashboard</NavLink>
                         <p className=''>{user?.email}</p>
 
                         {user
-                            ? <button onClick={logOut} className='btn btn-primary'>Log Out</button>
-                            : <NavLink to='/login'>Login</NavLink>
+                            ? 
+                            <button onClick={logOut} className='btn btn-primary'>Log Out</button>
+                            : 
+                            <NavLink to='/login'>Login</NavLink>
                         }
                     </div>
             }
