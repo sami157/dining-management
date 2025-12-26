@@ -55,103 +55,30 @@ const MealCard = ({ schedule, onUpdate }) => {
     const displayHoliday = isEditing ? editedSchedule.isHoliday : schedule.isHoliday;
 
     return (
-        <div className='card bg-base-100 max-w-6xl'>
-            <div className='flex items-center justify-between p-8'>
-                {/* Date Header */}
-                <div className='flex flex-col items-center justify-center gap-4'>
-                    <h2 className='text-2xl font-bold'>
-                        {format(new Date(schedule.date), 'dd/MM/yyyy')}
-                    </h2>
+        <div className='flex gap-4 items-center h-45 w-11/12 md:w-8/10 mx-auto bg-base-100 rounded-xl justify-between p-4'>
+            {/* Date and Day */}
+            <div className='text-center flex flex-col gap-4 w-1/2'>
+                <h2 className='text-2xl font-bold'>
+                    {format(new Date(schedule.date), 'dd/MM/yyyy')}
+                </h2>
 
-                    <p className='text-lg text-gray-500'>
-                        {format(new Date(schedule.date), 'EEEE')}
-                    </p>
-                </div>
+                <p className='text-lg text-gray-500'>
+                    {format(new Date(schedule.date), 'EEEE')}
+                </p>
+            </div>
 
-                {/* Holiday Toggle */}
-                {/* <div className='flex items-center gap-2 mt-2'>
-                    {isEditing ? (
-                        <label className='flex items-center gap-2 cursor-pointer'>
-                            <input
-                                type="checkbox"
-                                checked={displayHoliday}
-                                onChange={handleHolidayToggle}
-                                className='checkbox checkbox-secondary'
-                            />
-                            <span>Mark as Holiday</span>
-                        </label>
-                    ) : (
-                        displayHoliday && <div className='badge badge-secondary'>Holiday</div>
-                    )}
-                </div> */}
-
-                {/* Meals Section */}
-                <div className=''>
-                    <div className='flex items-center justify-between gap-3'>
-                        {displayMeals?.map((meal, idx) => (
-                            <div key={idx} className='h-auto bg-base-200 p-3 rounded-lg'>
-                                {/* Meal Type with Checkbox */}
-                                <div className='flex items-center gap-2 mb-2'>
-                                    {isEditing ? (
-                                        <label className='flex items-center gap-2 cursor-pointer'>
-                                            <input
-                                                type="checkbox"
-                                                checked={meal.isAvailable}
-                                                onChange={() => handleMealToggle(meal.mealType)}
-                                                className='checkbox checkbox-primary'
-                                            />
-                                            <span className='font-medium'>
-                                                {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
-                                            </span>
-                                        </label>
-                                    ) : (
-                                        <div className='bg-base-100 p-1 rounded-md'>
-                                            {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
-                                            {!meal.isAvailable && ' (Unavailable)'}
-                                        </div>
-                                    )}
+            {/* Meals */}
+            <div className='flex gap-4 w-full h-full'>
+                {displayMeals?.map((meal, idx) => (
+                    <div key={idx} className='bg-base-200 p-2 w-full rounded-xl hover:bg-base-200/50 duration-100 ease-in cursor-pointer'>
+                            {/* Meal Type with Checkbox */}
+                            <div className='flex gap-2'>
+                                <div className='bg-base-100 cursor-default p-1 rounded-md w-full text-center'>
+                                    {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
                                 </div>
-
-                                {/* Menu Input/Display */}
-                                {meal.isAvailable && (
-                                    <div className='ml-6'>
-                                        {isEditing ? (
-                                            <input
-                                                type="text"
-                                                placeholder="Enter menu (optional)"
-                                                value={meal.menu || ''}
-                                                onChange={(e) => handleMenuChange(meal.mealType, e.target.value)}
-                                                className='input input-sm input-bordered w-full'
-                                            />
-                                        ) : (
-                                            <p className='text-sm text-gray-600'>
-                                                {meal.menu ? `Menu: ${meal.menu}` : 'No menu specified'}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className='card-actions justify-end mt-4'>
-                    {isEditing ? (
-                        <>
-                            <button onClick={handleSave} className='btn btn-sm btn-primary'>
-                                Save
-                            </button>
-                            <button onClick={handleCancel} className='btn btn-sm btn-ghost'>
-                                Cancel
-                            </button>
-                        </>
-                    ) : (
-                        <button onClick={() => setIsEditing(true)} className='btn btn-sm btn-outline'>
-                            Edit
-                        </button>
-                    )}
-                </div>
+                        </div>
+                ))}
             </div>
         </div>
     );

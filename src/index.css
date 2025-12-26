@@ -94,3 +94,7 @@ a.active {
   color: orange;
   font-weight: 600;
 }
+
+.btn {
+  border-radius: 40px;
+}

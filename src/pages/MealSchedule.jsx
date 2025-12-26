@@ -1,34 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
-
-// react-date-picker
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
-
-import { format } from 'date-fns';
+import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import MealCard from '../components/MealCard';
 
 const MealSchedule = () => {
-    const axiosSecure = useAxiosSecure()
-    const [startDate, setStartDate] = useState(new Date());
-    const [endDate, setEndDate] = useState(new Date());
-    const [shouldFetch, setShouldFetch] = useState(false);
+    const axiosSecure = useAxiosSecure();
+    const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 })); // Sunday
+
+    // Calculate week end date
+    const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 0 });
 
     const { data: schedules, isLoading, refetch } = useQuery({
-        queryKey: ['schedules'],
+        queryKey: ['schedules', currentWeekStart],
         queryFn: async () => {
-            const response = await axiosSecure.get(`/managers/schedules?startDate=${format(startDate, 'yyyy-MM-dd')}&endDate=${format(endDate, 'yyyy-MM-dd')}`);
+            const response = await axiosSecure.get(`/managers/schedules?startDate=${format(currentWeekStart, 'yyyy-MM-dd')}&endDate=${format(weekEnd, 'yyyy-MM-dd')}`);
             return response.data.schedules;
         },
-        enabled: shouldFetch, // Only fetch when this is true
     });
 
-    const handleGenerate = async () => {
+    const handlePreviousWeek = () => {
+        setCurrentWeekStart(prev => addDays(prev, -7));
+    };
+
+    const handleNextWeek = () => {
+        setCurrentWeekStart(prev => addDays(prev, 7));
+    };
+
+    const handleThisWeek = () => {
+        setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 0 }));
+    };
+
+    const handleGenerateWeek = async () => {
         try {
-            await axiosSecure.post('/schedules/generate', {
-                startDate: format(startDate, 'yyyy-MM-dd'),
-                endDate: format(endDate, 'yyyy-MM-dd')
+            await axiosSecure.post('/managers/schedules/generate', {
+                startDate: format(currentWeekStart, 'yyyy-MM-dd'),
+                endDate: format(weekEnd, 'yyyy-MM-dd')
             });
             alert('Schedules generated!');
             refetch();
@@ -37,51 +44,63 @@ const MealSchedule = () => {
         }
     };
 
+    const handleUpdateSchedule = async (scheduleId, updateData) => {
+        try {
+            await axiosSecure.put(`/managers/schedules/${scheduleId}`, updateData);
+            alert('Schedule updated!');
+            refetch();
+        } catch (error) {
+            console.error('Error updating schedule:', error);
+        }
+    };
+
     return (
-        <div>
-            {
-                isLoading
-                    ?
-                    <div className='skeleton w-10 h-10'></div>
-                    :
-                    <div className='flex flex-col gap-4'>
-                        <div className='flex gap-50'>
-                            <div className='flex gap-2'>
-                                <label className='label'>Start Date</label>
-                                <DatePicker
-                                    selected={startDate}
-                                    onChange={(date) => {
-                                        setStartDate(date)
-                                    }}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="input w-full"
-                                    minDate={new Date()}
-                                />
-                            </div>
-                            <div className='flex gap-2'>
-                                <label className='label'>End Date</label>
-                                <DatePicker
-                                    selected={endDate}
-                                    onChange={(date) => {
-                                        setEndDate(date)
-                                    }}
-                                    dateFormat="dd/MM/yyyy"
-                                    className="input w-full"
-                                    minDate={new Date()}
-                                />
-                            </div>
-                            <button onClick={() => {
-                                setShouldFetch(true)
-                                refetch()
-                            }} className='btn btn-primary'>Get Meal List</button>
-                        </div>
-                        <div className='flex p-4 flex-col gap-4'>
-                            {
-                                schedules?.map((schedule, index) => <MealCard key={index} schedule={schedule}></MealCard>)
-                            }
-                        </div>
+        <div className='p-4 flex flex-col gap-4'>
+            {/* Week Navigation */}
+            <div className='flex justify-between'>
+                <div className='flex items-center gap-2'>
+                    <button onClick={handlePreviousWeek} className='btn btn-sm'>
+                        ← Previous Week
+                    </button>
+                    <div className='text-center'>
+                        <p className='font-semibold'>
+                            {format(currentWeekStart, 'MMM dd')} - {format(weekEnd, 'MMM dd, yyyy')}
+                        </p>
                     </div>
-            }
+                    <button onClick={handleNextWeek} className='btn btn-sm'>
+                        Next Week →
+                    </button>
+                </div>
+                <button onClick={handleGenerateWeek} className='btn btn-primary font-bold'>
+                    Generate Schedules
+                </button>
+            </div>
+
+            {/* Loading State */}
+            {isLoading && (
+                <div className='loading loading-dots loading-xl'>
+                </div>
+            )}
+
+            {/* Schedules Grid */}
+            {schedules && schedules.length > 0 ? (
+                <div className='grid grid-cols-1 gap-4'>
+                    {schedules.map((schedule, index) => 
+                    (
+                        <MealCard
+                            key={schedule._id || index}
+                            schedule={schedule}
+                            onUpdate={handleUpdateSchedule}
+                        />
+                    ))}
+                </div>
+            ) : (
+                !isLoading && (
+                    <div className='text-center py-8'>
+                        <p className='text-gray-500'>No schedules found for this week</p>
+                    </div>
+                )
+            )}
         </div>
     );
 };
