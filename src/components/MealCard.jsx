@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { CgUnavailable } from "react-icons/cg";
 import toast from 'react-hot-toast';
+import { MdRestaurantMenu } from 'react-icons/md';
+import { FiEdit } from 'react-icons/fi';
 
 const MealCard = ({ schedule, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -94,8 +96,8 @@ const MealCard = ({ schedule, onUpdate }) => {
                             </button>
                         </div>
                     ) : (
-                        <button onClick={() => setIsEditing(true)} className='btn btn-xs btn-outline'>
-                            Edit
+                        <button onClick={() => setIsEditing(true)} className='btn rounded-full'>
+                            <FiEdit /> Edit
                         </button>
                     )}
                 </div>
@@ -126,8 +128,11 @@ const MealCard = ({ schedule, onUpdate }) => {
                                         className='input input-xs input-bordered w-full'
                                     />
                                 ) : (
-                                    <div className='p-1 rounded-sm bg-primary/20 text-sm'>
-                                        {meal.menu || 'Menu'}
+                                    <div className='p-1 items-center flex flex-col gap-3 rounded-sm bg-primary/20 text-sm'>
+                                        <div className='text-4xl'>
+                                            <MdRestaurantMenu/>
+                                        </div>
+                                        {meal.menu || '??'}
                                     </div>
                                 )}
                             </div>
