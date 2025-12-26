@@ -4,6 +4,7 @@ import { CgUnavailable } from "react-icons/cg";
 import toast from 'react-hot-toast';
 import { MdRestaurantMenu } from 'react-icons/md';
 import { FiEdit } from 'react-icons/fi';
+import { GiMeal } from 'react-icons/gi';
 
 const MealCard = ({ schedule, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -129,8 +130,8 @@ const MealCard = ({ schedule, onUpdate }) => {
                                     />
                                 ) : (
                                     <div className='p-1 items-center flex flex-col gap-3 rounded-sm bg-primary/20 text-sm'>
-                                        <div className='text-4xl'>
-                                            <MdRestaurantMenu/>
+                                        <div className='text-5xl'>
+                                            <GiMeal />
                                         </div>
                                         {meal.menu || '??'}
                                     </div>
