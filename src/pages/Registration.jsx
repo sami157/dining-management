@@ -52,7 +52,8 @@ const Registration = () => {
                             )
                             } type="text" className="input" placeholder="11 digit phone number" />
                             {errors.name && <p className='text-error font-semibold' role="alert">{errors.mobile.message}</p>}
-                            {errors.mobile && <p className='text-error font-semibold' role="alert">{errors.mobile.message}</p>}
+                            {errors.mobile?.type === 'maxLength' && <p className='text-error font-semibold' role="alert">11 digit phone number is required</p>}
+                            {errors.mobile?.type === 'minLength' && <p className='text-error font-semibold' role="alert">11 digit phone number required</p>}
 
                             {/* Email */}
                             <label className="label">Email</label>
