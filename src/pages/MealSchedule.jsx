@@ -46,8 +46,8 @@ const MealSchedule = () => {
 
     const handleUpdateSchedule = async (scheduleId, updateData) => {
         try {
+            console.log(updateData)
             await axiosSecure.put(`/managers/schedules/${scheduleId}`, updateData);
-            alert('Schedule updated!');
             refetch();
         } catch (error) {
             console.error('Error updating schedule:', error);
@@ -55,6 +55,7 @@ const MealSchedule = () => {
     };
 
     return (
+        // Card view
         <div className='p-4 flex flex-col gap-4'>
             {/* Week Navigation */}
             <div className='flex justify-between'>

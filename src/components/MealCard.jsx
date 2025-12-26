@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { CgUnavailable } from "react-icons/cg";
+import toast from 'react-hot-toast';
 
 const MealCard = ({ schedule, onUpdate }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -9,14 +11,19 @@ const MealCard = ({ schedule, onUpdate }) => {
     });
 
     const handleMealToggle = (mealType) => {
-        setEditedSchedule(prev => ({
-            ...prev,
-            availableMeals: prev.availableMeals.map(meal =>
-                meal.mealType === mealType
-                    ? { ...meal, isAvailable: !meal.isAvailable }
-                    : meal
-            )
-        }));
+        setEditedSchedule(prev => {
+            const updatedMeals = prev.availableMeals.map(meal => {
+                if (meal.mealType === mealType) {
+                    return { ...meal, isAvailable: !meal.isAvailable };
+                }
+                return meal;
+            });
+
+            return {
+                ...prev,
+                availableMeals: updatedMeals
+            };
+        });
     };
 
     const handleMenuChange = (mealType, newMenu) => {
@@ -37,13 +44,21 @@ const MealCard = ({ schedule, onUpdate }) => {
         }));
     };
 
-    const handleSave = async () => {
-        await onUpdate(schedule._id, editedSchedule);
-        setIsEditing(false);
+    const handleSave = () => {
+        toast.promise(
+            async () => {
+                await onUpdate(schedule._id, editedSchedule);
+                setIsEditing(false);
+            },
+            {
+                loading: 'Processing',
+                success: 'Successful',
+                error: 'Operation failed',
+            }
+        )
     };
 
     const handleCancel = () => {
-        // Reset to original values
         setEditedSchedule({
             isHoliday: schedule.isHoliday,
             availableMeals: schedule.availableMeals
@@ -62,26 +77,68 @@ const MealCard = ({ schedule, onUpdate }) => {
                     {format(new Date(schedule.date), 'dd/MM/yyyy')}
                 </h2>
 
-                <p className='text-lg text-gray-500'>
-                    {format(new Date(schedule.date), 'EEEE')}
-                </p>
+                <div className='flex items-center justify-center gap-2'>
+                    <p className='text-lg text-gray-500'>
+                        {format(new Date(schedule.date), 'EEEE')}
+                    </p>
+                </div>
+                <div>
+                    {/* Edit/Save/Cancel Buttons */}
+                    {isEditing ? (
+                        <div className='flex justify-center gap-2'>
+                            <button onClick={handleSave} className='btn btn-xs btn-primary'>
+                                Save
+                            </button>
+                            <button onClick={handleCancel} className='btn btn-xs'>
+                                Cancel
+                            </button>
+                        </div>
+                    ) : (
+                        <button onClick={() => setIsEditing(true)} className='btn btn-xs btn-outline'>
+                            Edit
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Meals */}
             <div className='flex gap-4 w-full h-full'>
-                {displayMeals?.map((meal, idx) => (
-                    <div key={idx} className='bg-base-200 p-3 w-full rounded-xl hover:bg-base-200/50 duration-100 ease-in cursor-pointer'>
-                            {/* Meal Type with Checkbox */}
-                            <div className='flex gap-2'>
-                                <div className='cursor-default rounded-md w-full'>
+                {displayMeals?.map((meal) => (
+                    <div 
+                        key={meal.mealType}
+                        onClick={isEditing ? () => handleMealToggle(meal.mealType) : undefined}
+                        className={`${meal?.isAvailable ? 'bg-primary/20' : 'bg-base-200 flex items-center justify-center'} p-3 w-full rounded-xl ${isEditing ? 'hover:bg-primary/30 cursor-pointer' : ''} duration-100 ease-in`}
+                    >
+                        {meal?.isAvailable ? (
+                            <div className='flex flex-col justify-between h-full gap-2'>
+                                <div className='rounded-md w-full font-medium'>
                                     {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
                                 </div>
+
+                                {/* Menu */}
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        placeholder="Menu"
+                                        value={meal.menu || ''}
+                                        onChange={(e) => handleMenuChange(meal.mealType, e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        className='input input-xs input-bordered w-full'
+                                    />
+                                ) : (
+                                    <div className='p-1 rounded-sm bg-primary/20 text-sm'>
+                                        {meal.menu || 'Menu'}
+                                    </div>
+                                )}
                             </div>
-                        </div>
+                        ) : (
+                            <div className='text-center text-5xl'><CgUnavailable /></div>
+                        )}
+                    </div>
                 ))}
             </div>
         </div>
     );
-};
+}
 
 export default MealCard;
