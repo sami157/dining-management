@@ -75,7 +75,7 @@ const MealSchedule = () => {
                                 refetch()
                             }} className='btn btn-primary'>Get Meal List</button>
                         </div>
-                        <div>
+                        <div className='flex p-4 flex-col gap-4'>
                             {
                                 schedules?.map((schedule, index) => <MealCard key={index} schedule={schedule}></MealCard>)
                             }
