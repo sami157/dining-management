@@ -18,7 +18,8 @@ const Registration = () => {
                 await registerUser(axiosSecure, {
                     name: data.name,
                     email: data.email,
-                    mobile: data.mobile
+                    mobile: data.mobile,
+                    bank: data.bank
                 })
                 navigate('/')
             },
@@ -59,6 +60,11 @@ const Registration = () => {
                             <label className="label">Email</label>
                             <input {...register("email", { required: "Email Address is required" })} type="email" className="input" placeholder="Email " />
                             {errors.email && <p className='text-error font-semibold' role="alert">{errors.email.message}</p>}
+                            
+                            {/* Email */}
+                            <label className="label">Bank Asia A/C</label>
+                            <input {...register("bank", { required: "Bank Asia account is required" })} type="text" className="input" placeholder="Account Number " />
+                            {errors.bank && <p className='text-error font-semibold' role="alert">{errors.bank.message}</p>}
 
                             {/* Password */}
                             <label className="label">Password</label>
