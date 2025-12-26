@@ -70,10 +70,10 @@ const MealCard = ({ schedule, onUpdate }) => {
             {/* Meals */}
             <div className='flex gap-4 w-full h-full'>
                 {displayMeals?.map((meal, idx) => (
-                    <div key={idx} className='bg-base-200 p-2 w-full rounded-xl hover:bg-base-200/50 duration-100 ease-in cursor-pointer'>
+                    <div key={idx} className='bg-base-200 p-3 w-full rounded-xl hover:bg-base-200/50 duration-100 ease-in cursor-pointer'>
                             {/* Meal Type with Checkbox */}
                             <div className='flex gap-2'>
-                                <div className='bg-base-100 cursor-default p-1 rounded-md w-full text-center'>
+                                <div className='cursor-default rounded-md w-full'>
                                     {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
                                 </div>
                             </div>
