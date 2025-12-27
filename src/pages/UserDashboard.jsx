@@ -15,6 +15,9 @@ const UserDashboard = () => {
         end: lastDate
     });
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize to start of day
+
     const monthString = format(currentMonth, 'yyyy-MM');
 
     const { data, isLoading, refetch } = useQuery({
@@ -72,13 +75,7 @@ const UserDashboard = () => {
             return;
         }
 
-        // Check if deadline has passed (applies to both register and cancel)
-        if (!status.canRegister) {
-            toast.error('Deadline has passed');
-            return;
-        }
-
-        // If registered, cancel registration
+        // If registered, cancel registration (no deadline check needed - if they could register, they can cancel)
         if (status.registered && status.registrationId) {
             toast.promise(
                 axiosSecure.delete(`/users/meals/register/cancel/${status.registrationId}`)
@@ -92,7 +89,13 @@ const UserDashboard = () => {
             return;
         }
 
-        // If available but not registered, register
+        // For new registration, check deadline
+        if (!status.canRegister) {
+            toast.error('Deadline has passed');
+            return;
+        }
+
+        // Register
         const dateStr = format(date, 'yyyy-MM-dd');
         toast.promise(
             axiosSecure.post('/users/meals/register', {
@@ -107,7 +110,6 @@ const UserDashboard = () => {
         );
     };
 
-
     // Meal Box Component
     const MealBox = ({ status, date, mealType }) => {
         let bgColor = 'bg-base-300'; // Unavailable (default)
@@ -115,18 +117,10 @@ const UserDashboard = () => {
         let cursorClass = 'cursor-not-allowed';
 
         if (status.registered) {
-            // Registered
+            // Registered - always clickable to cancel
             bgColor = 'bg-primary/80';
-
-            if (status.canRegister) {
-                // Can still cancel (before deadline)
-                title = `Registered${status.menu ? ` - ${status.menu}` : ''} (Click to cancel)`;
-                cursorClass = 'cursor-pointer hover:bg-primary';
-            } else {
-                // Deadline passed, can't cancel
-                title = `Registered - Deadline passed${status.menu ? ` - ${status.menu}` : ''}`;
-                cursorClass = 'cursor-not-allowed';
-            }
+            title = `Registered${status.menu ? ` - ${status.menu}` : ''} (Click to cancel)`;
+            cursorClass = 'cursor-pointer hover:bg-primary';
         } else if (status.available) {
             // Available meal
             bgColor = 'bg-base-200';
@@ -212,7 +206,7 @@ const UserDashboard = () => {
                                     {/* Date Column */}
                                     <td>
                                         <div className='flex flex-col'>
-                                            <span className='font-semibold'>
+                                            <span className={`${format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd') ? 'font-extrabold' : ''}`}>
                                                 {format(date, 'dd-MM-yyyy')}
                                             </span>
                                             <span className='text-xs text-gray-500'>
