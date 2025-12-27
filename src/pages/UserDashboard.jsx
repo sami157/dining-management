@@ -172,10 +172,6 @@ const UserDashboard = () => {
                     <div className='w-4 h-4 rounded bg-primary/80' />
                     <span>Registered</span>
                 </div>
-                <div className='flex items-center gap-2'>
-                    <div className='w-4 h-4 rounded bg-base-300' />
-                    <span>Unavailable</span>
-                </div>
             </div>
 
             {/* Loading */}
