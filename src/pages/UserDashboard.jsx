@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, addMonths, subMonths, lastDayOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
+import toast from 'react-hot-toast';
 
 const UserDashboard = () => {
     const axiosSecure = useAxiosSecure();
@@ -16,7 +17,7 @@ const UserDashboard = () => {
 
     const monthString = format(currentMonth, 'yyyy-MM');
 
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, refetch } = useQuery({
         queryKey: ['userMeals', monthString],
         queryFn: async () => {
             const response = await axiosSecure.get(`/users/meals/available?month=${monthString}`);
@@ -37,19 +38,21 @@ const UserDashboard = () => {
         const schedule = scheduleMap[dateKey];
 
         if (!schedule) {
-            return { available: false, registered: false, menu: '' };
+            return { available: false, registered: false, menu: '', canRegister: false, registrationId: null };
         }
 
         const meal = schedule.meals.find(m => m.mealType === mealType);
 
         if (!meal) {
-            return { available: false, registered: false, menu: '' };
+            return { available: false, registered: false, menu: '', canRegister: false, registrationId: null };
         }
 
         return {
             available: meal.isAvailable,
             registered: meal.isRegistered,
-            menu: meal.menu || ''
+            menu: meal.menu || '',
+            canRegister: meal.canRegister,
+            registrationId: meal.registrationId
         };
     };
 
@@ -61,23 +64,89 @@ const UserDashboard = () => {
         setCurrentMonth(prev => addMonths(prev, 1));
     };
 
+    // Handle meal registration
+    const handleMealClick = async (date, mealType, status) => {
+        // If unavailable, do nothing
+        if (!status.available) {
+            toast.error('This meal is not available');
+            return;
+        }
+
+        // Check if deadline has passed (applies to both register and cancel)
+        if (!status.canRegister) {
+            toast.error('Deadline has passed');
+            return;
+        }
+
+        // If registered, cancel registration
+        if (status.registered && status.registrationId) {
+            toast.promise(
+                axiosSecure.delete(`/users/meals/register/cancel/${status.registrationId}`)
+                    .then(() => refetch()),
+                {
+                    loading: 'Cancelling registration...',
+                    success: 'Registration cancelled',
+                    error: 'Failed to cancel registration'
+                }
+            );
+            return;
+        }
+
+        // If available but not registered, register
+        const dateStr = format(date, 'yyyy-MM-dd');
+        toast.promise(
+            axiosSecure.post('/users/meals/register', {
+                date: dateStr,
+                mealType: mealType
+            }).then(() => refetch()),
+            {
+                loading: 'Registering...',
+                success: 'Meal registered successfully',
+                error: 'Failed to register meal'
+            }
+        );
+    };
+
+
     // Meal Box Component
-    const MealBox = ({ status }) => {
+    const MealBox = ({ status, date, mealType }) => {
         let bgColor = 'bg-base-300'; // Unavailable (default)
         let title = 'Unavailable';
+        let cursorClass = 'cursor-not-allowed';
 
         if (status.registered) {
-            bgColor = 'bg-base-200'; // Registered
-            title = `Registered${status.menu ? ` - ${status.menu}` : ''}`;
+            // Registered
+            bgColor = 'bg-primary/80';
+
+            if (status.canRegister) {
+                // Can still cancel (before deadline)
+                title = `Registered${status.menu ? ` - ${status.menu}` : ''} (Click to cancel)`;
+                cursorClass = 'cursor-pointer hover:bg-primary';
+            } else {
+                // Deadline passed, can't cancel
+                title = `Registered - Deadline passed${status.menu ? ` - ${status.menu}` : ''}`;
+                cursorClass = 'cursor-not-allowed';
+            }
         } else if (status.available) {
-            bgColor = 'bg-base-200'; // Available
-            title = `Available${status.menu ? ` - ${status.menu}` : ''}`;
+            // Available meal
+            bgColor = 'bg-base-200';
+
+            if (status.canRegister) {
+                // Can register - clickable
+                title = `Available${status.menu ? ` - ${status.menu}` : ''} (Click to register)`;
+                cursorClass = 'cursor-pointer hover:bg-base-100';
+            } else {
+                // Deadline passed - not clickable
+                title = `Not registered - Deadline passed${status.menu ? ` - ${status.menu}` : ''}`;
+                cursorClass = 'cursor-not-allowed';
+            }
         }
 
         return (
             <div
-                className={`w-8 h-8 rounded ${bgColor}`}
+                className={`w-8 h-8 rounded ${bgColor} ${cursorClass} transition-colors duration-150`}
                 title={title}
+                onClick={() => handleMealClick(date, mealType, status)}
             />
         );
     };
@@ -103,7 +172,7 @@ const UserDashboard = () => {
             <div className='flex gap-4 mb-4 text-sm'>
                 <div className='flex items-center gap-2'>
                     <div className='w-4 h-4 rounded bg-base-200' />
-                    <span>Available</span>
+                    <span>Not registered</span>
                 </div>
                 <div className='flex items-center gap-2'>
                     <div className='w-4 h-4 rounded bg-primary/80' />
@@ -137,7 +206,6 @@ const UserDashboard = () => {
                             const morningStatus = getMealStatus(date, 'morning');
                             const eveningStatus = getMealStatus(date, 'evening');
                             const nightStatus = getMealStatus(date, 'night');
-                            const schedule = scheduleMap[format(date, 'yyyy-MM-dd')];
 
                             return (
                                 <tr key={index} className='hover'>
@@ -150,11 +218,6 @@ const UserDashboard = () => {
                                             <span className='text-xs text-gray-500'>
                                                 {format(date, 'EEEE')}
                                             </span>
-                                            {schedule?.isHoliday && (
-                                                <span className='badge badge-secondary badge-xs mt-1'>
-                                                    Holiday
-                                                </span>
-                                            )}
                                         </div>
                                     </td>
 
@@ -162,15 +225,27 @@ const UserDashboard = () => {
                                     <td>
                                         <div className='flex gap-2 items-center'>
                                             <div className='flex flex-col items-center gap-1'>
-                                                <MealBox status={morningStatus} />
+                                                <MealBox
+                                                    status={morningStatus}
+                                                    date={date}
+                                                    mealType="morning"
+                                                />
                                                 <span className='text-xs text-gray-500'>M</span>
                                             </div>
                                             <div className='flex flex-col items-center gap-1'>
-                                                <MealBox status={eveningStatus} />
+                                                <MealBox
+                                                    status={eveningStatus}
+                                                    date={date}
+                                                    mealType="evening"
+                                                />
                                                 <span className='text-xs text-gray-500'>E</span>
                                             </div>
                                             <div className='flex flex-col items-center gap-1'>
-                                                <MealBox status={nightStatus} />
+                                                <MealBox
+                                                    status={nightStatus}
+                                                    date={date}
+                                                    mealType="night"
+                                                />
                                                 <span className='text-xs text-gray-500'>N</span>
                                             </div>
                                         </div>
