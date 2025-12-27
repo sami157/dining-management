@@ -40,13 +40,6 @@ const MealCard = ({ schedule, onUpdate }) => {
         }));
     };
 
-    const handleHolidayToggle = () => {
-        setEditedSchedule(prev => ({
-            ...prev,
-            isHoliday: !prev.isHoliday
-        }));
-    };
-
     const handleSave = () => {
         toast.promise(
             async () => {
