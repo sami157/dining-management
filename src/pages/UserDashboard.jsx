@@ -3,20 +3,29 @@ import { useQuery } from '@tanstack/react-query';
 import { format, addMonths, subMonths, lastDayOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
+import { GiMeal } from 'react-icons/gi';
+
+
+const getToday = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+};
 
 const UserDashboard = () => {
     const axiosSecure = useAxiosSecure();
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const firstDate = startOfMonth(currentMonth);
     const lastDate = lastDayOfMonth(currentMonth);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [showModal, setShowModal] = useState(false);
 
     const dateArray = eachDayOfInterval({
         start: firstDate,
         end: lastDate
     });
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize to start of day
+    const today = getToday(); // Normalize to start of day
 
     const monthString = format(currentMonth, 'yyyy-MM');
 
@@ -136,6 +145,7 @@ const UserDashboard = () => {
             }
         }
 
+
         return (
             <div
                 className={`w-8 h-8 rounded ${bgColor} ${cursorClass} transition-colors duration-150`}
@@ -143,6 +153,28 @@ const UserDashboard = () => {
                 onClick={() => handleMealClick(date, mealType, status)}
             />
         );
+    };
+
+    const showMenu = (date) => {
+        setSelectedDate(date);
+        setShowModal(true);
+    }
+
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedDate(null);
+    }
+
+    // Get meals for selected date
+    const getSelectedDateMeals = () => {
+        if (!selectedDate) return [];
+
+        const dateKey = format(selectedDate, 'yyyy-MM-dd');
+        const schedule = scheduleMap[dateKey];
+
+        if (!schedule) return [];
+
+        return schedule.meals;
     };
 
     return (
@@ -187,8 +219,8 @@ const UserDashboard = () => {
                     {/* Sticky Head */}
                     <thead>
                         <tr>
-                            <th className='bg-base-300'>Date</th>
-                            <th className='bg-base-300'>Meals</th>
+                            <th className='bg-base-300 text-center'>Date</th>
+                            <th className='bg-base-300 text-center'>Meals</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -200,7 +232,15 @@ const UserDashboard = () => {
                             return (
                                 <tr key={index} className='hover'>
                                     {/* Date Column */}
-                                    <td>
+                                    {/* Date Column */}
+                                    <td className='flex gap-4 items-center'>
+                                        <button
+                                            onClick={() => showMenu(date)}
+                                            className={`text-2xl ${scheduleMap[format(date, 'yyyy-MM-dd')] ? 'hover:text-primary cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
+                                            disabled={!scheduleMap[format(date, 'yyyy-MM-dd')]}
+                                        >
+                                            <GiMeal />
+                                        </button>
                                         <div className='flex flex-col'>
                                             <span className={`${format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd') ? 'font-extrabold' : ''}`}>
                                                 {format(date, 'dd-MM-yyyy')}
@@ -245,6 +285,65 @@ const UserDashboard = () => {
                         })}
                     </tbody>
                 </table>
+
+                {/* Modal for meal details */}
+                {showModal && (
+                    <div className="modal modal-open">
+                        <div className="modal-box">
+                            <h3 className="font-bold text-2xl mb-6 text-center">
+                                {selectedDate && format(selectedDate, 'EEEE, dd MMMM yyyy')}
+                            </h3>
+
+                            <div className='flex flex-col gap-4'>
+                                {['morning', 'evening', 'night'].map((mealType) => {
+                                    const status = getMealStatus(selectedDate, mealType);
+
+                                    return (
+                                        <div>
+                                            {
+                                                status.available && (
+                                                    <div key={mealType} className='bg-base-200 p-4 rounded-lg flex flex-col gap-3'>
+                                                        {/* Meal Type Header */}
+                                                        <div className='text-center'>
+                                                            <h4 className='font-bold text-lg capitalize mb-2'>
+                                                                {mealType}
+                                                            </h4>
+
+                                                            {/* Status Badge */}
+                                                            {status.registered ? (
+                                                                <span className='badge badge-primary'>Registered</span>
+                                                            ) : status.available && status.canRegister ? (
+                                                                <span className='badge badge-success'>Available</span>
+                                                            ) : status.available ? (
+                                                                <span className='badge badge-error'>Deadline Passed</span>
+                                                            ) : (
+                                                                <span className='badge badge-ghost'>Unavailable</span>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Menu */}
+                                                        {status.menu && (
+                                                            <div className='bg-base-100 p-2 rounded text-center'>
+                                                                <p className='text-sm font-medium'>Menu</p>
+                                                                <p className='text-sm'>{status.menu}</p>
+                                                            </div>
+                                                        )}
+
+                                                    </div>
+                                                )
+                                            }
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="modal-action">
+                                <button className="btn btn-primary btn-wide mx-auto" onClick={closeModal}>Close</button>
+                            </div>
+                        </div>
+                        <div className="modal-backdrop" onClick={closeModal}></div>
+                    </div>
+                )}
             </div>
         </div>
     );
