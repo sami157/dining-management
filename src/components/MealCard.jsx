@@ -29,6 +29,17 @@ const MealCard = ({ schedule, onUpdate }) => {
         });
     };
 
+    const handleWeightChange = (mealType, newWeight) => {
+        setEditedSchedule(prev => ({
+            ...prev,
+            availableMeals: prev.availableMeals.map(meal =>
+                meal.mealType === mealType
+                    ? { ...meal, weight: parseFloat(newWeight) || 0 }
+                    : meal
+            )
+        }));
+    };
+
     const handleMenuChange = (mealType, newMenu) => {
         setEditedSchedule(prev => ({
             ...prev,
@@ -100,7 +111,7 @@ const MealCard = ({ schedule, onUpdate }) => {
             {/* Meals */}
             <div className='flex gap-4 w-full h-full'>
                 {displayMeals?.map((meal) => (
-                    <div 
+                    <div
                         key={meal.mealType}
                         onClick={isEditing ? () => handleMealToggle(meal.mealType) : undefined}
                         className={`${meal?.isAvailable ? 'bg-primary/20' : 'bg-base-200 flex items-center justify-center'} p-3 w-full rounded-xl ${isEditing ? 'hover:bg-primary/30 cursor-pointer' : ''} duration-100 ease-in`}
@@ -113,14 +124,27 @@ const MealCard = ({ schedule, onUpdate }) => {
 
                                 {/* Menu */}
                                 {isEditing ? (
-                                    <input
-                                        type="text"
-                                        placeholder="Menu"
-                                        value={meal.menu || ''}
-                                        onChange={(e) => handleMenuChange(meal.mealType, e.target.value)}
-                                        onClick={(e) => e.stopPropagation()}
-                                        className='input input-xs input-bordered w-full'
-                                    />
+                                    <div className='flex flex-col gap-2'>
+                                        <input
+                                            type="number"
+                                            step="0.5"
+                                            min="0"
+                                            placeholder="Weight"
+                                            value={meal.weight || 1}
+                                            onChange={(e) => handleWeightChange(meal.mealType, e.target.value)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className='input input-xs input-bordered w-20'
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Menu"
+                                            value={meal.menu || ''}
+                                            onChange={(e) => handleMenuChange(meal.mealType, e.target.value)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className='input input-xs input-bordered w-full'
+                                        />
+                                    </div>
+
                                 ) : (
                                     <div className='p-1 items-center flex flex-col gap-3 rounded-sm bg-primary/20 text-sm'>
                                         <div className='text-5xl'>

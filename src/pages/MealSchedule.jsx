@@ -51,7 +51,6 @@ const MealSchedule = () => {
 
 const handleUpdateSchedule = async (scheduleId, updateData) => {
     try {
-        console.log(updateData)
         await axiosSecure.put(`/managers/schedules/${scheduleId}`, updateData);
         refetch();
     } catch (error) {
