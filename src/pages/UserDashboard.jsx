@@ -150,7 +150,7 @@ const UserDashboard = () => {
         return (
             <div>
                 <div
-                    className={`w-8 flex items-center justify-center h-8 rounded ${bgColor} ${cursorClass} transition-colors duration-400 text-center font-semibold text-[10px]`}
+                    className={`w-7 flex items-center justify-center h-7 rounded ${bgColor} ${cursorClass} transition-colors duration-400 ease-in-out text-center font-semibold text-[10px]`}
                     title={title}
                     onClick={() => handleMealClick(date, mealType, status)}
                 >
