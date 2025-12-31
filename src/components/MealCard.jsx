@@ -118,8 +118,11 @@ const MealCard = ({ schedule, onUpdate }) => {
                     >
                         {meal?.isAvailable ? (
                             <div className='flex flex-col justify-between h-full gap-2'>
-                                <div className='rounded-md w-full font-medium'>
-                                    {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
+                                <div className='flex items-center justify-between'>
+                                    <div className='rounded-md w-full font-medium'>
+                                        {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
+                                    </div>
+                                    <p className='px-3 text-sm rounded-sm font-bold bg-primary text-primary-content'>{meal?.weight}</p>
                                 </div>
 
                                 {/* Menu */}

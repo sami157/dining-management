@@ -64,7 +64,8 @@ const UserDashboard = () => {
             registered: meal.isRegistered,
             menu: meal.menu || '',
             canRegister: meal.canRegister,
-            registrationId: meal.registrationId
+            registrationId: meal.registrationId,
+            weight: meal.weight
         };
     };
 
@@ -147,11 +148,15 @@ const UserDashboard = () => {
 
 
         return (
-            <div
-                className={`w-8 h-8 rounded ${bgColor} ${cursorClass} transition-colors duration-150`}
-                title={title}
-                onClick={() => handleMealClick(date, mealType, status)}
-            />
+            <div>
+                <div
+                    className={`w-8 flex items-center justify-center h-8 rounded ${bgColor} ${cursorClass} transition-colors duration-400 text-center font-semibold text-[10px]`}
+                    title={title}
+                    onClick={() => handleMealClick(date, mealType, status)}
+                >
+                    {status.available && status.weight }
+                    </div>
+            </div>
         );
     };
 
@@ -214,7 +219,7 @@ const UserDashboard = () => {
             )}
 
             {/* Table */}
-            <div className="overflow-x-auto max-h-150">
+            <div className="overflow-x-auto">
                 <table className="table table-pin-rows">
                     {/* Sticky Head */}
                     <thead>
@@ -232,22 +237,23 @@ const UserDashboard = () => {
                             return (
                                 <tr key={index} className='hover'>
                                     {/* Date Column */}
-                                    {/* Date Column */}
-                                    <td className='flex gap-4 items-center'>
-                                        <button
-                                            onClick={() => showMenu(date)}
-                                            className={`text-2xl ${scheduleMap[format(date, 'yyyy-MM-dd')] ? 'hover:text-primary cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
-                                            disabled={!scheduleMap[format(date, 'yyyy-MM-dd')]}
-                                        >
-                                            <GiMeal />
-                                        </button>
-                                        <div className='flex flex-col'>
-                                            <span className={`${format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd') ? 'font-extrabold' : ''}`}>
-                                                {format(date, 'dd-MM-yyyy')}
-                                            </span>
-                                            <span className='text-xs text-gray-500'>
-                                                {format(date, 'EEEE')}
-                                            </span>
+                                    <td>
+                                        <div className='flex gap-4 items-center'>
+                                            <button
+                                                onClick={() => showMenu(date)}
+                                                className={`text-2xl ${scheduleMap[format(date, 'yyyy-MM-dd')] ? 'hover:text-primary cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
+                                                disabled={!scheduleMap[format(date, 'yyyy-MM-dd')]}
+                                            >
+                                                <GiMeal />
+                                            </button>
+                                            <div className='flex flex-col'>
+                                                <span className={`${format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd') ? 'font-extrabold' : ''}`}>
+                                                    {format(date, 'dd-MM-yyyy')}
+                                                </span>
+                                                <span className='text-xs text-gray-500'>
+                                                    {format(date, 'EEEE')}
+                                                </span>
+                                            </div>
                                         </div>
                                     </td>
 

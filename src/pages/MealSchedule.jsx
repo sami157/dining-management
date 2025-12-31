@@ -60,9 +60,9 @@ const handleUpdateSchedule = async (scheduleId, updateData) => {
 
 return (
     // Card view
-    <div className='p-4 flex flex-col gap-4'>
+    <div className='p-4 flex flex-col gap-4 mx-auto max-w-4xl'>
         {/* Week Navigation */}
-        <div className='flex justify-between'>
+        <div className='flex mx-auto items-center justify-center gap-8'>
             <div className='flex items-center gap-2'>
                 <button onClick={handlePreviousWeek} className='btn btn-sm'>
                     ← Previous Week
@@ -76,7 +76,7 @@ return (
                     Next Week →
                 </button>
             </div>
-            <button onClick={handleGenerateWeek} className='btn btn-primary font-bold'>
+            <button onClick={handleGenerateWeek} className='btn btn-primary btn-sm font-bold'>
                 Generate Schedules
             </button>
         </div>
