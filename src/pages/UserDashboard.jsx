@@ -4,6 +4,7 @@ import { format, addMonths, subMonths, lastDayOfMonth, startOfMonth, eachDayOfIn
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { GiMeal } from 'react-icons/gi';
+import useAuth from '../hooks/useAuth';
 
 
 const getToday = () => {
@@ -14,6 +15,7 @@ const getToday = () => {
 
 const UserDashboard = () => {
     const axiosSecure = useAxiosSecure();
+    const { user, loading } = useAuth()
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const firstDate = startOfMonth(currentMonth);
     const lastDate = lastDayOfMonth(currentMonth);
@@ -35,6 +37,16 @@ const UserDashboard = () => {
             const response = await axiosSecure.get(`/users/meals/available?month=${monthString}`);
             return response.data;
         },
+        enabled: !loading
+    });
+    
+    const { data: mealCountData } = useQuery({
+        queryKey: ['userMealsData', user?.email, monthString],
+        queryFn: async () => {
+            const response = await axiosSecure.get(`/users/meals/total/${user.email}?month=${monthString}`);
+            return response.data;
+        },
+        enabled: !isLoading
     });
 
     // Create a map of schedules by date for quick lookup
@@ -212,11 +224,11 @@ const UserDashboard = () => {
             </div>
 
             {/* Loading */}
-            {isLoading && (
+            {isLoading ?
                 <div className='flex justify-center'>
                     <span className='loading loading-spinner loading-lg'></span>
-                </div>
-            )}
+                </div> : <p>Total Meals Registered <span className='bg-primary/80 rounded-md px-2 py-0.5 font-semibold text-base-content'>{mealCountData?.totalMeals}</span></p>
+            }
 
             {/* Table */}
             <div className="overflow-x-auto">
