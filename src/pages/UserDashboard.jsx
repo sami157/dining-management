@@ -227,7 +227,7 @@ const UserDashboard = () => {
             {isLoading ?
                 <div className='flex justify-center'>
                     <span className='loading loading-spinner loading-lg'></span>
-                </div> : <p>Total Meals Registered <span className='bg-primary/80 rounded-md px-2 py-0.5 font-semibold text-base-content'>{mealCountData?.totalMeals}</span></p>
+                </div> : <p>Total Meals Registered <span className='bg-primary/80 rounded-md px-2 py-0.5 font-semibold text-primary-content'>{mealCountData?.totalMeals}</span></p>
             }
 
             {/* Table */}
