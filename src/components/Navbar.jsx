@@ -47,17 +47,20 @@ const Navbar = () => {
             </svg>
         </label>
     return (
-        <div className='flex items-center justify-between px-4 py-4 bg-base-100'>
+        <div className='flex items-center justify-between px-4 py-1 bg-base-100'>
             <div className='flex gap-4 items-center'>
-                <div>
-                    Logo
-                </div>
 
+                <NavLink to='/'>
+                <div className='flex flex-col'>
+                    <p className='text-sm'>Township</p>
+                    <p className='font-bold text-2xl'>Dining</p>
+                </div>
+                </NavLink>
+                
                 <div>
                     {themeController}
                 </div>
 
-                <NavLink to='/'>Home</NavLink>
             </div>
 
             {
@@ -65,6 +68,7 @@ const Navbar = () => {
                     ? <div className="skeleton rounded-lg h-10 w-50"></div>
                     : <div className='flex gap-5 items-center'>
                         <NavLink to='/meal-schedule'>Meal Schedule</NavLink>
+                        <NavLink to='/member-management'>Member Management</NavLink>
                         <NavLink to='/user-dashboard'>User Dashboard</NavLink>
                         <p className=''>{user?.email}</p>
 

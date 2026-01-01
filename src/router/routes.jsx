@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import Registration from "../pages/Registration";
 import MealSchedule from "../pages/MealSchedule";
 import UserDashboard from "../pages/UserDashboard";
+import MemberManagement from "../pages/MemberManagement";
 
 export const router = createBrowserRouter([
     {
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
             {
                 path: '/user-dashboard',
                 element: <UserDashboard/>
+            },
+            {
+                path: '/member-management',
+                element: <MemberManagement/>
             }
         ]
     },
