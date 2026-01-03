@@ -183,16 +183,16 @@ const UserDashboard = () => {
     }
 
     // Get meals for selected date
-    const getSelectedDateMeals = () => {
-        if (!selectedDate) return [];
+    // const getSelectedDateMeals = () => {
+    //     if (!selectedDate) return [];
 
-        const dateKey = format(selectedDate, 'yyyy-MM-dd');
-        const schedule = scheduleMap[dateKey];
+    //     const dateKey = format(selectedDate, 'yyyy-MM-dd');
+    //     const schedule = scheduleMap[dateKey];
 
-        if (!schedule) return [];
+    //     if (!schedule) return [];
 
-        return schedule.meals;
-    };
+    //     return schedule.meals;
+    // };
 
     return (
         <div className='p-4 flex flex-col gap-4 items-center'>

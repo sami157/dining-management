@@ -74,7 +74,6 @@ const MealCard = ({ schedule, onUpdate }) => {
     };
 
     const displayMeals = isEditing ? editedSchedule.availableMeals : schedule.availableMeals;
-    const displayHoliday = isEditing ? editedSchedule.isHoliday : schedule.isHoliday;
 
     return (
         <div className='flex gap-4 items-center h-45 w-11/12 md:w-8/10 mx-auto bg-base-100 rounded-xl justify-between p-4'>
