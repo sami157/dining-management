@@ -50,7 +50,7 @@ const Navbar = () => {
         <div className='flex items-center justify-between px-4 py-1 bg-base-100'>
             <div className='flex gap-4 items-center'>
 
-                <NavLink to='/'>
+                <NavLink to='/' viewTransition>
                 <div className='flex flex-col'>
                     <p className='text-sm'>Township</p>
                     <p className='font-bold text-2xl'>Dining</p>
@@ -67,16 +67,16 @@ const Navbar = () => {
                 loading
                     ? <div className="skeleton rounded-lg h-10 w-50"></div>
                     : <div className='flex gap-5 items-center'>
-                        <NavLink to='/meal-schedule'>Meal Schedule</NavLink>
-                        <NavLink to='/member-management'>Member Management</NavLink>
-                        <NavLink to='/user-dashboard'>User Dashboard</NavLink>
+                        <NavLink to='/meal-schedule' viewTransition>Meal Schedule</NavLink>
+                        <NavLink to='/member-management' viewTransition>Member Management</NavLink>
+                        <NavLink to='/user-dashboard' viewTransition>User Dashboard</NavLink>
                         <p className=''>{user?.email}</p>
 
                         {user
                             ? 
                             <button onClick={logOut} className='btn btn-primary'>Log Out</button>
                             : 
-                            <NavLink to='/login'>Login</NavLink>
+                            <NavLink to='/login' viewTransition>Login</NavLink>
                         }
                     </div>
             }
