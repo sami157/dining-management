@@ -6,6 +6,7 @@ import Registration from "../pages/Registration";
 import MealSchedule from "../pages/MealSchedule";
 import UserDashboard from "../pages/UserDashboard";
 import MemberManagement from "../pages/MemberManagement";
+import FundManagement from "../pages/FundManagement";
 
 export const router = createBrowserRouter([
     {
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
             {
                 path: '/member-management',
                 element: <MemberManagement/>
+            },
+            {
+                path: '/fund-management',
+                element: <FundManagement/>
             }
         ]
     },

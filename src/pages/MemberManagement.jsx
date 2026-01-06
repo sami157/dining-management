@@ -19,6 +19,7 @@ const MemberManagement = () => {
     queryKey: ['allUsers'],
     queryFn: async () => {
       const response = await axiosSecure.get('/users');
+      console.log(response.data.users)
       return response.data.users;
     },
   });

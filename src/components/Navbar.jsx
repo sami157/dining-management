@@ -68,8 +68,9 @@ const Navbar = () => {
                     ? <div className="skeleton rounded-lg h-10 w-50"></div>
                     : <div className='flex gap-5 items-center'>
                         <NavLink to='/meal-schedule' viewTransition>Meal Schedule</NavLink>
-                        <NavLink to='/member-management' viewTransition>Member Management</NavLink>
-                        <NavLink to='/user-dashboard' viewTransition>User Dashboard</NavLink>
+                        <NavLink to='/member-management' viewTransition>Members</NavLink>
+                        <NavLink to='/fund-management' viewTransition>Funds</NavLink>
+                        <NavLink to='/user-dashboard' viewTransition>Dashboard</NavLink>
                         <p className=''>{user?.email}</p>
 
                         {user
