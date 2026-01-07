@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { NavLink } from 'react-router';
+import { NavLink, Link } from 'react-router';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 
@@ -51,12 +51,12 @@ const Navbar = () => {
             <div className='flex gap-4 items-center'>
 
                 <NavLink to='/' viewTransition>
-                <div className='flex flex-col'>
-                    <p className='text-sm'>Township</p>
-                    <p className='font-bold text-2xl'>Dining</p>
-                </div>
+                    <div className='flex flex-col'>
+                        <p className='text-sm'>Township</p>
+                        <p className='font-bold text-2xl'>Dining</p>
+                    </div>
                 </NavLink>
-                
+
                 <div>
                     {themeController}
                 </div>
@@ -67,16 +67,27 @@ const Navbar = () => {
                 loading
                     ? <div className="skeleton rounded-lg h-10 w-50"></div>
                     : <div className='flex gap-5 items-center'>
-                        <NavLink to='/meal-schedule' viewTransition>Meal Schedule</NavLink>
-                        <NavLink to='/member-management' viewTransition>Members</NavLink>
-                        <NavLink to='/fund-management' viewTransition>Funds</NavLink>
-                        <NavLink to='/user-dashboard' viewTransition>Dashboard</NavLink>
-                        <p className=''>{user?.email}</p>
-
+                        <div className="dropdown">
+                            <div tabIndex={0} role="button" className="btn m-1">{user?.email}</div>
+                            <ul onClick={() => document.activeElement.blur()} tabIndex="-1" className="dropdown-content menu bg-base-100 rounded-box z-5 w-52 p-2 shadow-sm">
+                                <li>
+                                    <NavLink to='/meal-schedule' viewTransition>Meal Schedule</NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to='/member-management' viewTransition>Members</NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to='/fund-management' viewTransition>Funds</NavLink>
+                                </li>
+                                <li>
+                                    <NavLink to='/user-dashboard' viewTransition>Dashboard</NavLink>
+                                </li>
+                            </ul>
+                        </div>
                         {user
-                            ? 
+                            ?
                             <button onClick={logOut} className='btn btn-primary'>Log Out</button>
-                            : 
+                            :
                             <NavLink to='/login' viewTransition>Login</NavLink>
                         }
                     </div>
