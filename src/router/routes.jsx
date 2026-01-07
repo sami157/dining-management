@@ -7,6 +7,8 @@ import MealSchedule from "../pages/MealSchedule";
 import UserDashboard from "../pages/UserDashboard";
 import MemberManagement from "../pages/MemberManagement";
 import FundManagement from "../pages/FundManagement";
+import AdminDashboard from "../pages/AdminDashboard";
+import AdminDashboardLayout from "../layouts/AdminDashboardLayout";
 
 export const router = createBrowserRouter([
     {
@@ -23,23 +25,33 @@ export const router = createBrowserRouter([
             },
             {
                 path: '/login',
-                element: <Login/>
-            },
-            {
-                path: '/meal-schedule',
-                element: <MealSchedule/>
+                element: <Login />
             },
             {
                 path: '/user-dashboard',
-                element: <UserDashboard/>
+                element: <UserDashboard />
             },
             {
-                path: '/member-management',
-                element: <MemberManagement/>
-            },
-            {
-                path: '/fund-management',
-                element: <FundManagement/>
+                path: '/admin-dashboard',
+                Component: AdminDashboardLayout,
+                children: [
+                    {
+                        index: true,
+                        element: <AdminDashboard />
+                    },
+                    {
+                        path: '/admin-dashboard/meal-schedule',
+                        element: <MealSchedule />
+                    },
+                    {
+                        path: '/admin-dashboard/fund-management',
+                        element: <FundManagement />
+                    },
+                    {
+                        path: '/admin-dashboard/member-management',
+                        element: <MemberManagement />
+                    },
+                ]
             }
         ]
     },

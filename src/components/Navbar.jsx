@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { NavLink, Link } from 'react-router';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
+import { IoIosArrowDropdownCircle } from "react-icons/io";
 
 const Navbar = () => {
     const { user, loading, signOutUser } = useAuth()
@@ -67,22 +68,18 @@ const Navbar = () => {
                 loading
                     ? <div className="skeleton rounded-lg h-10 w-50"></div>
                     : <div className='flex gap-5 items-center'>
-                        <div className="dropdown">
-                            <div tabIndex={0} role="button" className="btn m-1">{user?.email}</div>
-                            <ul onClick={() => document.activeElement.blur()} tabIndex="-1" className="dropdown-content menu bg-base-100 rounded-box z-5 w-52 p-2 shadow-sm">
-                                <li>
-                                    <NavLink to='/meal-schedule' viewTransition>Meal Schedule</NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to='/member-management' viewTransition>Members</NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to='/fund-management' viewTransition>Funds</NavLink>
-                                </li>
-                                <li>
-                                    <NavLink to='/user-dashboard' viewTransition>Dashboard</NavLink>
-                                </li>
-                            </ul>
+                        <div className='flex gap-4 items-center justify-between'>
+                            <div className="dropdown">
+                                <div tabIndex={0} role="button" className="btn m-1">{user?.email}<span><IoIosArrowDropdownCircle className='text-xl' /></span></div>
+                                <ul onClick={() => document.activeElement.blur()} tabIndex="-1" className="dropdown-content menu bg-base-100 rounded-box z-5 w-52 p-2 shadow-sm">
+                                    <li>
+                                        <NavLink to='/admin-dashboard' viewTransition>Admin Dashboard</NavLink>
+                                    </li>
+                                    <li>
+                                        <NavLink to='/user-dashboard' viewTransition>User Dashboard</NavLink>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                         {user
                             ?
