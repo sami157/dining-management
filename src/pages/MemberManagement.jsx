@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
+import { MdAdminPanelSettings } from "react-icons/md";
 
 const MemberManagement = () => {
   const axiosSecure = useAxiosSecure();
@@ -15,11 +16,10 @@ const MemberManagement = () => {
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
   // Fetch all users
-  const { data: usersData, isLoading: usersLoading } = useQuery({
+  const { data: usersData, isLoading: usersLoading, refetch: userRefetch } = useQuery({
     queryKey: ['allUsers'],
     queryFn: async () => {
       const response = await axiosSecure.get('/users');
-      console.log(response.data.users)
       return response.data.users;
     },
   });
@@ -82,6 +82,25 @@ const MemberManagement = () => {
     return registration?._id;
   };
 
+  const handleRoleSwitch = (userId, role) => {
+    let newRole = ''
+    role === 'member'
+      ? newRole = 'admin'
+      : newRole = 'member'
+    toast.promise(
+      async () => {
+        await axiosSecure.put(`users/role/${userId}`, { role: newRole })
+        userRefetch()
+      }
+      ,
+      {
+        loading: 'Procesing...',
+        success: 'Role updated sucessfully',
+        error: 'Operation failed'
+      }
+    );
+  };
+
   // Helper to check if meal is available on that date
   const isMealAvailable = (date, mealType) => {
     if (!schedulesData) return false;
@@ -126,7 +145,7 @@ const MemberManagement = () => {
       const dateStr = format(date, 'yyyy-MM-dd');
       toast.promise(
         axiosSecure.post('/users/meals/register', {
-          userId: userId.toString(), // Convert to string
+          userId,
           date: dateStr,
           mealType
         }).then(() => refetch()),
@@ -175,7 +194,7 @@ const MemberManagement = () => {
   }
 
   return (
-    <div className='p-4'>
+    <div className='p-4 w-11/12 mx-auto'>
       {/* Week Navigation */}
       <div className='flex justify-between items-center mb-6'>
         <div className='flex gap-2'>
@@ -216,6 +235,7 @@ const MemberManagement = () => {
         <table className='table table-xs table-pin-rows'>
           <thead>
             <tr>
+              <th className='bg-base-300 text-center'>Role</th>
               <th className='bg-base-300'>User</th>
               {weekDates.map((date, idx) => (
                 <th key={idx} className='bg-base-300 text-center'>
@@ -230,6 +250,7 @@ const MemberManagement = () => {
           <tbody>
             {usersData?.map((user) => (
               <tr key={user._id} className='hover'>
+                <td className={`${user.role === 'member' ? 'text-base-content/10' : 'text-base-content'} text-center text-2xl cursor-pointer`}><MdAdminPanelSettings onClick={() => handleRoleSwitch(user._id, user.role)} /></td>
                 <td className='font-semibold'>
                   <div className='flex flex-col'>
                     <span>{user.name}</span>

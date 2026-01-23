@@ -76,7 +76,7 @@ const MealCard = ({ schedule, onUpdate }) => {
     const displayMeals = isEditing ? editedSchedule.availableMeals : schedule.availableMeals;
 
     return (
-        <div className='flex gap-4 items-center h-45 w-11/12 md:w-8/10 mx-auto bg-base-100 rounded-xl justify-between p-4'>
+        <div className='flex gap-4 items-center h-45 mx-auto bg-base-100 rounded-xl justify-between p-4'>
             {/* Date and Day */}
             <div className='text-center flex flex-col gap-4 w-1/2'>
                 <h2 className='text-2xl font-bold'>
@@ -108,7 +108,7 @@ const MealCard = ({ schedule, onUpdate }) => {
             </div>
 
             {/* Meals */}
-            <div className='flex gap-4 w-full h-full'>
+            <div className='flex gap-4 w-150 h-full'>
                 {displayMeals?.map((meal) => (
                     <div
                         key={meal.mealType}

@@ -37,7 +37,7 @@ export const router = createBrowserRouter([
                 children: [
                     {
                         index: true,
-                        element: <AdminDashboard />
+                        element: <MealSchedule />
                     },
                     {
                         path: '/admin-dashboard/meal-schedule',

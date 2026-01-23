@@ -21,7 +21,7 @@ const FundManagement = () => {
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [expenseData, setExpenseData] = useState({
     date: format(new Date(), 'yyyy-MM-dd'),
-    category: 'shopping',
+    category: '',
     amount: '',
     description: ''
   });
@@ -151,7 +151,7 @@ const FundManagement = () => {
       setEditingExpense(null);
       setExpenseData({
         date: format(new Date(), 'yyyy-MM-dd'),
-        category: 'shopping',
+        category: 'Bazar',
         amount: '',
         description: ''
       });

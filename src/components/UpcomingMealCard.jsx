@@ -1,105 +1,148 @@
 import { format } from 'date-fns';
 import { GiMeal } from 'react-icons/gi';
-import { FiUsers } from 'react-icons/fi';
 import { FaUserCheck } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa6";
+import toast from 'react-hot-toast';
+import useAxiosSecure from '../hooks/useAxiosSecure';
+import { MdRadioButtonUnchecked } from "react-icons/md";
+import { IoIosCheckmarkCircle } from "react-icons/io";
 
-const UpcomingMealCard = ({ date, schedule, registrations = [] }) => {
-  console.log(schedule)
-  // Check if date is today
+const UpcomingMealCard = ({ date, schedule, registrations = [], refetch }) => {
+  const axiosSecure = useAxiosSecure();
+
   const isToday = () => {
     const today = new Date();
     return format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
   };
 
-  // Get available meals
-  const availableMeals = schedule?.availableMeals?.filter(m => m.isAvailable) || [];
+  const meals = schedule?.meals || [];
+  const dateStr = format(date, 'yyyy-MM-dd');
 
-  // Count registrations per meal type
-  const getRegistrationCount = (mealType) => {
-    return registrations.filter(reg => 
-      reg.mealType === mealType && 
-      format(new Date(reg.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-    ).length;
+  // Count registrations per meal type for this date
+  const mealCounts = registrations
+    .filter(r => r.date === dateStr)
+    .reduce((acc, r) => {
+      acc[r.mealType] = (acc[r.mealType] || 0) + 1;
+      return acc;
+    }, {});
+
+  const handleMealAction = async (meal) => {
+    if (meal.isRegistered && meal.registrationId) {
+      toast.promise(
+        async () => {
+          await axiosSecure.delete(
+            `/users/meals/register/cancel/${meal.registrationId}`
+          );
+          refetch();
+        },
+        {
+          loading: 'Cancelling...',
+          success: 'Registration cancelled',
+          error: 'Failed to cancel registration'
+        }
+      );
+      return;
+    }
+
+    if (!meal.canRegister) {
+      toast.error('Deadline has passed');
+      return;
+    }
+
+    toast.promise(
+      async () => {
+        await axiosSecure.post('/users/meals/register', {
+          date: dateStr,
+          mealType: meal.mealType
+        });
+        refetch();
+      },
+      {
+        loading: 'Registering...',
+        success: 'Meal registered',
+        error: 'Failed to register meal'
+      }
+    );
   };
 
-  // Total registrations for the day
-  const totalRegistrations = registrations.filter(reg => 
-    format(new Date(reg.date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-  ).length;
-
   return (
-    <div className={`card bg-linear-to-br from-base-100 to-base-200 shadow-xl hover:shadow-2xl transition-all duration-300`}>
-      <div className='card-body'>
+    <div className="rounded-2xl bg-base-100 hover:scale-101 transition">
+      <div className="p-6 space-y-4 rounded-2xl">
+
         {/* Header */}
-        <div className='flex justify-between items-start mb-4'>
-          <div>
-            <div className='flex items-center gap-2 mb-2'>
-              {isToday() && (
-                <div className='badge badge-primary gap-1'>
-                  <span className='text-xs'>●</span> Today
-                </div>
-              )}
-            </div>
-            <h2 className='text-3xl font-bold'>
-              {format(date, 'EEE')}
-            </h2>
-            <p className='text-base text-gray-500'>
-              {format(date, 'dd MMM yyyy')}
-            </p>
-          </div>
+        <div>
+          {isToday() && <span className="badge badge-primary">Today</span>}
+          <h2 className="text-2xl font-bold mt-1">
+            {format(date, 'EEEE')}
+          </h2>
+          <p className="text-sm text-gray-500">
+            {format(date, 'dd MMM yyyy')}
+          </p>
         </div>
 
         {/* Meals */}
-        <div className='space-y-3'>
-          {availableMeals.length > 0 ? (
-            availableMeals.map((meal, idx) => {
-              const regCount = getRegistrationCount(meal.mealType);
-              
-              return (
-                <div key={idx} className='bg-base-200 rounded-xl p-4'>
-                  {/* Meal Header */}
-                  <div className='flex justify-between items-center mb-3'>
-                    <div className='flex items-center gap-2'>
-                      <div className='bg-primary/20 p-2 rounded-lg'>
-                        <GiMeal className='text-primary text-3xl' />
+        <div className="space-y-4">
+          {meals.length > 0 ? meals.map((meal) => (
+            <div
+              key={meal.mealType}
+              className={`p-4 rounded-lg space-y-3 transition
+                ${meal.isRegistered
+                  ? 'bg-primary/20'
+                  : 'bg-base-200'
+                }`}
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex gap-2 items-center">
+                  <GiMeal className="text-base-content text-4xl" />
+                  <div className='flex flex-col gap-1'>
+                    <h3 className="capitalize font-semibold">
+                      {meal.mealType}<span className='ml-2 bg-base-100 px-3 py-1 rounded-md'>{meal.weight}</span>
+                    </h3>
+                    <span className="text-xs text-gray-500">
+                      {/* Total Registered Count */}
+                      <div className="flex items-center text-[14px] gap-2 text-gray-500">
+                        <FaUsers />
+                        <span>
+                          {mealCounts[meal.mealType] || 0}
+                        </span>
                       </div>
-                      <div>
-                        <h3 className='font-bold capitalize text-base-content'>
-                          {meal.mealType}
-                        </h3>
-                        <div className='flex items-center gap-2 mt-0.5'>
-                          <span className='text-xs px-3 py-1 rounded-md bg-base-100 font-semibold text-gray-500'>{meal.weight || 1}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                      {regCount > 0 && (
-                        <div className='bg-primary flex gap-2 items-center text-primary-content px-3 py-1 rounded-lg'>
-                              <FaUserCheck />
-                              <span className='font-medium text-primary-content'>{regCount}</span>
-                              </div>
-                          )}
+                    </span>
                   </div>
-                  
-                  {/* Menu */}
-                  {meal.menu ? (
-                    <div className='bg-base-300/50 rounded-lg p-2 mt-2'>
-                      <p className='text-sm text-center text-base-content'>{meal.menu}</p>
-                    </div>
-                  ) : (
-                    <div className='bg-base-200/30 rounded-lg p-2 mt-2 text-center'>
-                      <p className='text-xs text-gray-400 italic'>No menu specified</p>
-                    </div>
-                  )}
                 </div>
-              );
-            })
-          ) : (
-            <div className='flex flex-col items-center justify-center py-12 bg-base-200/30 rounded-xl'>
-              <div className='text-6xl mb-3 opacity-30'>🍽️</div>
-              <p className='text-lg font-medium text-gray-400'>No Meals Scheduled</p>
-              <p className='text-xs text-gray-400 mt-1'>Check back later</p>
+
+                {/* Action */}
+                {meal.isRegistered ? (
+                  <button
+                    onClick={() => handleMealAction(meal)}
+                    className="text-2xl text-primary hover:scale-120 transition cursor-pointer hover:text-base-content/10 active:scale-70"
+                  >
+                    <IoIosCheckmarkCircle />
+                  </button>
+                ) : meal.isAvailable && meal.canRegister && (
+                  <button
+                    onClick={() => handleMealAction(meal)}
+                    className="text-2xl text-base-content hover:scale-120 transition cursor-pointer hover:text-primary active:scale-70"
+                  >
+                    <MdRadioButtonUnchecked/>
+                  </button>
+                )}
+              </div>
+
+              {/* Menu */}
+              {meal.menu ? (
+                <div className="bg-base-100/70 rounded-md p-2 text-sm text-center">
+                  {meal.menu}
+                </div>
+              ) : (
+                <p className="text-center rounded p-2 text-base-content/30 italic">
+                  No menu specified
+                </p>
+              )}
             </div>
+          )) : (
+            <p className="text-center text-base-content/30">
+              No meals scheduled
+            </p>
           )}
         </div>
       </div>
