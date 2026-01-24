@@ -3,9 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { format, addDays, startOfWeek } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import UpcomingMealCard from '../components/UpcomingMealCard';
+import useAuth from '../hooks/useAuth';
 
 const UpcomingMeals = () => {
   const axiosSecure = useAxiosSecure();
+  const { loading } = useAuth();
   const [currentWeekStart, setCurrentWeekStart] = useState(
     new Date()
   );
@@ -19,6 +21,7 @@ const UpcomingMeals = () => {
   // ✅ USER-AWARE MEALS
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['userMealsWeek', currentWeekStart],
+    enabled: !loading,
     queryFn: async () => {
       const res = await axiosSecure.get(
         `/users/meals/available?startDate=${format(

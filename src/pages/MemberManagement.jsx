@@ -4,10 +4,11 @@ import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { MdAdminPanelSettings } from "react-icons/md";
+import useAuth from '../hooks/useAuth';
 
 const MemberManagement = () => {
   const axiosSecure = useAxiosSecure();
-  const queryClient = useQueryClient();
+  const { loading } = useAuth();
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }));
 
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 0 });
@@ -18,6 +19,7 @@ const MemberManagement = () => {
   // Fetch all users
   const { data: usersData, isLoading: usersLoading, refetch: userRefetch } = useQuery({
     queryKey: ['allUsers'],
+    enabled: !loading,
     queryFn: async () => {
       const response = await axiosSecure.get('/users');
       return response.data.users;
@@ -27,6 +29,7 @@ const MemberManagement = () => {
   // Fetch all registrations for the week
   const { data: registrationsData, isLoading: registrationsLoading, refetch } = useQuery({
     queryKey: ['weekRegistrations', currentWeekStart],
+    enabled: !loading,
     queryFn: async () => {
       const response = await axiosSecure.get(`/managers/registrations?startDate=${format(currentWeekStart, 'yyyy-MM-dd')}&endDate=${format(weekEnd, 'yyyy-MM-dd')}`);
       return response.data.registrations;
@@ -36,6 +39,7 @@ const MemberManagement = () => {
   // Fetch meal schedules for the week
   const { data: schedulesData } = useQuery({
     queryKey: ['weekSchedules', currentWeekStart],
+    enabled: !loading,
     queryFn: async () => {
       const response = await axiosSecure.get(`/managers/schedules?startDate=${format(currentWeekStart, 'yyyy-MM-dd')}&endDate=${format(weekEnd, 'yyyy-MM-dd')}`);
       return response.data.schedules;
@@ -164,7 +168,7 @@ const MemberManagement = () => {
     const available = isMealAvailable(date, mealType);
 
     let bgColor = 'bg-base-300'; // Unavailable
-    let cursorClass = 'cursor-not-allowed';
+    let cursorClass = '';
 
     if (available) {
       if (registered) {
@@ -194,7 +198,7 @@ const MemberManagement = () => {
   }
 
   return (
-    <div className='p-4 w-11/12 mx-auto'>
+    <div className='p-4 w-4/5 mx-auto'>
       {/* Week Navigation */}
       <div className='flex justify-between items-center mb-6'>
         <div className='flex gap-2'>
@@ -235,7 +239,7 @@ const MemberManagement = () => {
         <table className='table table-xs table-pin-rows'>
           <thead>
             <tr>
-              <th className='bg-base-300 text-center'>Role</th>
+              <th className='bg-base-300 justify-center'></th>
               <th className='bg-base-300'>User</th>
               {weekDates.map((date, idx) => (
                 <th key={idx} className='bg-base-300 text-center'>
@@ -250,7 +254,7 @@ const MemberManagement = () => {
           <tbody>
             {usersData?.map((user) => (
               <tr key={user._id} className='hover'>
-                <td className={`${user.role === 'member' ? 'text-base-content/10' : 'text-base-content'} text-center text-2xl cursor-pointer`}><MdAdminPanelSettings onClick={() => handleRoleSwitch(user._id, user.role)} /></td>
+                <td className={`${user.role === 'member' ? 'text-base-content/10' : 'text-base-content'} mx-auto text-2xl transition-colors duration-300 ease-in-out cursor-pointer`}><MdAdminPanelSettings onClick={() => handleRoleSwitch(user._id, user.role)} /></td>
                 <td className='font-semibold'>
                   <div className='flex flex-col'>
                     <span>{user.name}</span>
@@ -281,7 +285,9 @@ const MemberManagement = () => {
         </table>
       </div>
 
-      {!usersData || usersData.length === 0 && (
+      {
+      loading ||
+      (!usersData || usersData.length === 0) && (
         <div className='text-center py-8 text-gray-500'>
           No users found
         </div>

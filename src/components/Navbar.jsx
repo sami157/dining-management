@@ -4,9 +4,11 @@ import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { IoIosArrowDropdownCircle } from "react-icons/io";
 import { GiCampCookingPot } from "react-icons/gi";
+import useRole from '../hooks/useRole';
 
 const Navbar = () => {
     const { user, loading, signOutUser } = useAuth()
+    const { role, roleLoading } = useRole()
     const logOut = async () => {
         await signOutUser()
         toast.success('Logged out')
@@ -55,7 +57,6 @@ const Navbar = () => {
                 </Link>
 
             </div>
-
             {
                 loading
                     ? <div className="skeleton rounded-lg h-10 w-50"></div>
@@ -64,24 +65,34 @@ const Navbar = () => {
                             {themeController}
                         </div>
                         <div className='flex gap-4 items-center justify-between'>
-                            <div className="dropdown">
+                            {
+                                user 
+                                ?
+                                <div className="dropdown">
                                 <div tabIndex={0} role="button" className="btn m-1">{user?.email}<span><IoIosArrowDropdownCircle className='text-xl' /></span></div>
                                 <ul onClick={() => document.activeElement.blur()} tabIndex="-1" className="dropdown-content menu bg-base-100 rounded-box z-5 w-52 p-2 shadow-sm">
-                                    <li>
-                                        <NavLink to='/admin-dashboard' viewTransition>Admin Dashboard</NavLink>
-                                    </li>
+                                    {
+                                        role !== 'member' &&
+                                        <li>
+                                            <NavLink to='/admin-dashboard' viewTransition>Manager Dashboard</NavLink>
+                                        </li>
+                                    }
+
                                     <li>
                                         <NavLink to='/user-dashboard' viewTransition>User Dashboard</NavLink>
                                     </li>
+                                    <li>
+                                        {user
+                                            &&
+                                            <button onClick={logOut} className=''>Log Out</button>
+                                        }
+                                    </li>
                                 </ul>
                             </div>
-                        </div>
-                        {user
-                            ?
-                            <button onClick={logOut} className='btn btn-primary'>Log Out</button>
                             :
-                            <NavLink to='/login' viewTransition>Login</NavLink>
-                        }
+                            <Link className='btn btn-sm btn-primary font-bold' to='/login' viewTransition>Login</Link>
+                            }
+                        </div>
                     </div>
             }
         </div>
