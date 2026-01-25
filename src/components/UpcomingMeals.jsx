@@ -52,14 +52,6 @@ const UpcomingMeals = () => {
     setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 0 }));
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-  }
-
   return (
     <div className="p-4 max-w-7xl mx-auto">
       {/* Header */}
@@ -86,21 +78,29 @@ const UpcomingMeals = () => {
       </p>
 
       {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {weekDates.map((date) => {
-          const key = format(date, 'yyyy-MM-dd');
-          const schedule = scheduleMap[key];
+      {
+        isLoading
+          ?
+          <div className="flex justify-center items-center h-96">
+            <span className="loading scale-150 loading-dots loading-lg"></span>
+          </div>
+          :
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {weekDates.map((date) => {
+              const key = format(date, 'yyyy-MM-dd');
+              const schedule = scheduleMap[key];
 
-          return (
-            <UpcomingMealCard
-              key={key}
-              date={date}
-              schedule={schedule}
-              refetch={refetch}
-            />
-          );
-        })}
-      </div>
+              return (
+                  <UpcomingMealCard
+                    key={key}
+                    date={date}
+                    schedule={schedule}
+                    refetch={refetch}
+                  />
+              );
+            })}
+          </div>
+      }
     </div>
   );
 };

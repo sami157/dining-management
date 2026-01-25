@@ -9,11 +9,13 @@ import MemberManagement from "../pages/MemberManagement";
 import FundManagement from "../pages/FundManagement";
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminDashboardLayout from "../layouts/AdminDashboardLayout";
+import Loading from "../components/Loading";
 
 export const router = createBrowserRouter([
     {
         path: "/",
         Component: HomeLayout,
+        hydrateFallbackElement: Loading,
         children: [
             {
                 index: true,

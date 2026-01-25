@@ -15,7 +15,7 @@ const getToday = () => {
 
 const UserDashboard = () => {
     const axiosSecure = useAxiosSecure();
-    const { user, loading } = useAuth()
+    const { user } = useAuth()
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const firstDate = startOfMonth(currentMonth);
     const lastDate = lastDayOfMonth(currentMonth);
@@ -36,17 +36,15 @@ const UserDashboard = () => {
         queryFn: async () => {
             const response = await axiosSecure.get(`/users/meals/available?month=${monthString}`);
             return response.data;
-        },
-        enabled: !loading
+        }
     });
-    
-    const { data: mealCountData } = useQuery({
+
+    const { data: mealCountData, isLoading: countLoading } = useQuery({
         queryKey: ['userMealsData', user?.email, monthString],
         queryFn: async () => {
             const response = await axiosSecure.get(`/users/meals/total/${user.email}?month=${monthString}`);
             return response.data;
-        },
-        enabled: !isLoading
+        }
     });
 
     // Create a map of schedules by date for quick lookup
@@ -166,8 +164,8 @@ const UserDashboard = () => {
                     title={title}
                     onClick={() => handleMealClick(date, mealType, status)}
                 >
-                    {status.available && status.weight }
-                    </div>
+                    {status.available && status.weight}
+                </div>
             </div>
         );
     };
@@ -212,10 +210,10 @@ const UserDashboard = () => {
             </div>
 
             {/* Loading */}
-            {isLoading ?
-                <div className='flex justify-center'>
-                    <span className='loading loading-spinner loading-lg'></span>
-                </div> : <p>Total Meals Registered <span className='bg-primary/80 rounded-md px-2 py-0.5 font-semibold text-primary-content'>{mealCountData?.totalMeals}</span></p>
+            {countLoading ?
+                <span className="loading loading-dots loading-md"></span>
+                :
+                <p>Total Meals Registered <span className='bg-primary/80 rounded-md px-2 py-0.5 font-semibold text-primary-content'>{mealCountData?.totalMeals}</span></p>
             }
 
             {/* Table */}
