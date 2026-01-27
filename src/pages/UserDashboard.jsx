@@ -188,7 +188,7 @@ const UserDashboard = () => {
                     ← Previous
                 </button>
 
-                <h2 className='text-2xl font-bold'>
+                <h2 className='text-xl md:text-2xl font-bold'>
                     {format(currentMonth, 'MMMM yyyy')}
                 </h2>
 

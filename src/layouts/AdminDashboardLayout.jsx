@@ -4,7 +4,7 @@ import { Outlet } from 'react-router'
 
 const AdminDashboardLayout = () => {
   return (
-    <div className='flex gap-4'>
+    <div className='flex flex-col md:flex-row gap-4'>
       <div className='p-2 min-w-50'>
         <Sidebar/>
       </div>

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { CgUnavailable } from "react-icons/cg";
 import toast from 'react-hot-toast';
-import { MdRestaurantMenu } from 'react-icons/md';
 import { FiEdit } from 'react-icons/fi';
 import { GiMeal } from 'react-icons/gi';
 
@@ -14,28 +13,19 @@ const MealCard = ({ schedule, onUpdate }) => {
     });
 
     const handleMealToggle = (mealType) => {
-        setEditedSchedule(prev => {
-            const updatedMeals = prev.availableMeals.map(meal => {
-                if (meal.mealType === mealType) {
-                    return { ...meal, isAvailable: !meal.isAvailable };
-                }
-                return meal;
-            });
-
-            return {
-                ...prev,
-                availableMeals: updatedMeals
-            };
-        });
+        setEditedSchedule(prev => ({
+            ...prev,
+            availableMeals: prev.availableMeals.map(meal =>
+                meal.mealType === mealType ? { ...meal, isAvailable: !meal.isAvailable } : meal
+            )
+        }));
     };
 
     const handleWeightChange = (mealType, newWeight) => {
         setEditedSchedule(prev => ({
             ...prev,
             availableMeals: prev.availableMeals.map(meal =>
-                meal.mealType === mealType
-                    ? { ...meal, weight: parseFloat(newWeight) || 0 }
-                    : meal
+                meal.mealType === mealType ? { ...meal, weight: parseFloat(newWeight) || 0 } : meal
             )
         }));
     };
@@ -44,9 +34,7 @@ const MealCard = ({ schedule, onUpdate }) => {
         setEditedSchedule(prev => ({
             ...prev,
             availableMeals: prev.availableMeals.map(meal =>
-                meal.mealType === mealType
-                    ? { ...meal, menu: newMenu }
-                    : meal
+                meal.mealType === mealType ? { ...meal, menu: newMenu } : meal
             )
         }));
     };
@@ -57,12 +45,8 @@ const MealCard = ({ schedule, onUpdate }) => {
                 await onUpdate(schedule._id, editedSchedule);
                 setIsEditing(false);
             },
-            {
-                loading: 'Processing',
-                success: 'Successful',
-                error: 'Operation failed',
-            }
-        )
+            { loading: 'Processing', success: 'Successful', error: 'Operation failed' }
+        );
     };
 
     const handleCancel = () => {
@@ -76,57 +60,58 @@ const MealCard = ({ schedule, onUpdate }) => {
     const displayMeals = isEditing ? editedSchedule.availableMeals : schedule.availableMeals;
 
     return (
-        <div className='flex gap-4 items-center h-45 mx-auto bg-base-100 rounded-xl justify-between p-4'>
+        <div className='flex flex-col md:flex-row gap-2 bg-base-100 rounded-xl p-4 w-full'>
+            
             {/* Date and Day */}
-            <div className='text-center flex flex-col gap-4 w-1/2'>
-                <h2 className='text-2xl font-bold'>
+            <div className='flex flex-col items-center md:items-start gap-4 w-full md:w-1/3 text-center md:text-left'>
+                <h2 className='text-xl sm:text-2xl font-bold'>
                     {format(new Date(schedule.date), 'dd/MM/yyyy')}
                 </h2>
+                <p className='text-gray-500 text-sm sm:text-base'>
+                    {format(new Date(schedule.date), 'EEEE')}
+                </p>
 
-                <div className='flex items-center justify-center gap-2'>
-                    <p className='text-lg text-gray-500'>
-                        {format(new Date(schedule.date), 'EEEE')}
-                    </p>
-                </div>
-                <div>
-                    {/* Edit/Save/Cancel Buttons */}
-                    {isEditing ? (
-                        <div className='flex justify-center gap-2'>
-                            <button onClick={handleSave} className='btn btn-xs btn-primary'>
-                                Save
-                            </button>
-                            <button onClick={handleCancel} className='btn btn-xs'>
-                                Cancel
-                            </button>
-                        </div>
-                    ) : (
-                        <button onClick={() => setIsEditing(true)} className='btn rounded-full'>
-                            <FiEdit /> Edit
+                {/* Edit/Save/Cancel Buttons */}
+                {isEditing ? (
+                    <div className='flex gap-2 justify-center md:justify-start'>
+                        <button onClick={handleSave} className='btn btn-xs btn-primary'>
+                            Save
                         </button>
-                    )}
-                </div>
+                        <button onClick={handleCancel} className='btn btn-xs'>
+                            Cancel
+                        </button>
+                    </div>
+                ) : (
+                    <button onClick={() => setIsEditing(true)} className='btn btn-sm flex items-center gap-1'>
+                        <FiEdit /> Edit
+                    </button>
+                )}
             </div>
 
             {/* Meals */}
-            <div className='flex gap-4 w-150 h-full'>
+            <div className='flex flex-wrap gap-4 w-full md:w-2/3'>
                 {displayMeals?.map((meal) => (
                     <div
                         key={meal.mealType}
                         onClick={isEditing ? () => handleMealToggle(meal.mealType) : undefined}
-                        className={`${meal?.isAvailable ? 'bg-primary/20' : 'bg-base-200 flex items-center justify-center'} p-3 w-full rounded-xl ${isEditing ? 'hover:bg-primary/30 cursor-pointer' : ''} duration-100 ease-in`}
+                        className={`flex flex-col justify-between p-3 rounded-xl w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33%-1rem)] 
+                        ${meal?.isAvailable ? 'bg-primary/20' : 'bg-base-200 flex items-center justify-center'} 
+                        ${isEditing ? 'hover:bg-primary/30 cursor-pointer' : ''} duration-100 ease-in`}
                     >
                         {meal?.isAvailable ? (
-                            <div className='flex flex-col justify-between h-full gap-2'>
-                                <div className='flex items-center justify-between'>
-                                    <div className='rounded-md w-full font-medium'>
+                            <div className='flex flex-col gap-2 h-full'>
+                                <div className='flex justify-between items-center'>
+                                    <div className='font-medium'>
                                         {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
                                     </div>
-                                    <p className='px-3 text-sm rounded-sm font-bold bg-primary text-primary-content'>{meal?.weight}</p>
+                                    <p className='px-2 py-1 text-xs sm:text-sm font-bold rounded bg-primary text-primary-content'>
+                                        {meal?.weight}
+                                    </p>
                                 </div>
 
                                 {/* Menu */}
                                 {isEditing ? (
-                                    <div className='flex flex-col gap-2'>
+                                    <div className='flex flex-col gap-2 mt-2'>
                                         <input
                                             type="number"
                                             step="0.5"
@@ -135,7 +120,7 @@ const MealCard = ({ schedule, onUpdate }) => {
                                             value={meal.weight || 1}
                                             onChange={(e) => handleWeightChange(meal.mealType, e.target.value)}
                                             onClick={(e) => e.stopPropagation()}
-                                            className='input input-xs input-bordered w-20'
+                                            className='input input-xs sm:input-sm input-bordered w-full'
                                         />
                                         <input
                                             type="text"
@@ -143,27 +128,26 @@ const MealCard = ({ schedule, onUpdate }) => {
                                             value={meal.menu || ''}
                                             onChange={(e) => handleMenuChange(meal.mealType, e.target.value)}
                                             onClick={(e) => e.stopPropagation()}
-                                            className='input input-xs input-bordered w-full'
+                                            className='input input-xs sm:input-sm input-bordered w-full'
                                         />
                                     </div>
-
                                 ) : (
-                                    <div className='p-1 items-center flex flex-col gap-3 rounded-sm bg-primary/20 text-sm'>
-                                        <div className='text-5xl'>
-                                            <GiMeal />
-                                        </div>
-                                        {meal.menu || '??'}
+                                    <div className='flex flex-col items-center justify-center bg-primary/20 rounded p-2 mt-2 text-sm'>
+                                        <GiMeal className='text-3xl sm:text-4xl' />
+                                        <span>{meal.menu || '??'}</span>
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <div className='text-center text-5xl'><CgUnavailable /></div>
+                            <div className='flex justify-center items-center h-full text-4xl sm:text-5xl'>
+                                <CgUnavailable />
+                            </div>
                         )}
                     </div>
                 ))}
             </div>
         </div>
     );
-}
+};
 
 export default MealCard;

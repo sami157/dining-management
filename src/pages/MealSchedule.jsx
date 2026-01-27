@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
 import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
@@ -8,8 +8,6 @@ import toast from 'react-hot-toast';
 const MealSchedule = () => {
     const axiosSecure = useAxiosSecure();
     const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 })); // Sunday
-
-    // Calculate week end date
     const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 0 });
 
     const { data: schedules, isLoading, refetch } = useQuery({
@@ -20,18 +18,8 @@ const MealSchedule = () => {
         },
     });
 
-    const handlePreviousWeek = () => {
-        setCurrentWeekStart(prev => addDays(prev, -7));
-    };
-
-    const handleNextWeek = () => {
-        setCurrentWeekStart(prev => addDays(prev, 7));
-    };
-
-    const handleThisWeek = () => {
-        setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 0 }));
-    };
-
+    const handlePreviousWeek = () => setCurrentWeekStart(prev => addDays(prev, -7));
+    const handleNextWeek = () => setCurrentWeekStart(prev => addDays(prev, 7));
     const handleGenerateWeek = async () => {
         toast.promise(
             async () => {
@@ -49,65 +37,63 @@ const MealSchedule = () => {
         )
     }
 
-const handleUpdateSchedule = async (scheduleId, updateData) => {
-    try {
-        await axiosSecure.put(`/managers/schedules/${scheduleId}`, updateData);
-        refetch();
-    } catch (error) {
-        console.error('Error updating schedule:', error);
-    }
-};
+    const handleUpdateSchedule = async (scheduleId, updateData) => {
+        try {
+            await axiosSecure.put(`/managers/schedules/${scheduleId}`, updateData);
+            refetch();
+        } catch (error) {
+            console.error('Error updating schedule:', error);
+        }
+    };
 
-return (
-    // Card view
-    <div className='p-4 flex flex-col gap-4 mx-auto max-w-4xl'>
-        {/* Week Navigation */}
-        <div className='flex mx-auto items-center justify-center gap-8'>
-            <div className='flex items-center gap-2'>
-                <button onClick={handlePreviousWeek} className='btn btn-sm'>
-                    ← Previous Week
-                </button>
-                <div className='text-center'>
-                    <p className='font-semibold'>
-                        {format(currentWeekStart, 'MMM dd')} - {format(weekEnd, 'MMM dd, yyyy')}
-                    </p>
+    return (
+        <div className='p-4 flex flex-col gap-4 mx-auto max-w-4xl'>
+
+            {/* Week Navigation */}
+            <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+                <div className='flex flex-col sm:flex-row items-center gap-2 justify-center md:justify-start'>
+                    <button onClick={handlePreviousWeek} className='btn btn-sm'>
+                        ← Previous Week
+                    </button>
+                    <div className='text-center'>
+                        <p className='font-semibold text-sm sm:text-base'>
+                            {format(currentWeekStart, 'MMM dd')} - {format(weekEnd, 'MMM dd, yyyy')}
+                        </p>
+                    </div>
+                    <button onClick={handleNextWeek} className='btn btn-sm'>
+                        Next Week →
+                    </button>
                 </div>
-                <button onClick={handleNextWeek} className='btn btn-sm'>
-                    Next Week →
+                <button onClick={handleGenerateWeek} className='btn btn-primary btn-sm font-bold w-full sm:w-auto'>
+                    Generate Schedules
                 </button>
             </div>
-            <button onClick={handleGenerateWeek} className='btn btn-primary btn-sm font-bold'>
-                Generate Schedules
-            </button>
+
+            {/* Loading State */}
+            {isLoading && (
+                <div className='loading loading-dots loading-xl mx-auto my-4'></div>
+            )}
+
+            {/* Schedules Grid */}
+            {schedules && schedules.length > 0 ? (
+                <div className='grid grid-cols-1 gap-4'>
+                    {schedules.map((schedule, index) => (
+                        <MealCard
+                            key={schedule._id || index}
+                            schedule={schedule}
+                            onUpdate={handleUpdateSchedule}
+                        />
+                    ))}
+                </div>
+            ) : (
+                !isLoading && (
+                    <div className='text-center py-8'>
+                        <p className='text-gray-500'>No schedules found for this week</p>
+                    </div>
+                )
+            )}
         </div>
-
-        {/* Loading State */}
-        {isLoading && (
-            <div className='loading loading-dots loading-xl'>
-            </div>
-        )}
-
-        {/* Schedules Grid */}
-        {schedules && schedules.length > 0 ? (
-            <div className='grid grid-cols-1 gap-4'>
-                {schedules.map((schedule, index) =>
-                (
-                    <MealCard
-                        key={schedule._id || index}
-                        schedule={schedule}
-                        onUpdate={handleUpdateSchedule}
-                    />
-                ))}
-            </div>
-        ) : (
-            !isLoading && (
-                <div className='text-center py-8'>
-                    <p className='text-gray-500'>No schedules found for this week</p>
-                </div>
-            )
-        )}
-    </div>
-);
+    );
 };
 
 export default MealSchedule;
