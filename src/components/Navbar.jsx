@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { NavLink, Link } from 'react-router';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
@@ -9,25 +9,27 @@ import useRole from '../hooks/useRole';
 
 const Navbar = () => {
     const { user, loading, signOutUser } = useAuth()
+    // const { value, setValue } = useState('')
     const { role } = useRole()
     const logOut = async () => {
         await signOutUser()
         toast.success('Logged out')
     }
 
-    const [isdark, setIsdark] = useState(
-        JSON.parse(localStorage.getItem('isdark')) || false
-    );
+    // const [isdark, setIsdark] = useState(
+    //     JSON.parse(localStorage.getItem('isdark')) || false
+    // );
 
-    useEffect(() => {
-        localStorage.setItem('isdark', JSON.stringify(isdark));
-    }, [isdark]);
+    // useEffect(() => {
+    //     localStorage.setItem('isdark', JSON.stringify(isdark));
+    // }, [isdark]);
 
     const [mobileMenu, setMobileMenu] = useState(false);
 
     const themeController = (
         <label className="swap swap-rotate cursor-pointer">
-            <input type="checkbox" className="theme-controller" checked={isdark} onChange={() => setIsdark(!isdark)} />
+            {/* <input type="checkbox" className="theme-controller" checked={isdark} onChange={() => setIsdark(!isdark)} /> */}
+            <input type="checkbox" className="theme-controller" value='dark' />
 
             {/* sun icon */}
             <svg

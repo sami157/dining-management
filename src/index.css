@@ -41,7 +41,7 @@
 /* dark theme */
 
 @plugin "daisyui/theme" {
-  name: "coffee";
+  name: "dark";
   default: false;
   prefersdark: false;
   color-scheme: "dark";
