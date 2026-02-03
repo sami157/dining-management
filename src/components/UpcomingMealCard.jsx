@@ -35,7 +35,7 @@ const UpcomingMealCard = ({ date, schedule, registrations = [], refetch }) => {
           await axiosSecure.delete(
             `/users/meals/register/cancel/${meal.registrationId}`
           );
-          refetch();
+          await refetch();
         },
         {
           loading: 'Cancelling...',
@@ -57,7 +57,7 @@ const UpcomingMealCard = ({ date, schedule, registrations = [], refetch }) => {
           date: dateStr,
           mealType: meal.mealType
         });
-        refetch();
+        await refetch();
       },
       {
         loading: 'Registering...',

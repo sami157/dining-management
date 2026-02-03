@@ -68,7 +68,10 @@ const MemberManagement = () => {
   const handleRoleSwitch = (userId, role) => {
     const newRole = role === 'member' ? 'admin' : 'member';
     toast.promise(
-      axiosSecure.put(`users/role/${userId}`, { role: newRole }).then(() => userRefetch()),
+      async () => {
+        await axiosSecure.put(`users/role/${userId}`, { role: newRole });
+        await userRefetch();
+      },
       { loading: 'Processing...', success: 'Role updated successfully', error: 'Operation failed' }
     );
   };
@@ -90,13 +93,19 @@ const MemberManagement = () => {
       const registrationId = getRegistrationId(userId, date, mealType);
       if (!registrationId) return;
       toast.promise(
-        axiosSecure.delete(`/users/meals/register/cancel/${registrationId}`).then(() => refetch()),
+        async () => {
+          await axiosSecure.delete(`/users/meals/register/cancel/${registrationId}`).then(() => refetch())
+          await refetch();
+        },
         { loading: 'Cancelling...', success: 'Registration cancelled', error: 'Failed to cancel' }
       );
     } else {
       const dateStr = format(date, 'yyyy-MM-dd');
       toast.promise(
-        axiosSecure.post('/users/meals/register', { userId, date: dateStr, mealType }).then(() => refetch()),
+        async () => {
+          await axiosSecure.post('/users/meals/register', { userId, date: dateStr, mealType })
+          await refetch();
+        },
         { loading: 'Registering...', success: 'Meal registered', error: 'Failed to register' }
       );
     }

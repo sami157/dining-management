@@ -31,7 +31,7 @@ const UserDashboard = () => {
 
     const monthString = format(currentMonth, 'yyyy-MM');
 
-    const { data, isLoading, refetch } = useQuery({
+    const { data, refetch } = useQuery({
         queryKey: ['userMeals', monthString],
         queryFn: async () => {
             const response = await axiosSecure.get(`/users/meals/available?month=${monthString}`);
@@ -98,8 +98,10 @@ const UserDashboard = () => {
         // If registered, cancel registration (no deadline check needed - if they could register, they can cancel)
         if (status.registered && status.registrationId) {
             toast.promise(
-                axiosSecure.delete(`/users/meals/register/cancel/${status.registrationId}`)
-                    .then(() => refetch()),
+                async () => {
+                    await axiosSecure.delete(`/users/meals/register/cancel/${status.registrationId}`);
+                    await refetch();
+                },
                 {
                     loading: 'Cancelling registration...',
                     success: 'Registration cancelled',
@@ -118,10 +120,10 @@ const UserDashboard = () => {
         // Register
         const dateStr = format(date, 'yyyy-MM-dd');
         toast.promise(
-            axiosSecure.post('/users/meals/register', {
-                date: dateStr,
-                mealType: mealType
-            }).then(() => refetch()),
+            async () => {
+                await axiosSecure.post('/users/meals/register', { date: dateStr, mealType });
+                await refetch();
+            },
             {
                 loading: 'Registering...',
                 success: 'Meal registered successfully',
