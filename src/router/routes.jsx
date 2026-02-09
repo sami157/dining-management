@@ -10,12 +10,15 @@ import FundManagement from "../pages/FundManagement";
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminDashboardLayout from "../layouts/AdminDashboardLayout";
 import Loading from "../components/Loading";
+import { NotFound } from "../components/NotFound";
+import { PrivateRoute } from "../components/PrivateRoute";
 
 export const router = createBrowserRouter([
     {
         path: "/",
         Component: HomeLayout,
         hydrateFallbackElement: Loading,
+        errorElement: <NotFound />,
         children: [
             {
                 index: true,
@@ -31,29 +34,32 @@ export const router = createBrowserRouter([
             },
             {
                 path: '/user-dashboard',
-                element: <UserDashboard />
+                element: <PrivateRoute><UserDashboard /></PrivateRoute>
             },
             {
                 path: '/admin-dashboard',
-                Component: AdminDashboardLayout,
+                element: <PrivateRoute><AdminDashboard /></PrivateRoute>,
                 children: [
                     {
                         index: true,
-                        element: <MealSchedule />
+                        element: <PrivateRoute><MealSchedule /></PrivateRoute>
                     },
                     {
                         path: '/admin-dashboard/meal-schedule',
-                        element: <MealSchedule />
+                        element: <PrivateRoute><MealSchedule /></PrivateRoute>
                     },
                     {
                         path: '/admin-dashboard/fund-management',
-                        element: <FundManagement />
+                        element: <PrivateRoute><FundManagement /></PrivateRoute>
                     },
                     {
                         path: '/admin-dashboard/member-management',
-                        element: <MemberManagement />
+                        element: <PrivateRoute><MemberManagement /></PrivateRoute>
                     },
                 ]
+            },
+            {
+
             }
         ]
     },
