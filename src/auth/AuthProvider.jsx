@@ -3,8 +3,6 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthState
 import { AuthContext } from './AuthContext.jsx';
 import { auth } from '../../firebase/firebase.init.js';
 
-const provider = new GoogleAuthProvider();
-
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState()
     const [loading, setLoading] = useState(true)

@@ -48,13 +48,13 @@ const FundManagement = () => {
   });
 
   //Fetch Finalization Data for Current Month
-  const { data: finalizationData } = useQuery({
-    queryKey: ['finalization'],
-    queryFn: async () => {
-      const response = await axiosSecure.get(`/finance/finalization/${currentMonth}`);
-      return response.data.finalization;
-    },
-  });
+  // const { data: finalizationData } = useQuery({
+  //   queryKey: ['finalization'],
+  //   queryFn: async () => {
+  //     const response = await axiosSecure.get(`/finance/finalization/${currentMonth}`);
+  //     return response.data.finalization;
+  //   },
+  // });
 
   // Fetch deposits for current month
   const { data: depositsData, refetch: refetchDeposits } = useQuery({
