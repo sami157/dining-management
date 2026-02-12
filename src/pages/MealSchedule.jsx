@@ -47,7 +47,7 @@ const MealSchedule = () => {
     };
 
     return (
-        <div className='p-4 flex flex-col gap-4 mx-auto max-w-4xl'>
+        <div className='p-4 flex flex-col gap-4 mx-auto max-w-7xl'>
 
             {/* Week Navigation */}
             <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>

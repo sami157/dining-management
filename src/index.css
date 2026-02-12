@@ -99,7 +99,7 @@ a.active {
   border-radius: 40px;
 }
 
-::view-transition-old(root) {
+/* ::view-transition-old(root) {
   animation: slide-out 300ms ease;
 }
 
@@ -127,4 +127,4 @@ a.active {
     transform: translateX(0);
     opacity: 1;
   }
-}
+} */

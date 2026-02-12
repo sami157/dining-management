@@ -37,8 +37,12 @@ export const router = createBrowserRouter([
                 element: <PrivateRoute><UserDashboard /></PrivateRoute>
             },
             {
+                path: '*',
+                element: <NotFound />
+            },
+            {
                 path: '/admin-dashboard',
-                element: <PrivateRoute><AdminDashboard /></PrivateRoute>,
+                element: <PrivateRoute><AdminDashboardLayout /></PrivateRoute>,
                 children: [
                     {
                         index: true,

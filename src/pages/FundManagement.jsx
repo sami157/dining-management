@@ -4,6 +4,8 @@ import { format } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { IoIosAddCircle } from "react-icons/io";
+import { FaCircleCheck } from "react-icons/fa6";
 
 const FundManagement = () => {
   const axiosSecure = useAxiosSecure();
@@ -42,6 +44,15 @@ const FundManagement = () => {
     queryFn: async () => {
       const response = await axiosSecure.get('/finance/balances');
       return response.data.balances;
+    },
+  });
+
+  //Fetch Finalization Data for Current Month
+  const { data: finalizationData } = useQuery({
+    queryKey: ['finalization'],
+    queryFn: async () => {
+      const response = await axiosSecure.get(`/finance/finalization/${currentMonth}`);
+      return response.data.finalization;
     },
   });
 
@@ -207,8 +218,23 @@ const FundManagement = () => {
     return acc;
   }, {}) || {};
 
+  const finalizeMonth = async() => {
+    toast.promise(
+      async () => {
+        await axiosSecure.post('/finance/finalize', { month: currentMonth });
+        await refetchExpenses();
+        await refetchDeposits();
+      },
+      {
+        loading: 'Finalizing month...',
+        success: 'Month finalized successfully',
+        error: 'Failed to finalize month'
+      }
+    );
+  }
+
   return (
-    <div className='p-4 max-w-4/5 mx-auto'>
+    <div className='p-4 max-w-11/12 mx-auto'>
       <h1 className='text-2xl font-bold mb-6'>Fund Management - {format(new Date(currentMonth + '-01'), 'MMMM yyyy')}</h1>
 
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
@@ -223,9 +249,9 @@ const FundManagement = () => {
               <thead>
                 <tr>
                   <th>Member</th>
-                  <th>Balance</th>
-                  <th>Deposits (This Month)</th>
-                  <th>Actions</th>
+                  <th className='text-center'>Balance</th>
+                  <th className='text-center'>Deposit</th>
+                  <th className='text-center'>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -238,7 +264,7 @@ const FundManagement = () => {
                       <td>
                         <div className='flex flex-col'>
                           <span className='font-medium'>{user.name}</span>
-                          <span className='text-xs text-gray-500'>{user.email}</span>
+                          <span className='text-xs text-gray-500'>{user.mobile}</span>
                         </div>
                       </td>
                       <td>
@@ -247,12 +273,15 @@ const FundManagement = () => {
                         </span>
                       </td>
                       <td>৳{monthlyDeposits.toFixed(2)}</td>
-                      <td>
+                      <td className='w-full'>
                         <button
                           onClick={() => openDepositModal(user)}
-                          className='btn btn-xs btn-primary'
+                          className='px-3 py-2 rounded-xl bg-primary cursor-pointer'
                         >
-                          Add Deposit
+                          <div className='flex gap-2 text-primary-content font-semibold items-center'>
+                            <IoIosAddCircle className='text-2xl' />
+                            <p>Deposit</p>
+                          </div>
                         </button>
                       </td>
                     </tr>
@@ -314,8 +343,14 @@ const FundManagement = () => {
         <div className='flex flex-col gap-4'>
           {/* Expense Summary */}
           <div className='card bg-base-200'>
-            <div className='card-body'>
-              <h2 className='card-title'>Monthly Summary</h2>
+            <div className='card-body space-y-5'>
+              <div className='flex items-center justify-between'>
+                <h2 className='card-title'>Monthly Summary</h2>
+                <button onClick={finalizeMonth} className='rounded-full text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2'>
+                    <FaCircleCheck className='text-xl' />
+                  <p className='font-semibold'>Finalize</p>
+                </button>
+              </div>
               <div className='stats rounded-lg bg-base-100 stats-vertical shadow'>
                 <div className='stat'>
                   <div className='stat-title'>Total Deposits</div>
@@ -334,8 +369,8 @@ const FundManagement = () => {
                 <div className='stat'>
                   <div className='stat-title'>Net Balance</div>
                   <div className={`text-2xl font-bold ${(depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0) - totalExpenses >= 0
-                      ? 'text-success'
-                      : 'text-error'
+                    ? 'text-success'
+                    : 'text-error'
                     }`}>
                     ৳{((depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0) - totalExpenses).toFixed(2)}
                   </div>
@@ -363,9 +398,12 @@ const FundManagement = () => {
                 <h2 className='card-title'>Expense Log</h2>
                 <button
                   onClick={() => openExpenseModal()}
-                  className='btn btn-sm btn-primary'
+                  className='px-3 py-2 rounded-xl bg-primary cursor-pointer'
                 >
-                  Add Expense
+                  <div className='flex gap-2 text-primary-content font-semibold items-center'>
+                    <IoIosAddCircle className='text-2xl' />
+                    <p>Expense</p>
+                  </div>
                 </button>
               </div>
 
