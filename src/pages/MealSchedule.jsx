@@ -38,12 +38,17 @@ const MealSchedule = () => {
     }
 
     const handleUpdateSchedule = async (scheduleId, updateData) => {
-        try {
-            await axiosSecure.put(`/managers/schedules/${scheduleId}`, updateData);
-            refetch();
-        } catch (error) {
-            console.error('Error updating schedule:', error);
-        }
+        toast.promise(
+            async () => {
+                await axiosSecure.put(`/managers/schedules/${scheduleId}`, updateData);
+                await refetch();
+            },
+            {
+                loading: 'Schedule update in progress',
+                success: 'Schedule updated successfully',
+                error: 'Schedule update failed',
+            }
+        )
     };
 
     return (

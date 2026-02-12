@@ -6,8 +6,6 @@ const axiosSecure = axios.create({
     baseURL: 'https://dining-management-server.vercel.app'
 });
 
-console.log(axiosSecure.baseURL);
-
 const useAxiosSecure = () => {
     const { user } = useAuth();
 

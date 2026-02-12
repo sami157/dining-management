@@ -13,7 +13,6 @@ const useRole = () => {
             return res.data?.role
         }
     })
-    console.log(role);
 
     return { role, roleLoading };
 };
