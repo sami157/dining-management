@@ -61,9 +61,6 @@ export const router = createBrowserRouter([
                         element: <PrivateRoute><MemberManagement /></PrivateRoute>
                     },
                 ]
-            },
-            {
-
             }
         ]
     },
