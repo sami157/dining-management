@@ -12,6 +12,7 @@ import AdminDashboardLayout from "../layouts/AdminDashboardLayout";
 import Loading from "../components/Loading";
 import { NotFound } from "../components/NotFound";
 import { PrivateRoute } from "../components/PrivateRoute";
+import PreviousData from "../pages/PreviousData";
 
 export const router = createBrowserRouter([
     {
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
                     {
                         path: '/admin-dashboard/member-management',
                         element: <PrivateRoute><MemberManagement /></PrivateRoute>
+                    },
+                    {
+                        path: '/admin-dashboard/history',
+                        element: <PrivateRoute><PreviousData /></PrivateRoute>
                     },
                 ]
             }

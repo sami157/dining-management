@@ -1,18 +1,13 @@
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
-import toast from 'react-hot-toast';
-import MemberInfoTable from '../components/ManagerDashboard/MemberInfoTable';
 import MonthlySummary from '../components/ManagerDashboard/MonthlySummary';
-import MonthlyExpense from '../components/ManagerDashboard/MonthlyExpense';
 
-const FundManagement = () => {
-
+const PreviousData = () => {
   const axiosSecure = useAxiosSecure();
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
-
-  //MonthPicker handler
+  
   // Extract year and month from currentMonth
   const [selectedYear, setSelectedYear] = useState(currentMonth.split('-')[0]);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth.split('-')[1]);
@@ -48,27 +43,9 @@ const FundManagement = () => {
     setCurrentMonth(`${selectedYear}-${month}`);
   };
 
-  // Fetch all users
-  const { data: usersData } = useQuery({
-    queryKey: ['allUsers'],
-    queryFn: async () => {
-      const response = await axiosSecure.get('/users');
-      return response.data.users;
-    },
-  });
-
-  // Fetch all balances
-  const { data: balancesData } = useQuery({
-    queryKey: ['allBalances'],
-    queryFn: async () => {
-      const response = await axiosSecure.get('/finance/balances');
-      return response.data.balances;
-    },
-  });
-
   // Fetch Finalization Data for Current Month
-  const { data: finalizationData} = useQuery({
-    queryKey: ['finalization'],
+  const { data: finalizationData } = useQuery({
+    queryKey: ['finalization', currentMonth],
     queryFn: async () => {
       const response = await axiosSecure.get(`/finance/finalization/${currentMonth}`);
       return response.data.finalization;
@@ -77,18 +54,8 @@ const FundManagement = () => {
 
   const monthFinalized = finalizationData?.isFinalized || false;
 
-
-  // Fetch deposits for current month
-  const { data: depositsData, refetch: refetchDeposits } = useQuery({
-    queryKey: ['deposits', currentMonth],
-    queryFn: async () => {
-      const response = await axiosSecure.get(`/finance/deposits?month=${currentMonth}`);
-      return response.data.deposits;
-    },
-  });
-
   // Fetch all expenses for current month
-  const { data: expensesData, refetch: refetchExpenses } = useQuery({
+  const { data: expensesData } = useQuery({
     queryKey: ['expenses', currentMonth],
     queryFn: async () => {
       const [year, month] = currentMonth.split('-');
@@ -101,7 +68,6 @@ const FundManagement = () => {
     },
   });
 
-
   // Calculate expense summary
   const totalExpenses = expensesData?.reduce((sum, exp) => sum + exp.amount, 0) || 0;
   const expensesByCategory = expensesData?.reduce((acc, exp) => {
@@ -109,24 +75,10 @@ const FundManagement = () => {
     return acc;
   }, {}) || {};
 
-  const finalizeMonth = async () => {
-    toast.promise(
-      async () => {
-        await axiosSecure.post('/finance/finalize', { month: currentMonth });
-        refetchExpenses();
-        refetchDeposits();
-      },
-      {
-        loading: 'Finalizing month...',
-        success: 'Month finalized successfully',
-        error: 'Failed to finalize month'
-      }
-    );
-  }
-
   return (
     <div className='p-4 w-11/12 mx-auto'>
-      <h1 className='text-2xl text-center font-bold mb-6'>Fund Management - {format(new Date(currentMonth + '-01'), 'MMMM yyyy')}</h1>
+      <h1 className='text-2xl text-center font-bold mb-6'>Previous Monthly Data</h1>
+      
       {/* Month Picker */}
       <div className='flex justify-center gap-4 mb-6'>
         <div>
@@ -159,18 +111,61 @@ const FundManagement = () => {
           </select>
         </div>
       </div>
-      {/* Monthly Summary */}
+
+      {/* Monthly Summary and Expenses */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        <div className='flex flex-col gap-8'>
-          <MonthlySummary totalExpenses={totalExpenses} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} />
-          <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} />
+        <div>
+          <MonthlySummary 
+            totalExpenses={totalExpenses} 
+            monthFinalized={monthFinalized} 
+            finalizeMonth={null}
+          />
         </div>
-        <div className='grid grid-cols-1 gap-8'>
-          <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} currentMonth={currentMonth} />
+
+        {/* Expense Data - Read Only */}
+        <div className='card bg-base-200'>
+          <div className='card-body'>
+            <div className='space-y-4 mb-4'>
+              <h3 className='card-title'>Expenses by Category</h3>
+              <div className='grid grid-cols-2 gap-2'>
+                {Object.entries(expensesByCategory).map(([category, amount]) => (
+                  <div key={category} className='flex justify-between p-2 bg-base-100 rounded-lg'>
+                    <span className='capitalize'>{category}</span>
+                    <span className='font-medium'>৳{amount}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <h2 className='card-title mb-3'>Expense Log</h2>
+            
+            <div className='overflow-x-auto'>
+              <table className='table table-xs'>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {expensesData?.map((expense) => (
+                    <tr key={expense._id}>
+                      <td>{format(new Date(expense.date), 'dd MMM')}</td>
+                      <td className='capitalize'>{expense.category}</td>
+                      <td className='font-medium'>৳{expense.amount}</td>
+                      <td className='text-xs'>{expense.description || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default FundManagement;
+export default PreviousData

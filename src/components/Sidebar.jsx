@@ -7,6 +7,7 @@ const Sidebar = () => {
       <NavLink to='/admin-dashboard/meal-schedule' viewTransition>Meal Schedule</NavLink>
       <NavLink to='/admin-dashboard/member-management' viewTransition>Members</NavLink>
       <NavLink to='/admin-dashboard/fund-management' viewTransition>Funds</NavLink>
+      <NavLink to='/admin-dashboard/history' viewTransition>Previous Data</NavLink>
     </div>
   )
 }
