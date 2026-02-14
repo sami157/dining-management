@@ -47,14 +47,14 @@ const FundManagement = () => {
     },
   });
 
-  //Fetch Finalization Data for Current Month
-  // const { data: finalizationData } = useQuery({
-  //   queryKey: ['finalization'],
-  //   queryFn: async () => {
-  //     const response = await axiosSecure.get(`/finance/finalization/${currentMonth}`);
-  //     return response.data.finalization;
-  //   },
-  // });
+  // Fetch Finalization Data for Current Month
+  const { data: finalizationData } = useQuery({
+    queryKey: ['finalization'],
+    queryFn: async () => {
+      const response = await axiosSecure.get(`/finance/finalization/${currentMonth}`);
+      return response.data.finalization;
+    },
+  });
 
   // Fetch deposits for current month
   const { data: depositsData, refetch: refetchDeposits } = useQuery({
@@ -234,10 +234,10 @@ const FundManagement = () => {
   }
 
   return (
-    <div className='p-4 max-w-11/12 mx-auto'>
-      <h1 className='text-2xl font-bold mb-6'>Fund Management - {format(new Date(currentMonth + '-01'), 'MMMM yyyy')}</h1>
+    <div className='p-4 w-11/12 mx-auto'>
+      <h1 className='text-2xl text-center font-bold mb-6'>Fund Management - {format(new Date(currentMonth + '-01'), 'MMMM yyyy')}</h1>
 
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         {/* Left: User List with Deposits */}
         <div>
           <div className='flex justify-between items-center mb-4'>

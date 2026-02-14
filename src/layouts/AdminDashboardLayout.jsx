@@ -6,9 +6,11 @@ const AdminDashboardLayout = () => {
   return (
     <div className='flex flex-col md:flex-row gap-4'>
       <div className='p-2 min-w-50'>
-        <Sidebar/>
+        <Sidebar />
       </div>
-      <Outlet/>
+      <div className='w-3/5 mx-auto'>
+        <Outlet />
+      </div>
     </div>
   )
 }
