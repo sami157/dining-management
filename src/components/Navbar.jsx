@@ -50,7 +50,7 @@ const Navbar = () => {
     );
 
     return (
-        <nav className="relative bg-base-100 shadow-md px-4 py-2 flex items-center justify-between">
+        <nav className="relative w-[96vw] mx-auto bg-base-100 rounded-lg px-4 py-2 flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
                 <GiCampCookingPot className="text-5xl" />
@@ -73,7 +73,7 @@ const Navbar = () => {
                         </div>
                         <ul
                             tabIndex="-1"
-                            className="dropdown-content menu bg-base-100 rounded-box w-52 p-2 shadow-sm"
+                            className="dropdown-content menu bg-base-100 rounded-box w-52 p-2"
                         >
                             {role !== "member" && (
                                 <li>
@@ -108,7 +108,7 @@ const Navbar = () => {
 
             {/* Mobile Menu */}
             {mobileMenu && (
-                <div className="absolute top-full left-0 w-full bg-base-100 shadow-md flex flex-col p-4 md:hidden z-50">
+                <div className="absolute top-full left-0 w-full bg-base-100 flex flex-col p-4 md:hidden z-50">
                     {user ? (
                         <>
                             <p className="mb-2 font-semibold">{user.email}</p>
