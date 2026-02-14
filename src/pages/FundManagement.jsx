@@ -10,43 +10,8 @@ import MonthlyExpense from '../components/ManagerDashboard/MonthlyExpense';
 const FundManagement = () => {
 
   const axiosSecure = useAxiosSecure();
-  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [currentMonth] = useState(format(new Date(), 'yyyy-MM'));
 
-  //MonthPicker handler
-  // Extract year and month from currentMonth
-  const [selectedYear, setSelectedYear] = useState(currentMonth.split('-')[0]);
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth.split('-')[1]);
-
-  // Generate year options (e.g., current year ± 5 years)
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
-
-  // Month options
-  const monthOptions = [
-    { value: '01', label: 'January' },
-    { value: '02', label: 'February' },
-    { value: '03', label: 'March' },
-    { value: '04', label: 'April' },
-    { value: '05', label: 'May' },
-    { value: '06', label: 'June' },
-    { value: '07', label: 'July' },
-    { value: '08', label: 'August' },
-    { value: '09', label: 'September' },
-    { value: '10', label: 'October' },
-    { value: '11', label: 'November' },
-    { value: '12', label: 'December' },
-  ];
-
-  // Update currentMonth when year or month changes
-  const handleYearChange = (year) => {
-    setSelectedYear(year);
-    setCurrentMonth(`${year}-${selectedMonth}`);
-  };
-
-  const handleMonthChange = (month) => {
-    setSelectedMonth(month);
-    setCurrentMonth(`${selectedYear}-${month}`);
-  };
 
   // Fetch all users
   const { data: usersData } = useQuery({
@@ -127,38 +92,6 @@ const FundManagement = () => {
   return (
     <div className='p-4 w-11/12 mx-auto'>
       <h1 className='text-2xl text-center font-bold mb-6'>Fund Management - {format(new Date(currentMonth + '-01'), 'MMMM yyyy')}</h1>
-      {/* Month Picker */}
-      <div className='flex justify-center gap-4 mb-6'>
-        <div>
-          <label className='label'>
-            <span className='label-text'>Year</span>
-          </label>
-          <select
-            value={selectedYear}
-            onChange={(e) => handleYearChange(e.target.value)}
-            className='select select-bordered'
-          >
-            {yearOptions.map(year => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className='label'>
-            <span className='label-text'>Month</span>
-          </label>
-          <select
-            value={selectedMonth}
-            onChange={(e) => handleMonthChange(e.target.value)}
-            className='select select-bordered'
-          >
-            {monthOptions.map(month => (
-              <option key={month.value} value={month.value}>{month.label}</option>
-            ))}
-          </select>
-        </div>
-      </div>
       {/* Monthly Summary */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         <div className='flex flex-col gap-8'>
