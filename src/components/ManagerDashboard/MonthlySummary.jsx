@@ -12,30 +12,30 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                     <div className='flex items-center justify-between'>
                         <h2 className='card-title'>Monthly Summary</h2>
                         <button onClick={finalizeMonth} className='rounded-full text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2'>
-                            <FaCircleCheck className='text-xl' />
-                            <p className='font-semibold'>Finalize</p>
+                            <FaCircleCheck className='text-lg' />
+                            <p className='font-semibold text-sm'>Finalize</p>
                         </button>
                     </div>
 
                     {/* Stats */}
-                    <div className='rounded-lg w-11/12 mx-auto flex justify-center gap-4'>
+                    <div className='rounded-lg w-full mx-auto flex justify-center gap-4'>
                         <div className='p-4 w-full bg-base-100 rounded-xl text-center'> 
                             <div className='font-medium'>Deposit</div>
-                            <div className='text-2xl text-success'>
+                            <div className='text-xl text-success'>
                                 ৳{(depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0)}
                             </div>
                         </div>
 
                         <div className='p-4 w-full bg-base-100 rounded-xl text-center'>
                             <div className=''>Expense</div>
-                            <div className='text-2xl text-error'>
+                            <div className='text-xl text-error'>
                                 ৳{totalExpenses}
                             </div>
                         </div>
 
                         <div className='p-4 w-full bg-base-100 rounded-xl text-center'>
                             <div className=''>Balance</div>
-                            <div className={`text-2xl font-bold ${(depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0) - totalExpenses >= 0
+                            <div className={`text-xl font-bold ${(depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0) - totalExpenses >= 0
                                 ? 'text-success'
                                 : 'text-error'
                                 }`}>

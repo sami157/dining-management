@@ -1,16 +1,21 @@
-import {useState} from 'react'
+import { useState } from 'react'
 import { format } from 'date-fns';
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { IoIosAddCircle } from "react-icons/io";
+import useAxiosSecure from '../../hooks/useAxiosSecure';
+import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 
-const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized, refetchDeposits, handleDeleteDeposit }) => {
+const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized, refetchDeposits, currentMonth }) => {
+    const axiosSecure = useAxiosSecure();
+    const queryClient = useQueryClient();
     const [showDepositModal, setShowDepositModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [depositAmount, setDepositAmount] = useState('');
     const [depositNotes, setDepositNotes] = useState('');
-    const [editingDeposit, setEditingDeposit] = useState(null);
+    const [editingDeposit, setEditingDeposit] = useState(false);
 
     // Open deposit modal
     const openDepositModal = (user, existingDeposit = null) => {
@@ -37,24 +42,41 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
         try {
             if (editingDeposit) {
                 // Update existing deposit
-                await axiosSecure.put(`/finance/deposits/${editingDeposit._id}`, {
-                    amount: parseFloat(depositAmount),
-                    notes: depositNotes
-                });
-                toast.success('Deposit updated successfully');
+                toast.promise(
+                    async () => {
+                        await axiosSecure.put(`/finance/deposits/${editingDeposit._id}`, {
+                            amount: parseFloat(depositAmount),
+                            notes: depositNotes
+                        });
+                        setShowDepositModal(false);
+                        refetchDeposits();
+                    },
+                    {
+                        loading: 'Updating deposit',
+                        success: 'Deposit updated successfully',
+                        error: 'Failed to update deposit',
+                    }
+                )
             } else {
                 // Add new deposit
-                await axiosSecure.post('/finance/deposits/add', {
-                    userId: selectedUser._id.toString(),
-                    amount: parseFloat(depositAmount),
-                    month: currentMonth,
-                    notes: depositNotes
-                });
-                toast.success('Deposit added successfully');
+                toast.promise(
+                    async () => {
+                        await axiosSecure.post('/finance/deposits/add', {
+                            userId: selectedUser._id.toString(),
+                            amount: parseFloat(depositAmount),
+                            month: currentMonth,
+                            notes: depositNotes
+                        });
+                        setShowDepositModal(false);
+                        refetchDeposits();
+                    },
+                    {
+                        loading: 'Adding deposit',
+                        success: 'Deposit added successfully',
+                        error: 'Failed to add deposit',
+                    }
+                )
             }
-
-            setShowDepositModal(false);
-            refetchDeposits();
             queryClient.invalidateQueries(['allBalances']);
         } catch (error) {
             toast.error(error.response?.data?.error || 'Failed to save deposit');
@@ -65,6 +87,20 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
     const getUserBalance = (userId) => {
         const balance = balancesData?.find(b => b.userId === userId);
         return balance?.balance || 0;
+    };
+
+    // Delete deposit
+    const handleDeleteDeposit = async (depositId) => {
+        if (!confirm('Are you sure you want to delete this deposit?')) return;
+
+        try {
+            await axiosSecure.delete(`/finance/deposits/${depositId}`);
+            toast.success('Deposit deleted successfully');
+            refetchDeposits();
+            queryClient.invalidateQueries(['allBalances']);
+        } catch (error) {
+            toast.error(error.response?.data?.error || 'Failed to delete deposit');
+        }
     };
     return (
         <div>
