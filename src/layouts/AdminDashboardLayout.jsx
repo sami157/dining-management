@@ -8,7 +8,7 @@ const AdminDashboardLayout = () => {
       <div className='p-2 min-w-50'>
         <Sidebar />
       </div>
-      <div className='w-3/5 mx-auto'>
+      <div className='lg:w-3/5 mx-auto'>
         <Outlet />
       </div>
     </div>

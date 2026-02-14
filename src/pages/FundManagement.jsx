@@ -10,7 +10,6 @@ import MonthlyExpense from '../components/ManagerDashboard/MonthlyExpense';
 const FundManagement = () => {
   const axiosSecure = useAxiosSecure();
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
-  const [monthFinalized, setMonthFinalized] = useState(false);
 
   // Fetch all users
   const { data: usersData } = useQuery({
@@ -31,7 +30,7 @@ const FundManagement = () => {
   });
 
   // Fetch Finalization Data for Current Month
-  const { data: finalizationData } = useQuery({
+  const { data: finalizationData} = useQuery({
     queryKey: ['finalization'],
     queryFn: async () => {
       const response = await axiosSecure.get(`/finance/finalization/${currentMonth}`);
@@ -39,7 +38,8 @@ const FundManagement = () => {
     },
   });
 
-  finalizationData && finalizationData.isFinalized !== undefined && setMonthFinalized(finalizationData.isFinalized);
+  const monthFinalized = finalizationData?.isFinalized || false;
+
 
   // Fetch deposits for current month
   const { data: depositsData, refetch: refetchDeposits } = useQuery({
@@ -76,8 +76,8 @@ const FundManagement = () => {
     toast.promise(
       async () => {
         await axiosSecure.post('/finance/finalize', { month: currentMonth });
-        await refetchExpenses();
-        await refetchDeposits();
+        refetchExpenses();
+        refetchDeposits();
       },
       {
         loading: 'Finalizing month...',

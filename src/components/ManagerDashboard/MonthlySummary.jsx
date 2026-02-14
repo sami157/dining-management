@@ -11,7 +11,7 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                     {/* Header */}
                     <div className='flex items-center justify-between'>
                         <h2 className='card-title'>Monthly Summary</h2>
-                        <button onClick={finalizeMonth} className='rounded-full text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2'>
+                        <button onClick={finalizeMonth} disabled={monthFinalized} className='rounded-full text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'>
                             <FaCircleCheck className='text-lg' />
                             <p className='font-semibold text-sm'>Finalize</p>
                         </button>

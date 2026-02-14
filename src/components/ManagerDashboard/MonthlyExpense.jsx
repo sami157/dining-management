@@ -145,10 +145,10 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                         <div className='flex justify-between'>
                             <h2 className='card-title'>Expense Log</h2>
                             <button
-                                onClick={() => openExpenseModal()}
-                                className='px-3 py-2 rounded-xl bg-primary cursor-pointer'
+                                onClick={() => openExpenseModal()} disabled={monthFinalized}
+                                className='rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
                             >
-                                <div className='flex text-primary-content font-semibold items-center'>
+                                <div className='flex items-center gap-1'>
                                     <IoIosAddCircle className='text-2xl' />
                                     <p>Expense</p>
                                 </div>

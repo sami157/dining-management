@@ -141,10 +141,10 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                         <td className='text-center'>৳{monthlyDeposits.toFixed(2)}</td>
                                         <td className='flex justify-center'>
                                             <button
-                                                onClick={() => openDepositModal(user)}
-                                                className='px-3 py-2 rounded-xl bg-primary cursor-pointer'
+                                                onClick={() => openDepositModal(user)} disabled={monthFinalized}
+                                                className='rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
                                             >
-                                                <div className='flex gap-2 text-primary-content font-semibold items-center'>
+                                                <div className='flex gap-2 items-center'>
                                                     <IoIosAddCircle className='text-2xl' />
                                                     <p>Deposit</p>
                                                 </div>
