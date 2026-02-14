@@ -91,12 +91,14 @@ const FundManagement = () => {
     <div className='p-4 w-11/12 mx-auto'>
       <h1 className='text-2xl text-center font-bold mb-6'>Fund Management - {format(new Date(currentMonth + '-01'), 'MMMM yyyy')}</h1>
       {/* Monthly Summary */}
-      <div className='flex flex-col gap-4'>
-        <MonthlySummary totalExpenses={totalExpenses} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} />
-
-        <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} currentMonth={currentMonth} />
-
-        <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} />
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+        <div className='flex flex-col gap-8'>
+          <MonthlySummary totalExpenses={totalExpenses} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} />
+          <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} />
+        </div>
+        <div className='grid grid-cols-1 gap-8'>
+          <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} currentMonth={currentMonth} />
+        </div>
       </div>
     </div>
   );

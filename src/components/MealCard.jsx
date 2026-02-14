@@ -60,16 +60,18 @@ const MealCard = ({ schedule, onUpdate }) => {
     const displayMeals = isEditing ? editedSchedule.availableMeals : schedule.availableMeals;
 
     return (
-        <div className='flex flex-col md:flex-row gap-2 bg-base-100 rounded-xl p-4 w-full'>
-            
+        <div className='flex flex-col md:flex-row gap-2 justify-between bg-base-100 rounded-xl p-3 w-full'>
+
             {/* Date and Day */}
-            <div className='flex flex-col items-center md:items-start gap-4 w-full md:w-1/3 text-center md:text-left'>
-                <h2 className='text-xl sm:text-2xl font-bold'>
-                    {format(new Date(schedule.date), 'dd/MM/yyyy')}
-                </h2>
-                <p className='text-gray-500 text-sm sm:text-base'>
-                    {format(new Date(schedule.date), 'EEEE')}
-                </p>
+            <div className='flex flex-col items-center md:items-start justify-center mx-auto gap-2 w-full md:w-2/7 text-center md:text-left'>
+                <div>
+                    <h2 className='text-lg font-bold'>
+                        {format(new Date(schedule.date), 'dd/MM/yyyy')}
+                    </h2>
+                    <p className='text-base-content/50 text-sm sm:text-base'>
+                        {format(new Date(schedule.date), 'EEEE')}
+                    </p>
+                </div>
 
                 {/* Edit/Save/Cancel Buttons */}
                 {isEditing ? (
@@ -82,29 +84,29 @@ const MealCard = ({ schedule, onUpdate }) => {
                         </button>
                     </div>
                 ) : (
-                    <button onClick={() => setIsEditing(true)} className='btn btn-sm flex items-center gap-1'>
+                    <button onClick={() => setIsEditing(true)} className='btn btn-sm btn-ghost flex items-center gap-1'>
                         <FiEdit /> Edit
                     </button>
                 )}
             </div>
 
             {/* Meals */}
-            <div className='flex flex-wrap gap-4 w-full md:w-2/3'>
+            <div className='flex justify-end gap-3 w-full'>
                 {displayMeals?.map((meal) => (
                     <div
                         key={meal.mealType}
                         onClick={isEditing ? () => handleMealToggle(meal.mealType) : undefined}
-                        className={`flex flex-col justify-between p-3 rounded-xl w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33%-1rem)] 
+                        className={`flex flex-col justify-between p-3 rounded-lg w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33%-1rem)] 
                         ${meal?.isAvailable ? 'bg-primary/20' : 'bg-base-200 flex items-center justify-center'} 
                         ${isEditing ? 'hover:bg-primary/30 cursor-pointer' : ''} duration-100 ease-in`}
                     >
                         {meal?.isAvailable ? (
-                            <div className='flex flex-col gap-2 h-full'>
+                            <div className='flex flex-col gap-1 h-full'>
                                 <div className='flex justify-between items-center'>
                                     <div className='font-medium'>
                                         {meal.mealType.charAt(0).toUpperCase() + meal.mealType.slice(1)}
                                     </div>
-                                    <p className='px-2 py-1 text-xs sm:text-sm font-bold rounded bg-primary text-primary-content'>
+                                    <p className='px-2 text-xs sm:text-sm font-bold rounded bg-primary text-primary-content'>
                                         {meal?.weight}
                                     </p>
                                 </div>
@@ -112,6 +114,14 @@ const MealCard = ({ schedule, onUpdate }) => {
                                 {/* Menu */}
                                 {isEditing ? (
                                     <div className='flex flex-col gap-2 mt-2'>
+                                        <input
+                                            type="text"
+                                            placeholder="Menu"
+                                            value={meal.menu || ''}
+                                            onChange={(e) => handleMenuChange(meal.mealType, e.target.value)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className='input input-xs sm:input-sm w-full input-bordered'
+                                        />
                                         <input
                                             type="number"
                                             step="0.5"
@@ -122,19 +132,10 @@ const MealCard = ({ schedule, onUpdate }) => {
                                             onClick={(e) => e.stopPropagation()}
                                             className='input input-xs sm:input-sm input-bordered w-full'
                                         />
-                                        <input
-                                            type="text"
-                                            placeholder="Menu"
-                                            value={meal.menu || ''}
-                                            onChange={(e) => handleMenuChange(meal.mealType, e.target.value)}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className='input input-xs sm:input-sm input-bordered w-full'
-                                        />
                                     </div>
                                 ) : (
-                                    <div className='flex flex-col items-center justify-center bg-primary/20 rounded p-2 mt-2 text-sm'>
-                                        <GiMeal className='text-3xl sm:text-4xl' />
-                                        <span>{meal.menu || '??'}</span>
+                                    <div className='flex flex-col items-center justify-center mt-2 text-sm'>
+                                        <span className={`text-center ${meal.menu ? 'text-primary-content font-italic' : 'text-primary-content/50'}`}>{meal.menu || 'Menu not specified'}</span>
                                     </div>
                                 )}
                             </div>

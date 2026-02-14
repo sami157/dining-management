@@ -103,7 +103,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
         }
     };
     return (
-        <div>
+        <div className='w-full'>
             {/* Member List with Balances and Deposit Actions */}
             <div>
                 <div className='flex justify-between items-center mb-4'>
