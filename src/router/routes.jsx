@@ -7,7 +7,6 @@ import MealSchedule from "../pages/MealSchedule";
 import UserDashboard from "../pages/UserDashboard";
 import MemberManagement from "../pages/MemberManagement";
 import FundManagement from "../pages/FundManagement";
-import AdminDashboard from "../pages/AdminDashboard";
 import AdminDashboardLayout from "../layouts/AdminDashboardLayout";
 import Loading from "../components/Loading";
 import { NotFound } from "../components/NotFound";
@@ -19,7 +18,6 @@ export const router = createBrowserRouter([
         path: "/",
         Component: HomeLayout,
         hydrateFallbackElement: Loading,
-        errorElement: <NotFound />,
         children: [
             {
                 index: true,
@@ -31,15 +29,11 @@ export const router = createBrowserRouter([
             },
             {
                 path: '/login',
-                element: <Login />
+                Component: Login
             },
             {
                 path: '/user-dashboard',
                 element: <PrivateRoute><UserDashboard /></PrivateRoute>
-            },
-            {
-                path: '*',
-                element: <NotFound />
             },
             {
                 path: '/admin-dashboard',
@@ -50,23 +44,27 @@ export const router = createBrowserRouter([
                         element: <PrivateRoute><MealSchedule /></PrivateRoute>
                     },
                     {
-                        path: '/admin-dashboard/meal-schedule',
+                        path: 'meal-schedule',
                         element: <PrivateRoute><MealSchedule /></PrivateRoute>
                     },
                     {
-                        path: '/admin-dashboard/fund-management',
+                        path: 'fund-management',
                         element: <PrivateRoute><FundManagement /></PrivateRoute>
                     },
                     {
-                        path: '/admin-dashboard/member-management',
+                        path: 'member-management',
                         element: <PrivateRoute><MemberManagement /></PrivateRoute>
                     },
                     {
-                        path: '/admin-dashboard/history',
+                        path: 'history',
                         element: <PrivateRoute><PreviousData /></PrivateRoute>
                     },
                 ]
-            }
+            },
+            {
+                path: '*',
+                Component: NotFound
+            },
         ]
     },
 ]);
