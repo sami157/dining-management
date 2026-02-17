@@ -5,6 +5,7 @@ import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { MdAdminPanelSettings } from "react-icons/md";
 import useAuth from '../hooks/useAuth';
+import Loading from '../components/Loading';
 
 const MemberManagement = () => {
   const axiosSecure = useAxiosSecure();
@@ -132,9 +133,7 @@ const MemberManagement = () => {
   };
 
   if (usersLoading || registrationsLoading) return (
-    <div className='flex justify-center p-8'>
-      <span className='loading loading-spinner loading-lg'></span>
-    </div>
+    <Loading/>
   );
 
   return (

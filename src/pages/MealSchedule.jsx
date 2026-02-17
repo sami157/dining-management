@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import MealCard from '../components/MealCard';
 import toast from 'react-hot-toast';
+import Loading from '../components/Loading';
 
 const MealSchedule = () => {
     const axiosSecure = useAxiosSecure();
@@ -75,9 +76,7 @@ const MealSchedule = () => {
             </div>
 
             {/* Loading State */}
-            {isLoading && (
-                <div className='loading loading-dots loading-xl mx-auto my-4'></div>
-            )}
+            {isLoading && <Loading/>}
 
             {/* Schedules Grid */}
             {schedules && schedules.length > 0 ? (

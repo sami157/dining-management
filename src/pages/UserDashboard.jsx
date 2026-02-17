@@ -5,6 +5,7 @@ import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { GiMeal } from 'react-icons/gi';
 import useAuth from '../hooks/useAuth';
+import Loading from '../components/Loading';
 
 
 const getToday = () => {
@@ -213,7 +214,7 @@ const UserDashboard = () => {
 
             {/* Loading */}
             {countLoading ?
-                <span className="loading loading-dots loading-md"></span>
+                <Loading/>
                 :
                 <p>Total Meals Registered <span className='bg-primary/80 rounded-md px-2 py-0.5 font-semibold text-primary-content'>{mealCountData?.totalMeals}</span></p>
             }
