@@ -1,7 +1,4 @@
 Server:
-1. Prevent deregistering deadline-over meals
-2. Add room number field to user registration
-3. Add fixed deposit field, managed by admin, default is 0
 
 Homepage:
 1. Two-column layout
@@ -15,7 +12,7 @@ User Dashboard:
 
 Fund Management:
 1. Add 'Associated Person' info on cost entry (Need Staff role?)
-2. Show the running Meal rate (Depends on offered meals and not registered meals)
+2. Show the running Meal rate (Depends on offered meals until a specific date and not registered meals)
 
 Member Management:
 1. Room-wise user list

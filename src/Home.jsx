@@ -1,9 +1,9 @@
-import { useState } from 'react'
 import Navbar from './components/Navbar'
 import UpcomingMeals from './components/UpcomingMeals'
 import useAuth from './hooks/useAuth'
 import Loading from './components/Loading'
 import { Link } from 'react-router';
+import { MealSheet } from './components/MealSheet';
 
 const Home = () => {
   const { user, loading } = useAuth()
@@ -14,7 +14,13 @@ const Home = () => {
       </div>
       {
         loading ? <Loading/> :
-        user ? <UpcomingMeals /> :
+        user 
+        ? 
+        <div className='flex justify-center max-w-11/12 mx-auto'>
+          <MealSheet/>
+          <UpcomingMeals/> 
+        </div>
+        :
         <Link className='' to='/login'><p className='text-center p-2'>Click here to Login and Continue</p></Link> 
       }
       
