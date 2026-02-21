@@ -17,6 +17,8 @@ const Registration = () => {
                 await createUser(data.email, data.password)
                 await registerUser(axiosSecure, {
                     name: data.name,
+                    building: data.building,
+                    room: data.room,
                     email: data.email,
                     mobile: data.mobile,
                     bank: data.bank
@@ -43,6 +45,31 @@ const Registration = () => {
                             <input {...register("name", { required: "Name is required" })} type="text" className="input" placeholder="Name" />
                             {errors.name && <p className='text-error font-semibold' role="alert">{errors.name.message}</p>}
 
+                            {/* Building */}
+                            <label className='label'>Building Name</label>
+                            <select
+                                {...register("building", { required: "Building name is required" })} type="text" className="select select-bordered w-full" placeholder="Building Name"
+                            >
+                                <option value="vip">VIP Building</option>
+                                <option value="engineer">Engineers' Building</option>
+                                <option value="mjvc">MJVC Building</option>
+                            </select>
+                            {errors.building && <p className='text-error font-semibold' role="alert">{errors.building.message}</p>}
+
+
+                            {/* Room */}
+                            <label className="label">Room Number</label>
+                            <input {...register("room", {
+                                required: "Room number is required",
+                                setValueAs: (value) => value.toUpperCase(),
+                                pattern: {
+                                    value: /^\d{3}(-[A-Z])?$/,
+                                    message: "Invalid format. Use format like 110 or 201-A"
+                                }
+                            })}
+                                type="text" className="input" placeholder="Format: 110, 201-A" />
+                            {errors.room && <p className='text-error font-semibold' role="alert">{errors.room.message}</p>}
+
                             {/* Mobile */}
                             <label className="label">Mobile Number</label>
                             <input {...register("mobile", {
@@ -60,8 +87,8 @@ const Registration = () => {
                             <label className="label">Email</label>
                             <input {...register("email", { required: "Email Address is required" })} type="email" className="input" placeholder="Email " />
                             {errors.email && <p className='text-error font-semibold' role="alert">{errors.email.message}</p>}
-                            
-                            {/* Email */}
+
+                            {/* Bank */}
                             <label className="label">Bank Asia A/C</label>
                             <input {...register("bank", { required: "Bank Asia account is required" })} type="text" className="input" placeholder="Account Number " />
                             {errors.bank && <p className='text-error font-semibold' role="alert">{errors.bank.message}</p>}
