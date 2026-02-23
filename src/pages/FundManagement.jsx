@@ -42,6 +42,19 @@ const FundManagement = () => {
 
   const monthFinalized = finalizationData?.isFinalized || false;
 
+  //Running Meal Rate
+  const { data: mealRateData } = useQuery({
+    queryKey: ['runningMealRate', currentMonth],
+    queryFn: async () => {
+      const response = await axiosSecure.get(`/finance/meal-rate?month=${currentMonth}&date=${format(new Date(), 'yyyy-MM-dd')}`);
+      return response.data;
+    },
+    enabled: !monthFinalized, // no need to fetch if already finalized
+  });
+
+  console.log(mealRateData);
+
+  const runningMealRate = mealRateData?.mealRate?.toFixed(2) || '0.00';
 
   // Fetch deposits for current month
   const { data: depositsData, refetch: refetchDeposits } = useQuery({
@@ -94,7 +107,8 @@ const FundManagement = () => {
       <h1 className='text-2xl text-center font-bold mb-6'>Fund Management - {format(new Date(currentMonth + '-01'), 'MMMM yyyy')}</h1>
       {/* Monthly Summary */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        <div className='flex flex-col gap-8'>
+        <div className='flex flex-col gap-4'>
+          <p className='text-center text-lg p-2 bg-base-100 rounded-xl'>{`Meal Rate: ৳${runningMealRate}`}</p>
           <MonthlySummary totalExpenses={totalExpenses} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} />
           <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} />
         </div>

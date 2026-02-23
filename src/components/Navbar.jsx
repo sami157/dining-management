@@ -50,7 +50,7 @@ const Navbar = () => {
     );
 
     return (
-        <nav className="relative lg:mx-2 mx-auto bg-base-100 rounded-lg px-4 py-2 flex items-center justify-between">
+        <nav className="relative lg:mx-2 md:w-[99vw] lg:w-[98vw] bg-base-100 rounded-lg px-4 py-2 flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
                 <GiCampCookingPot className="text-5xl" />

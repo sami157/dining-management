@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
-import MonthlySummary from '../components/ManagerDashboard/MonthlySummary';
+import { MonthlySummaryHistory } from '../components/ManagerDashboard/MonthlySummaryHistory';
 
 const PreviousData = () => {
   const axiosSecure = useAxiosSecure();
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
-  
+
   // Extract year and month from currentMonth
   const [selectedYear, setSelectedYear] = useState(currentMonth.split('-')[0]);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth.split('-')[1]);
@@ -76,9 +76,9 @@ const PreviousData = () => {
   }, {}) || {};
 
   return (
-    <div className='p-4 w-11/12 mx-auto'>
-      <h1 className='text-2xl text-center font-bold mb-6'>Previous Monthly Data</h1>
-      
+    <div className='p-4 w-11/12 mx-auto flex flex-col gap-4 items-center'>
+      <h1 className='text-2xl text-center font-bold mb-6'>Monthly Data History</h1>
+
       {/* Month Picker */}
       <div className='flex justify-center gap-4 mb-6'>
         <div>
@@ -112,58 +112,64 @@ const PreviousData = () => {
         </div>
       </div>
 
-      {/* Monthly Summary and Expenses */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        <div>
-          <MonthlySummary 
-            totalExpenses={totalExpenses} 
-            monthFinalized={monthFinalized} 
-            finalizeMonth={null}
-          />
+      {
+        !monthFinalized ? 
+        <div classname='flex items-center'>
+          <p classname='text-center'>This month hasn't been finalized yet</p>
         </div>
+          : 
+          // Monthly Summary and Expenses
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
+            <div>
+              <MonthlySummaryHistory
+                totalExpenses={totalExpenses}
+                monthFinalized={monthFinalized}
+              />
+            </div>
 
-        {/* Expense Data - Read Only */}
-        <div className='card bg-base-200'>
-          <div className='card-body'>
-            <div className='space-y-4 mb-4'>
-              <h3 className='card-title'>Expenses by Category</h3>
-              <div className='grid grid-cols-2 gap-2'>
-                {Object.entries(expensesByCategory).map(([category, amount]) => (
-                  <div key={category} className='flex justify-between p-2 bg-base-100 rounded-lg'>
-                    <span className='capitalize'>{category}</span>
-                    <span className='font-medium'>৳{amount}</span>
+            {/* Expense Data - Read Only */}
+            <div className='card bg-base-200'>
+              <div className='card-body'>
+                <div className='space-y-4 mb-4'>
+                  <h3 className='card-title'>Expenses by Category</h3>
+                  <div className='grid grid-cols-2 gap-2'>
+                    {Object.entries(expensesByCategory).map(([category, amount]) => (
+                      <div key={category} className='flex justify-between p-2 bg-base-100 rounded-lg'>
+                        <span className='capitalize'>{category}</span>
+                        <span className='font-medium'>৳{amount}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                <h2 className='card-title mb-3'>Expense Log</h2>
+
+                <div className='overflow-x-auto'>
+                  <table className='table table-xs'>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {expensesData?.map((expense) => (
+                        <tr key={expense._id}>
+                          <td>{format(new Date(expense.date), 'dd MMM')}</td>
+                          <td className='capitalize'>{expense.category}</td>
+                          <td className='font-medium'>৳{expense.amount}</td>
+                          <td className='text-xs'>{expense.description || '-'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-
-            <h2 className='card-title mb-3'>Expense Log</h2>
-            
-            <div className='overflow-x-auto'>
-              <table className='table table-xs'>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {expensesData?.map((expense) => (
-                    <tr key={expense._id}>
-                      <td>{format(new Date(expense.date), 'dd MMM')}</td>
-                      <td className='capitalize'>{expense.category}</td>
-                      <td className='font-medium'>৳{expense.amount}</td>
-                      <td className='text-xs'>{expense.description || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           </div>
-        </div>
-      </div>
+      }
     </div>
   )
 }

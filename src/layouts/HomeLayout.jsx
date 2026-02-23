@@ -5,7 +5,7 @@ import { Toaster } from 'react-hot-toast'
 
 const HomeLayout = () => {
   return (
-    <div className='py-2 bg-base-300 min-h-screen'>
+    <div className='py-2 flex flex-col bg-base-300 min-h-screen'>
       <Navbar/>
       <Outlet/>
       <Toaster/>

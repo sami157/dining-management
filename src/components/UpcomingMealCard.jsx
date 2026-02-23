@@ -69,25 +69,25 @@ const UpcomingMealCard = ({ date, schedule, registrations = [], refetch }) => {
   return (
     !loading &&
     <div className="rounded-2xl bg-base-100 transition">
-      <div className="p-6 space-y-4 rounded-2xl">
-            <div>
+      <div className="p-6 rounded-2xl">
+            <div className='flex flex-col justify-center'>
               {/* Header */}
-              <div>
-                {isToday() && <span className="badge badge-primary">Today</span>}
-                <h2 className="text-2xl font-bold mt-1">
+              <div className='mb-4'>
+                {/* {isToday() && <span className="badge badge-primary">Today</span>} */}
+              <h2 className={`${isToday() && 'text-primary'} text-2xl font-bold mt-1`}>
                   {format(date, 'EEEE')}
                 </h2>
-                <p className="text-sm text-gray-500">
+              <p className={`${isToday() && 'text-primary'} text-sm text-gray-500`}>
                   {format(date, 'dd MMM yyyy')}
                 </p>
               </div>
 
               {/* Meals */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {meals?.length > 0 ? meals?.map((meal) => (
                   <div
                     key={meal.mealType}
-                    className={`p-4 rounded-lg space-y-3 transition
+                    className={`p-4 rounded-lg space-y-1 transition
                 ${meal.isRegistered
                         ? 'bg-primary/20'
                         : 'bg-base-200'

@@ -12,7 +12,8 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
         date: format(new Date(), 'yyyy-MM-dd'),
         category: '',
         amount: 0,
-        description: ''
+        description: '',
+        person: ''
     });
     const [editingExpense, setEditingExpense] = useState(null);
 
@@ -239,6 +240,21 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                     className='input input-bordered w-full'
                                     placeholder='Enter amount'
                                 />
+                            </div>
+
+                            <div>
+                                <label className='label'>Associated Person</label>
+                                <select
+                                    value={expenseData.category}
+                                    onChange={(e) => setExpenseData({ ...expenseData, person: e.target.value })}
+                                    className='select select-bordered w-full'
+                                >
+                                    <option value="none">Select Person</option>
+                                    <option value="jakir">Jakir</option>
+                                    <option value="sohan">Sohan</option>
+                                    <option value="kawsar">Kawsar</option>
+                                    <option value="sifat">Sifat</option>
+                                </select>
                             </div>
 
                             <div>

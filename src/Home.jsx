@@ -16,14 +16,13 @@ const Home = () => {
         loading ? <Loading/> :
         user 
         ? 
-        <div className='flex justify-center max-w-11/12 mx-auto'>
+        <div className='flex flex-col md:flex-row justify-center'>
           <MealSheet/>
           <UpcomingMeals/> 
         </div>
         :
         <Link className='' to='/login'><p className='text-center p-2'>Click here to Login and Continue</p></Link> 
       }
-      
     </div>
   )
 }
