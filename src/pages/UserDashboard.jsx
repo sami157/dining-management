@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { GiMeal } from 'react-icons/gi';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
+import { UserMonthlyStats } from '../components/UserDashboard/UserMonthlyStats';
 
 
 const getToday = () => {
@@ -31,6 +32,24 @@ const UserDashboard = () => {
     const today = getToday(); // Normalize to start of day
 
     const monthString = format(currentMonth, 'yyyy-MM');
+
+    const { data: finalizationData, isLoading: finalizationLoading } = useQuery({
+        queryKey: ['myFinalizationData', monthString],
+        queryFn: async () => {
+            const response = await axiosSecure.get(`/finance/user-finalization/?month=${monthString}`);
+            return response.data.finalization;
+        }
+    });
+
+    const { data: depositData, loading: depositLoading } = useQuery({
+        queryKey: ['userDeposit', monthString],
+        queryFn: async () => {
+            const response = await axiosSecure.get(`/finance/user-deposit/?month=${monthString}`);
+            return response.data;
+        }
+    });
+
+    console.log(depositData);
 
     const { data, refetch } = useQuery({
         queryKey: ['userMeals', monthString],
@@ -186,9 +205,9 @@ const UserDashboard = () => {
     return (
         <div className='p-4 flex flex-col gap-4 items-center'>
             {/* Month Navigation */}
-            <div className='flex items-center justify-between gap-8'>
+            <div className='flex items-center justify-between gap-2'>
                 <button onClick={handlePreviousMonth} className='btn btn-sm'>
-                    ← Previous
+                    ←
                 </button>
 
                 <h2 className='text-xl md:text-2xl font-bold'>
@@ -196,161 +215,187 @@ const UserDashboard = () => {
                 </h2>
 
                 <button onClick={handleNextMonth} className='btn btn-sm'>
-                    Next →
+                    →
                 </button>
             </div>
 
-            {/* Legend */}
-            <div className='flex gap-4 mb-4 text-sm'>
-                <div className='flex items-center gap-2'>
-                    <div className='w-4 h-4 rounded bg-base-200' />
-                    <span>Not registered</span>
+            {/* Stats */}
+            <div className='rounded-lg mb-8 mx-auto flex justify-center gap-4'>
+                <div className='p-4 w-30 bg-base-200 rounded-xl text-center'>
+                    <div className='font-medium'>Meals</div>
+                    {countLoading ?
+                        <Loading />
+                        :
+                        <div className='text-xl font-bold'>
+                            {mealCountData?.totalMeals}
+                        </div>
+                    }
                 </div>
-                <div className='flex items-center gap-2'>
-                    <div className='w-4 h-4 rounded bg-primary/80' />
-                    <span>Registered</span>
+
+                <div className='p-4 w-30 bg-base-200 rounded-xl text-center'>
+                    <div className=''>Deposit</div>
+                    {depositLoading ?
+                        <Loading />
+                        :
+                        <div className='text-xl font-bold text-success'>
+                            ৳{depositData?.deposit}
+                        </div>
+                    }
                 </div>
             </div>
 
-            {/* Loading */}
-            {countLoading ?
-                <Loading/>
-                :
-                <p>Total Meals Registered <span className='bg-primary/80 rounded-md px-2 py-0.5 font-semibold text-primary-content'>{mealCountData?.totalMeals}</span></p>
-            }
+            <div className={`${finalizationData ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'grid-cols-1 w-[90vw] md:w-2/5'}`}>
+                <div className={`${!finalizationData && 'hidden'}`}>
+                    <UserMonthlyStats finalizationData={finalizationData} finalizationLoading={finalizationLoading} />
+                </div>
+                <div className='flex flex-col gap-4 items-center'>
+                    <p className='text-lg font-bold'>Meal Sheet</p>
+                    {/* Legend */}
+                    <div className='flex gap-8 text-sm'>
+                        <div className='flex items-center gap-2'>
+                            <div className='w-4 h-4 rounded bg-base-200' />
+                            <span>Not registered</span>
+                        </div>
+                        <div className='flex items-center gap-2'>
+                            <div className='w-4 h-4 rounded bg-primary/80' />
+                            <span>Registered</span>
+                        </div>
+                    </div>
 
-            {/* Table */}
-            <div className="overflow-x-auto">
-                <table className="table table-pin-rows">
-                    {/* Sticky Head */}
-                    <thead>
-                        <tr>
-                            <th className='bg-base-300 text-center'>Date</th>
-                            <th className='bg-base-300 text-center'>Meals</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {dateArray.map((date, index) => {
-                            const morningStatus = getMealStatus(date, 'morning');
-                            const eveningStatus = getMealStatus(date, 'evening');
-                            const nightStatus = getMealStatus(date, 'night');
-
-                            return (
-                                <tr key={index} className='hover'>
-                                    {/* Date Column */}
-                                    <td>
-                                        <div className='flex gap-4 items-center'>
-                                            <button
-                                                onClick={() => showMenu(date)}
-                                                className={`text-2xl ${scheduleMap[format(date, 'yyyy-MM-dd')] ? 'hover:text-primary cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
-                                                disabled={!scheduleMap[format(date, 'yyyy-MM-dd')]}
-                                            >
-                                                <GiMeal />
-                                            </button>
-                                            <div className='flex flex-col'>
-                                                <span className={`${format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd') ? 'font-extrabold' : ''}`}>
-                                                    {format(date, 'dd-MM-yyyy')}
-                                                </span>
-                                                <span className='text-xs text-gray-500'>
-                                                    {format(date, 'EEEE')}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    {/* Meals Column - 3 boxes */}
-                                    <td>
-                                        <div className='flex gap-2 items-center'>
-                                            <div className='flex flex-col items-center gap-1'>
-                                                <MealBox
-                                                    status={morningStatus}
-                                                    date={date}
-                                                    mealType="morning"
-                                                />
-                                                <span className='text-xs text-gray-500'>M</span>
-                                            </div>
-                                            <div className='flex flex-col items-center gap-1'>
-                                                <MealBox
-                                                    status={eveningStatus}
-                                                    date={date}
-                                                    mealType="evening"
-                                                />
-                                                <span className='text-xs text-gray-500'>E</span>
-                                            </div>
-                                            <div className='flex flex-col items-center gap-1'>
-                                                <MealBox
-                                                    status={nightStatus}
-                                                    date={date}
-                                                    mealType="night"
-                                                />
-                                                <span className='text-xs text-gray-500'>N</span>
-                                            </div>
-                                        </div>
-                                    </td>
+                    {/* Table */}
+                    <div className="px-8 mx-auto w-full">
+                        <table className="table table-pin-rows">
+                            {/* Sticky Head */}
+                            <thead>
+                                <tr>
+                                    <th className='bg-base-300 text-center'>Date</th>
+                                    <th className='bg-base-300 text-center'>Meals</th>
                                 </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-
-                {/* Modal for meal details */}
-                {showModal && (
-                    <div className="modal modal-open">
-                        <div className="modal-box">
-                            <h3 className="font-bold text-2xl mb-6 text-center">
-                                {selectedDate && format(selectedDate, 'EEEE, dd MMMM yyyy')}
-                            </h3>
-
-                            <div className='flex flex-col gap-4'>
-                                {['morning', 'evening', 'night'].map((mealType) => {
-                                    const status = getMealStatus(selectedDate, mealType);
+                            </thead>
+                            <tbody>
+                                {dateArray.map((date, index) => {
+                                    const morningStatus = getMealStatus(date, 'morning');
+                                    const eveningStatus = getMealStatus(date, 'evening');
+                                    const nightStatus = getMealStatus(date, 'night');
 
                                     return (
-                                        <div>
-                                            {
-                                                status.available && (
-                                                    <div key={mealType} className='bg-base-200 p-4 rounded-lg flex flex-col gap-3'>
-                                                        {/* Meal Type Header */}
-                                                        <div className='text-center'>
-                                                            <h4 className='font-bold text-lg capitalize mb-2'>
-                                                                {mealType}
-                                                            </h4>
-
-                                                            {/* Status Badge */}
-                                                            {status.registered ? (
-                                                                <span className='badge badge-primary'>Registered</span>
-                                                            ) : status.available && status.canRegister ? (
-                                                                <span className='badge badge-success'>Available</span>
-                                                            ) : status.available ? (
-                                                                <span className='badge badge-error'>Deadline Passed</span>
-                                                            ) : (
-                                                                <span className='badge badge-ghost'>Unavailable</span>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Menu */}
-                                                        {status.menu && (
-                                                            <div className='bg-base-100 p-2 rounded text-center'>
-                                                                <p className='text-sm font-medium'>Menu</p>
-                                                                <p className='text-sm'>{status.menu}</p>
-                                                            </div>
-                                                        )}
-
+                                        <tr key={index} className='hover'>
+                                            {/* Date Column */}
+                                            <td>
+                                                <div className='flex gap-4 items-center justify-center'>
+                                                    <button
+                                                        onClick={() => showMenu(date)}
+                                                        className={`text-2xl ${scheduleMap[format(date, 'yyyy-MM-dd')] ? 'hover:text-primary cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
+                                                        disabled={!scheduleMap[format(date, 'yyyy-MM-dd')]}
+                                                    >
+                                                        <GiMeal />
+                                                    </button>
+                                                    <div className='flex flex-col'>
+                                                        <span className={`${format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd') ? 'font-extrabold' : ''}`}>
+                                                            {format(date, 'dd-MM-yyyy')}
+                                                        </span>
+                                                        <span className='text-xs text-gray-500'>
+                                                            {format(date, 'EEEE')}
+                                                        </span>
                                                     </div>
-                                                )
-                                            }
-                                        </div>
+                                                </div>
+                                            </td>
+
+                                            {/* Meals Column - 3 boxes */}
+                                            <td>
+                                                <div className='flex justify-center gap-2 items-center'>
+                                                    <div className='flex flex-col items-center gap-1'>
+                                                        <MealBox
+                                                            status={morningStatus}
+                                                            date={date}
+                                                            mealType="morning"
+                                                        />
+                                                        <span className='text-xs text-gray-500'>M</span>
+                                                    </div>
+                                                    <div className='flex flex-col items-center gap-1'>
+                                                        <MealBox
+                                                            status={eveningStatus}
+                                                            date={date}
+                                                            mealType="evening"
+                                                        />
+                                                        <span className='text-xs text-gray-500'>E</span>
+                                                    </div>
+                                                    <div className='flex flex-col items-center gap-1'>
+                                                        <MealBox
+                                                            status={nightStatus}
+                                                            date={date}
+                                                            mealType="night"
+                                                        />
+                                                        <span className='text-xs text-gray-500'>N</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     );
                                 })}
-                            </div>
+                            </tbody>
+                        </table>
 
-                            <div className="modal-action">
-                                <button className="btn btn-primary btn-wide mx-auto" onClick={closeModal}>Close</button>
+                        {/* Modal for meal details */}
+                        {showModal && (
+                            <div className="modal modal-open">
+                                <div className="modal-box">
+                                    <h3 className="font-bold text-2xl mb-6 text-center">
+                                        {selectedDate && format(selectedDate, 'EEEE, dd MMMM yyyy')}
+                                    </h3>
+
+                                    <div className='flex flex-col gap-4'>
+                                        {['morning', 'evening', 'night'].map((mealType) => {
+                                            const status = getMealStatus(selectedDate, mealType);
+
+                                            return (
+                                                <div>
+                                                    {
+                                                        status.available && (
+                                                            <div key={mealType} className='bg-base-200 p-4 rounded-lg flex flex-col gap-3'>
+                                                                {/* Meal Type Header */}
+                                                                <div className='text-center'>
+                                                                    <h4 className='font-bold text-lg capitalize mb-2'>
+                                                                        {mealType}
+                                                                    </h4>
+
+                                                                    {/* Status Badge */}
+                                                                    {status.registered ? (
+                                                                        <span className='badge badge-primary'>Registered</span>
+                                                                    ) : status.available && status.canRegister ? (
+                                                                        <span className='badge badge-success'>Available</span>
+                                                                    ) : status.available ? (
+                                                                        <span className='badge badge-error'>Deadline Passed</span>
+                                                                    ) : (
+                                                                        <span className='badge badge-ghost'>Unavailable</span>
+                                                                    )}
+                                                                </div>
+
+                                                                {/* Menu */}
+                                                                {status.menu && (
+                                                                    <div className='bg-base-100 p-2 rounded text-center'>
+                                                                        <p className='text-sm font-medium'>Menu</p>
+                                                                        <p className='text-sm'>{status.menu}</p>
+                                                                    </div>
+                                                                )}
+
+                                                            </div>
+                                                        )
+                                                    }
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    <div className="modal-action">
+                                        <button className="btn btn-primary btn-wide mx-auto" onClick={closeModal}>Close</button>
+                                    </div>
+                                </div>
+                                <div className="modal-backdrop" onClick={closeModal}></div>
                             </div>
-                        </div>
-                        <div className="modal-backdrop" onClick={closeModal}></div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );

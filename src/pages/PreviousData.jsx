@@ -54,6 +54,15 @@ const PreviousData = () => {
 
   const monthFinalized = finalizationData?.isFinalized || false;
 
+  // Fetch deposits for current month
+  const { data: depositsData, } = useQuery({
+    queryKey: ['deposits', currentMonth],
+    queryFn: async () => {
+      const response = await axiosSecure.get(`/finance/deposits?month=${currentMonth}`);
+      return response.data.deposits;
+    },
+  });
+
   // Fetch all expenses for current month
   const { data: expensesData } = useQuery({
     queryKey: ['expenses', currentMonth],
@@ -113,60 +122,101 @@ const PreviousData = () => {
       </div>
 
       {
-        !monthFinalized ? 
-        <div classname='flex items-center'>
-          <p classname='text-center'>This month hasn't been finalized yet</p>
-        </div>
-          : 
+        !monthFinalized ?
+          <div classname='flex items-center'>
+            <p classname='text-center'>This month hasn't been finalized yet</p>
+          </div>
+          :
           // Monthly Summary and Expenses
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-            <div>
+            <div className='flex flex-col gap-8'>
               <MonthlySummaryHistory
                 totalExpenses={totalExpenses}
-                monthFinalized={monthFinalized}
+                depositsData={depositsData}
+                finalizationData={finalizationData}
               />
-            </div>
+              {/* Expense Data - Read Only */}
+              <div className='card bg-base-200'>
+                <div className='card-body'>
+                  <div className='space-y-4 mb-4'>
+                    <h3 className='card-title'>Expenses by Category</h3>
+                    <div className='grid grid-cols-2 gap-2'>
+                      {Object.entries(expensesByCategory).map(([category, amount]) => (
+                        <div key={category} className='flex justify-between p-2 bg-base-100 rounded-lg'>
+                          <span className='capitalize'>{category}</span>
+                          <span className='font-medium'>৳{amount}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
-            {/* Expense Data - Read Only */}
-            <div className='card bg-base-200'>
-              <div className='card-body'>
-                <div className='space-y-4 mb-4'>
-                  <h3 className='card-title'>Expenses by Category</h3>
-                  <div className='grid grid-cols-2 gap-2'>
-                    {Object.entries(expensesByCategory).map(([category, amount]) => (
-                      <div key={category} className='flex justify-between p-2 bg-base-100 rounded-lg'>
-                        <span className='capitalize'>{category}</span>
-                        <span className='font-medium'>৳{amount}</span>
-                      </div>
-                    ))}
+                  <h2 className='card-title mb-3'>Expense Log</h2>
+                  <div className='overflow-x-auto'>
+                    <table className='table table-xs'>
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Category</th>
+                          <th>Amount</th>
+                          <th>Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {expensesData?.map((expense) => (
+                          <tr key={expense._id}>
+                            <td>{format(new Date(expense.date), 'dd MMM')}</td>
+                            <td className='capitalize'>{expense.category}</td>
+                            <td className='font-medium'>৳{expense.amount}</td>
+                            <td className='text-xs'>{expense.description || '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
-
-                <h2 className='card-title mb-3'>Expense Log</h2>
-
-                <div className='overflow-x-auto'>
-                  <table className='table table-xs'>
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Category</th>
-                        <th>Amount</th>
-                        <th>Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {expensesData?.map((expense) => (
-                        <tr key={expense._id}>
-                          <td>{format(new Date(expense.date), 'dd MMM')}</td>
-                          <td className='capitalize'>{expense.category}</td>
-                          <td className='font-medium'>৳{expense.amount}</td>
-                          <td className='text-xs'>{expense.description || '-'}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
               </div>
+            </div>
+            <div>
+              {/* Member Details Table */}
+              {finalizationData?.memberDetails?.length > 0 && (
+                <div className='card bg-base-200'>
+                  <div className='p-8 flex flex-col gap-4'>
+                    <h2 className='card-title'>Member Details</h2>
+                    <div className='overflow-x-auto'>
+                      <table className='table table-zebra w-full'>
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th className='text-center'>Meals</th>
+                            <th className='text-center'>Deposits</th>
+                            <th className='text-center'>Meal Cost</th>
+                            <th className='text-center'>Mosque Fee</th>
+                            <th className='text-center'>Prev. Balance</th>
+                            <th className='text-center'>New Balance</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {finalizationData.memberDetails.map((member) => (
+                            <tr key={member.userId}>
+                              <td className='font-semibold'>{member.userName}</td>
+                              <td className='text-center'>{member.totalMeals}</td>
+                              <td className='text-center text-success'>৳{member.totalDeposits}</td>
+                              <td className='text-center text-error'>৳{member.mealCost?.toFixed(0)}</td>
+                              <td className='text-center text-error'>৳{member.mosqueFee || 0}</td>
+                              <td className={`text-center ${member.previousBalance >= 0 ? 'text-success' : 'text-error'}`}>
+                                ৳{member.previousBalance?.toFixed(0)}
+                              </td>
+                              <td className={`text-center font-bold ${member.newBalance >= 0 ? 'text-success' : 'text-error'}`}>
+                                ৳{member.newBalance?.toFixed(0)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
       }

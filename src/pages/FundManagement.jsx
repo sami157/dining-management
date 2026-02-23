@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import MemberInfoTable from '../components/ManagerDashboard/MemberInfoTable';
 import MonthlySummary from '../components/ManagerDashboard/MonthlySummary';
 import MonthlyExpense from '../components/ManagerDashboard/MonthlyExpense';
+import Loading from '../components/Loading';
 
 const FundManagement = () => {
 
@@ -43,7 +44,7 @@ const FundManagement = () => {
   const monthFinalized = finalizationData?.isFinalized || false;
 
   //Running Meal Rate
-  const { data: mealRateData } = useQuery({
+  const { data: mealRateData, loading: mealRateLoading } = useQuery({
     queryKey: ['runningMealRate', currentMonth],
     queryFn: async () => {
       const response = await axiosSecure.get(`/finance/meal-rate?month=${currentMonth}&date=${format(new Date(), 'yyyy-MM-dd')}`);
@@ -108,8 +109,12 @@ const FundManagement = () => {
       {/* Monthly Summary */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         <div className='flex flex-col gap-4'>
-          <p className='text-center text-lg p-2 bg-base-100 rounded-xl'>{`Meal Rate: ৳${runningMealRate}`}</p>
-          <MonthlySummary totalExpenses={totalExpenses} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} />
+          {
+            !mealRateLoading ? 
+              <p className='text-center text-lg p-2 rounded-xl'>{`Meal Rate: ৳${runningMealRate}`}</p>
+              : <Loading/>
+          }
+          <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} />
           <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} />
         </div>
         <div className='grid grid-cols-1 gap-8'>

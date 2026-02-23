@@ -1,14 +1,8 @@
 Server:
+1. Api to undo finalization
 
 User Dashboard:
-1. Historical Data (Monthly deposit, cost, number of meals, balance, deposit, cost trend, cost breakdown etc), Fixed deposit amount
-3. Prominent Deposit Reminder
+1. User Profile Page, showing basic info (Name, email, fixed deposit)
 
 Fund Management:
-2. Show the running Meal rate (Depends on offered meals until a specific date and not registered meals)
-
-Member Management:
-1. Room-wise user list
-
-Visual:
-1. Change blank gray meal boxes to gray outlined
+1. Show the current number of meals registered
