@@ -114,18 +114,15 @@ export const MealSheet = () => {
                                 <div className='flex  gap-6 justify-center items-center'>
                                     {/* M Column Header */}
                                         <div className="flex items-center">
-                                            <span>M</span>
-                                            <span className=" font-bold px-1.5 rounded-md">({mealTotals.morning})</span>
+                                            <span className=" font-bold rounded-md">M({mealTotals.morning})</span>
                                         </div>
                                     {/* E Column Header */}
                                         <div className="flex items-center">
-                                            <span>E</span>
-                                            <span className=" font-bold px-1.5 rounded-md">({mealTotals.evening})</span>
+                                            <span className=" font-bold">E({mealTotals.evening})</span>
                                         </div>
                                     {/* N Column Header */}
                                         <div className="flex items-center">
-                                            <span>N</span>
-                                            <span className=" font-bold px-1.5 rounded-md">({mealTotals.night})</span>
+                                            <span className=" font-bold">N({mealTotals.night})</span>
                                         </div>
                                 </div>
                             </th>
