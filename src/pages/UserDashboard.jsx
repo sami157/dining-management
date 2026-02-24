@@ -245,13 +245,13 @@ const UserDashboard = () => {
                                                 <div className='flex gap-4 items-center justify-center'>
                                                     <button
                                                         onClick={() => showMenu(date)}
-                                                        className={`text-2xl transition-transform active:scale-90 ${scheduleMap[dateStr] ? 'text-primary/80 hover:text-primary cursor-pointer' : 'opacity-20 cursor-not-allowed'}`}
+                                                        className={`text-2xl transition-transform active:scale-90 ${scheduleMap[dateStr] ? 'text-base-content hover:text-primary cursor-pointer' : 'opacity-20 cursor-not-allowed'}`}
                                                         disabled={!scheduleMap[dateStr]}
                                                     >
                                                         <GiMeal />
                                                     </button>
                                                     <div className='flex flex-col'>
-                                                        <span className={`text-sm ${dateStr === format(today, 'yyyy-MM-dd') ? 'font-black text-primary' : 'font-medium'}`}>
+                                                        <span className={`text-sm ${dateStr === format(today, 'yyyy-MM-dd') ? 'font-black' : 'font-medium'}`}>
                                                             {format(date, 'dd MMM')}
                                                         </span>
                                                         <span className=' uppercase tracking-wider opacity-50'>{format(date, 'EEE')}</span>
@@ -289,7 +289,6 @@ const UserDashboard = () => {
 
                                                                     {/* ORIGINAL BOX */}
                                                                     <div
-                                                                        onClick={() => !isEditing && handleMealClick(date, type, status)}
                                                                     >
                                                                         <MealBox status={status} date={date} mealType={type}></MealBox>
                                                                         {/* {status.available && (status.registered && status.numberOfMeals > 1 ? `x${status.numberOfMeals}` : null)} */}
