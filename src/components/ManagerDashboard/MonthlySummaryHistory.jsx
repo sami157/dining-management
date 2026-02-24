@@ -6,7 +6,7 @@ export const MonthlySummaryHistory = ({ totalExpenses, depositsData, finalizatio
 
     return (
         <div className="w-full">
-            <div className="bg-base-100 border border-base-300 rounded-[2rem] overflow-hidden">
+            <div className="bg-base-100 border border-base-300 rounded-4xl overflow-hidden">
                 <div className="p-6 md:p-8 space-y-6">
                     
                     {/* Header Section */}

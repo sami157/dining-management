@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import useAuth from '../hooks/useAuth';
 import { format } from 'date-fns';
 import Loading from './Loading';
-import { Search, UserCheck } from 'lucide-react'; // Modern icons
+import { UserSearch , UserCheck } from 'lucide-react'; // Modern icons
 
 export const MealSheet = () => {
     const axiosSecure = useAxiosSecure()
@@ -77,12 +77,11 @@ export const MealSheet = () => {
                     </p>
                 </div>
 
-                <div className='relative w-full sm:w-64'>
-                    <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40' size={16} />
+                <div className='w-full sm:w-64'>
                     <input 
                         type="text" 
                         placeholder="Search name or room..." 
-                        className='input input-sm input-bordered w-full pl-10 bg-base-100 focus:input-primary transition-all'
+                        className='input input-sm input-bordered w-full bg-base-100 focus:input-primary transition-all'
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -90,7 +89,7 @@ export const MealSheet = () => {
             </div>
 
             {/* Legend - Helps user understand the boxes */}
-            <div className='px-6 py-2 bg-base-200/50 flex gap-4 text-[10px] font-bold uppercase tracking-tighter text-base-content/60'>
+            <div className='px-4 py-2 bg-base-300/40 flex gap-4 text-[10px] font-bold uppercase rounded-lg tracking-tighter text-base-content/60'>
                 <div className='flex items-center gap-1.5'>
                     <div className='w-3 h-3 rounded bg-primary'></div> Registered
                 </div>
@@ -104,7 +103,7 @@ export const MealSheet = () => {
 
             {/* Table Area */}
             <div className='overflow-x-auto overflow-y-auto grow max-h-[70vh]'>
-                <table className='table table-zebra w-full'>
+                <table className='table w-full'>
                     <thead className='sticky top-0 z-10'>
                         <tr className='bg-base-100'>
                             <th className='w-20 text-center font-bold'>Room</th>

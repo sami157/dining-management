@@ -7,6 +7,7 @@ import { GiMeal } from 'react-icons/gi';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
 import { UserMonthlyStats } from '../components/UserDashboard/UserMonthlyStats';
+import { ChevronLeft, ChevronRight, Utensils, Wallet } from 'lucide-react';
 
 
 const getToday = () => {
@@ -202,43 +203,76 @@ const UserDashboard = () => {
 
     return (
         <div className='p-4 flex flex-col gap-4 items-center'>
-            {/* Month Navigation */}
-            <div className='flex items-center justify-between gap-2'>
-                <button onClick={handlePreviousMonth} className='btn btn-sm'>
-                    ←
-                </button>
+            {/* Month Navigation & Stats Header */}
+            <div className="w-full flex flex-col gap-8 mb-4">
 
-                <h2 className='text-xl md:text-2xl font-bold'>
-                    {format(currentMonth, 'MMMM yyyy')}
-                </h2>
+                {/* Floating Month Selector */}
+                <div className='flex items-center justify-between bg-base-200 p-2 rounded-xl max-w-md mx-auto w-full'>
+                    <button
+                        onClick={handlePreviousMonth}
+                        className='p-3 hover:bg-base-200 rounded-full transition-all active:scale-95'
+                    >
+                        <ChevronLeft className='hover:cursor-pointer' size={20} />
+                    </button>
 
-                <button onClick={handleNextMonth} className='btn btn-sm'>
-                    →
-                </button>
-            </div>
+                    <h2 className='text-sm md:text-base font-bold uppercase'>
+                        {format(currentMonth, 'MMMM yyyy')}
+                    </h2>
 
-            {/* Stats */}
-            <div className='rounded-lg mb-8 mx-auto flex justify-center gap-4'>
-                <div className='p-4 w-30 bg-base-200 rounded-xl text-center'>
-                    <div className='font-medium'>Meals</div>
-                    {countLoading ?
-                        <Loading />
-                        :
-                        <div className='text-xl font-bold'>
-                            {mealCountData?.totalMeals}
-                        </div>
-                    }
+                    <button
+                        onClick={handleNextMonth}
+                        className='p-3 hover:bg-base-200 rounded-full transition-all active:scale-95'
+                    >
+                        <ChevronRight className='hover:cursor-pointer' size={20} />
+                    </button>
                 </div>
 
-                <div className='p-4 w-30 bg-base-200 rounded-xl text-center'>
-                    <div className=''>Deposit</div>
-                    {depositLoading ?
-                        <Loading />
-                        :
-                        <div className='text-xl font-bold text-success'>
-                            ৳{depositData?.deposit}
+                {/* Stats Bento Grid */}
+                <div className='grid grid-cols-2 gap-4 max-w-2xl mx-auto'>
+                    {/* Total Meals Card */}
+                    <div className='relative overflow-hidden bg-base-100 border border-base-300 p-6 rounded-2xl group transition-all hover:border-primary'>
+                        <div className='flex items-center gap-3 mb-2'>
+                            <div className='p-2 bg-primary/10 text-primary rounded-xl'>
+                                <Utensils size={16} />
+                            </div>
+                            <span className='text-[10px] font-black uppercase tracking-widest opacity-40'>Total Meals</span>
                         </div>
-                    }
+
+                        {countLoading ? (
+                            <div className="h-8 flex items-center"><Loading /></div>
+                        ) : (
+                            <div className='text-3xl text-center font-black tracking-tighter'>
+                                {mealCountData?.totalMeals}
+                            </div>
+                        )}
+                        {/* Decorative background element */}
+                        <div className="absolute -bottom-2 -right-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                            <Utensils size={80} />
+                        </div>
+                    </div>
+
+                    {/* Deposit Card */}
+                    <div className='relative overflow-hidden bg-base-100 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success'>
+                        <div className='flex items-center gap-3 mb-2'>
+                            <div className='p-2 bg-success/10 text-success rounded-xl'>
+                                <Wallet size={16} />
+                            </div>
+                            <span className='text-[10px] font-black uppercase tracking-widest opacity-40'>Your Deposit</span>
+                        </div>
+
+                        {depositLoading ? (
+                            <div className="h-8 flex items-center"><Loading /></div>
+                        ) : (
+                            <div className='text-3xl text-center font-black tracking-tighter text-success'>
+                                ৳{depositData?.deposit}
+                            </div>
+                        )}
+                        {/* Decorative background element */}
+                        <div className="absolute -bottom-2 -right-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                            <Wallet size={80} />
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

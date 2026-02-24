@@ -59,17 +59,17 @@ const Navbar = () => {
                     ) : user ? (
                         <>
                             {/* Polished User Avatar & Dropdown */}
-                            <div className="dropdown dropdown-end" ref={dropdownRef}>
+                            <div className="dropdown cursor-pointer dropdown-end" ref={dropdownRef}>
                                 <div 
                                     tabIndex={0} 
                                     role="button" 
-                                    className="flex items-center gap-2 p-1 rounded-full bg-base-200/50 hover:bg-base-200 transition-colors border border-base-300"
+                                    className="flex items-center gap-2 p-1 rounded-full bg-base-300/80 hover:bg-base-200 transition-colors"
                                 >
                                     <span className="hidden cursor-pointer md:block text-sm font-semibold p-0 md:px-2">
-                                        Menu
+                                        {user.email}
                                     </span>
                                     <div className="avatar">
-                                        <div className="w-8 h-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1">
+                                        <div className="w-8 h-8 rounded-full">
                                             {user.photoURL ? (
                                                 <img src={user.photoURL} alt="User" />
                                             ) : (
