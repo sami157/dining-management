@@ -223,7 +223,7 @@ const MemberManagement = () => {
   if (usersLoading || registrationsLoading) return <Loading />;
 
   return (
-    <div className='p-2 w-full mx-auto'>
+    <div className='p-2 w-[98vw] lg:w-full mx-auto'>
       {/* Modal */}
       {editingUser && (
         <UserEditModal
@@ -251,8 +251,8 @@ const MemberManagement = () => {
       </div>
 
       {/* Table */}
-      <div className='overflow-x-auto'>
-        <table className='table table-pin-rows w-full'>
+      <div className='w-full overflow-x-auto'>
+        <table className='table table-xs sm:table-sm md:table-md min-w-max'>
           <thead>
             <tr>
               <th className='bg-base-300 text-center'></th>
@@ -276,7 +276,7 @@ const MemberManagement = () => {
           <tbody>
             {usersData?.map(user => (
               <tr key={user._id} className='hover'>
-                <td className={`mx-auto text-xl transition-colors duration-300 ease-in-out cursor-pointer ${user.role !== 'member' ? 'text-base-content' : 'text-base-content/40'}`}>
+                <td className={`mx-auto bg-base-300 text-xl transition-colors duration-300 ease-in-out cursor-pointer ${user.role !== 'member' ? 'text-base-content' : 'text-base-content/40'}`}>
                   <MdAdminPanelSettings onClick={() => setEditingUser(user)} />
                 </td>
                 <td className='font-semibold'>

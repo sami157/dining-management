@@ -294,7 +294,7 @@ const UserDashboard = () => {
                                                         <span className={`${format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd') ? 'font-extrabold' : ''}`}>
                                                             {format(date, 'dd-MM-yyyy')}
                                                         </span>
-                                                        <span className='text-xs text-gray-500'>
+                                                        <span className='text-xs text-base-content/60'>
                                                             {format(date, 'EEEE')}
                                                         </span>
                                                     </div>
@@ -310,7 +310,7 @@ const UserDashboard = () => {
                                                             date={date}
                                                             mealType="morning"
                                                         />
-                                                        <span className='text-xs text-gray-500'>M</span>
+                                                        <span className='text-xs text-base-content/60'>M</span>
                                                     </div>
                                                     <div className='flex flex-col items-center gap-1'>
                                                         <MealBox
@@ -318,7 +318,7 @@ const UserDashboard = () => {
                                                             date={date}
                                                             mealType="evening"
                                                         />
-                                                        <span className='text-xs text-gray-500'>E</span>
+                                                        <span className='text-xs text-base-content/60'>E</span>
                                                     </div>
                                                     <div className='flex flex-col items-center gap-1'>
                                                         <MealBox
@@ -326,7 +326,7 @@ const UserDashboard = () => {
                                                             date={date}
                                                             mealType="night"
                                                         />
-                                                        <span className='text-xs text-gray-500'>N</span>
+                                                        <span className='text-xs text-base-content/60'>N</span>
                                                     </div>
                                                 </div>
                                             </td>

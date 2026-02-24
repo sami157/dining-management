@@ -77,7 +77,7 @@ const UpcomingMealCard = ({ date, schedule, registrations = [], refetch }) => {
               <h2 className={`${isToday() && 'text-primary'} text-2xl font-bold mt-1`}>
                   {format(date, 'EEEE')}
                 </h2>
-              <p className={`${isToday() && 'text-primary'} text-sm text-gray-500`}>
+              <p className={`${isToday() && 'text-primary'} text-sm text-base-content/60`}>
                   {format(date, 'dd MMM yyyy')}
                 </p>
               </div>
@@ -100,9 +100,9 @@ const UpcomingMealCard = ({ date, schedule, registrations = [], refetch }) => {
                           <h3 className="capitalize font-semibold">
                             {meal.mealType}<span className='ml-2 bg-base-100 px-3 py-1 rounded-md'>{meal.weight}</span>
                           </h3>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-base-content/60">
                             {/* Total Registered Count */}
-                            <div className="flex items-center text-[14px] gap-2 text-gray-500">
+                            <div className="flex items-center text-[14px] gap-2 text-base-content/60">
                               <FaUsers />
                               <span>
                                 {mealCounts[meal.mealType] || 0}

@@ -130,7 +130,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                         <td>
                                             <div className='flex flex-col'>
                                                 <span className='font-medium'>{user.name}</span>
-                                                <span className='text-xs text-gray-500'>{user.room}</span>
+                                                <span className='text-xs text-base-content/60'>{user.room}</span>
                                             </div>
                                         </td>
                                         <td className='text-center'>
