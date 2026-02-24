@@ -109,9 +109,11 @@ const FundManagement = () => {
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         <div className='flex flex-col gap-4'>
           {
+            !monthFinalized ?
             !mealRateLoading ? 
               <p className='text-center text-lg p-2 rounded-xl'>{`Meal Rate: ৳${runningMealRate}`}</p>
               : <Loading/>
+              : null
           }
           <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} />
           <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} />
