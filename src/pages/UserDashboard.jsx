@@ -49,8 +49,6 @@ const UserDashboard = () => {
         }
     });
 
-    console.log(depositData);
-
     const { data, refetch } = useQuery({
         queryKey: ['userMeals', monthString],
         queryFn: async () => {

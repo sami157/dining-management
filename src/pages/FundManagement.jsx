@@ -53,7 +53,6 @@ const FundManagement = () => {
     enabled: !monthFinalized, // no need to fetch if already finalized
   });
 
-  console.log(mealRateData);
 
   const runningMealRate = mealRateData?.mealRate?.toFixed(2) || '0.00';
 
