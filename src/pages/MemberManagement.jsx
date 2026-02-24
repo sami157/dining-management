@@ -4,11 +4,12 @@ import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { MdAdminPanelSettings } from "react-icons/md";
+import { Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
 
 // ─── User Edit Modal ────────────────────────────────────────────────────────
-
+// ─── User Edit Modal (Mobile Optimized) ──────────────────────────────────────
 const UserEditModal = ({ user, onClose, onSave }) => {
   const [role, setRole] = useState(user.role);
   const [fixedDeposit, setFixedDeposit] = useState(user.fixedDeposit ?? 1000);
@@ -18,7 +19,13 @@ const UserEditModal = ({ user, onClose, onSave }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await onSave({ userId: user._id, role, fixedDeposit: Number(fixedDeposit), mosqueFee: Number(mosqueFee), originalRole: user.role });
+      await onSave({
+        userId: user._id,
+        role,
+        fixedDeposit: Number(fixedDeposit),
+        mosqueFee: Number(mosqueFee),
+        originalRole: user.role
+      });
       onClose();
     } finally {
       setSaving(false);
@@ -26,19 +33,29 @@ const UserEditModal = ({ user, onClose, onSave }) => {
   };
 
   return (
+    // Added modal-bottom for mobile (slides up) and sm:modal-middle for desktop
     <dialog open className="modal modal-open">
-      <div className="modal-box max-w-md">
-        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={onClose}>✕</button>
+      <div className="modal-box relative w-full max-w-md mx-auto border-t sm:border border-base-300 rounded-xl p-6">
+        {/* Close button - larger touch target for mobile */}
+        <button
+          className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
+          onClick={onClose}
+        >✕</button>
 
-        <h3 className="font-bold text-lg mb-1">Edit User</h3>
-        <p className="text-sm text-gray-500 mb-4">{user.name} — Room {user.room}</p>
+        <h3 className="font-black text-xl mb-1 text-primary italic uppercase tracking-tight">
+          Edit Member
+        </h3>
+        <p className="text-[10px] font-bold opacity-50 mb-6 uppercase tracking-widest">
+          {user.name} — Room {user.room}
+        </p>
 
-        <div className="flex flex-col gap-4">
-          {/* Role */}
-          <div className="form-control">
-            <label className="label"><span className="label-text font-semibold">Role</span></label>
+        <div className="flex flex-col gap-5">
+          <div className="form-control w-full">
+            <label className="label py-1">
+              <span className="label-text font-black uppercase text-[10px] opacity-70">Role</span>
+            </label>
             <select
-              className="select select-bordered w-full"
+              className="select select-bordered w-full font-bold focus:outline-primary transition-all"
               value={role}
               onChange={e => setRole(e.target.value)}
             >
@@ -47,24 +64,26 @@ const UserEditModal = ({ user, onClose, onSave }) => {
             </select>
           </div>
 
-          {/* Fixed Deposit */}
-          <div className="form-control">
-            <label className="label"><span className="label-text font-semibold">Fixed Deposit (৳)</span></label>
+          <div className="form-control w-full">
+            <label className="label py-1">
+              <span className="label-text font-black uppercase text-[10px] opacity-70">Fixed Deposit (৳)</span>
+            </label>
             <input
               type="number"
-              className="input input-bordered w-full"
+              className="input input-bordered w-full font-bold focus:outline-primary"
               value={fixedDeposit}
               min={0}
               onChange={e => setFixedDeposit(e.target.value)}
             />
           </div>
 
-          {/* Mosque Fee */}
-          <div className="form-control">
-            <label className="label"><span className="label-text font-semibold">Mosque Fee (৳)</span></label>
+          <div className="form-control w-full">
+            <label className="label py-1">
+              <span className="label-text font-black uppercase text-[10px] opacity-70">Mosque Fee (৳)</span>
+            </label>
             <input
               type="number"
-              className="input input-bordered w-full"
+              className="input input-bordered w-full font-bold focus:outline-primary"
               value={mosqueFee}
               min={0}
               onChange={e => setMosqueFee(e.target.value)}
@@ -72,20 +91,32 @@ const UserEditModal = ({ user, onClose, onSave }) => {
           </div>
         </div>
 
-        <div className="modal-action">
-          <button className="btn btn-ghost" onClick={onClose} disabled={saving}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? <span className="loading loading-spinner loading-sm" /> : 'Save Changes'}
+        <div className="modal-action mt-8 flex flex-col-reverse sm:flex-row gap-2">
+          <button
+            className="btn btn-ghost w-full sm:w-auto font-bold uppercase"
+            onClick={onClose}
+            disabled={saving}
+          >
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary w-full sm:flex-1 font-black shadow-lg shadow-primary/20"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            {saving ? <span className="loading loading-spinner loading-sm" /> : 'SAVE UPDATES'}
           </button>
         </div>
       </div>
-      <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
+      {/* Backdrop for mobile tapping to close */}
+      <form method="dialog" className="modal-backdrop bg-black/40" onClick={onClose}>
+        <button>close</button>
+      </form>
     </dialog>
   );
 };
 
 // ─── Main Component ─────────────────────────────────────────────────────────
-
 const MemberManagement = () => {
   const axiosSecure = useAxiosSecure();
   const { loading } = useAuth();
@@ -94,7 +125,9 @@ const MemberManagement = () => {
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
   const [editingUser, setEditingUser] = useState(null);
+  const [editingCell, setEditingCell] = useState(null);
 
+  // Queries
   const { data: usersData, isLoading: usersLoading, refetch: userRefetch } = useQuery({
     queryKey: ['allUsers'],
     enabled: !loading,
@@ -122,44 +155,27 @@ const MemberManagement = () => {
     },
   });
 
-  const handlePreviousWeek = () => setCurrentWeekStart(prev => addDays(prev, -7));
-  const handleNextWeek = () => setCurrentWeekStart(prev => addDays(prev, 7));
-  const handleThisWeek = () => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 0 }));
-
-  const isRegistered = (userId, date, mealType) => {
-    if (!registrationsData) return false;
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return registrationsData.some(reg =>
-      reg.userId.toString() === userId.toString() &&
-      format(new Date(reg.date), 'yyyy-MM-dd') === dateStr &&
-      reg.mealType === mealType
-    );
-  };
-
-  const getRegistrationId = (userId, date, mealType) => {
-    if (!registrationsData) return null;
-    const dateStr = format(date, 'yyyy-MM-dd');
-    const registration = registrationsData.find(reg =>
-      (reg.userId?.toString() || reg.userId) === (userId?.toString() || userId) &&
-      format(new Date(reg.date), 'yyyy-MM-dd') === dateStr &&
-      reg.mealType === mealType
-    );
-    return registration?._id;
-  };
-
-  // ── Save handler for modal ──────────────────────────────────────────────
+  // ── Save handler for the User Modal ──────────────────────────────────────
   const handleSaveUser = async ({ userId, role, fixedDeposit, mosqueFee, originalRole }) => {
     const promises = [];
-
-    if (role !== originalRole) {
-      promises.push(axiosSecure.put(`users/role/${userId}`, { role }));
-    }
+    if (role !== originalRole) promises.push(axiosSecure.put(`users/role/${userId}`, { role }));
     promises.push(axiosSecure.put(`users/fixedDeposit/${userId}`, { fixedDeposit }));
     promises.push(axiosSecure.put(`users/mosqueFee/${userId}`, { mosqueFee }));
 
     await toast.promise(
       Promise.all(promises).then(() => userRefetch()),
       { loading: 'Saving...', success: 'User updated successfully', error: 'Failed to update user' }
+    );
+  };
+
+  // Helper functions
+  const getRegistration = (userId, date, mealType) => {
+    if (!registrationsData) return null;
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return registrationsData.find(reg =>
+      (reg.userId?._id?.toString() || reg.userId?.toString()) === userId.toString() &&
+      format(new Date(reg.date), 'yyyy-MM-dd') === dateStr &&
+      reg.mealType === mealType
     );
   };
 
@@ -171,103 +187,60 @@ const MemberManagement = () => {
   };
 
   const handleMealToggle = async (userId, date, mealType) => {
-    const registered = isRegistered(userId, date, mealType);
+    const reg = getRegistration(userId, date, mealType);
     const available = isMealAvailable(date, mealType);
+    if (!available) return toast.error('Meal not available');
 
-    if (!available) return toast.error('This meal is not available');
-
-    if (registered) {
-      const registrationId = getRegistrationId(userId, date, mealType);
-      if (!registrationId) return;
+    if (reg) {
       toast.promise(
-        async () => {
-          await axiosSecure.delete(`/users/meals/register/cancel/${registrationId}`).then(() => refetch())
-          await refetch();
-        },
-        { loading: 'Cancelling...', success: 'Registration cancelled', error: 'Failed to cancel' }
+        axiosSecure.delete(`/users/meals/register/cancel/${reg._id}`).then(() => refetch()),
+        { loading: 'Cancelling...', success: 'Cancelled', error: 'Error' }
       );
     } else {
-      const dateStr = format(date, 'yyyy-MM-dd');
       toast.promise(
-        async () => {
-          await axiosSecure.post('/users/meals/register', { userId, date: dateStr, mealType })
-          await refetch();
-        },
-        { loading: 'Registering...', success: 'Meal registered', error: 'Failed to register' }
+        axiosSecure.post('/users/meals/register', { userId, date: format(date, 'yyyy-MM-dd'), mealType, numberOfMeals: 1 }).then(() => refetch()),
+        { loading: 'Registering...', success: 'Registered', error: 'Error' }
       );
     }
   };
 
-  const MealBox = ({ userId, date, mealType }) => {
-    const registered = isRegistered(userId, date, mealType);
-    const available = isMealAvailable(date, mealType);
-
-    let bgColor = 'bg-base-300';
-    let cursorClass = '';
-    if (available) {
-      if (registered) { bgColor = 'bg-primary/80'; cursorClass = 'cursor-pointer hover:bg-primary'; }
-      else { bgColor = 'bg-base-200'; cursorClass = 'cursor-pointer hover:bg-base-100'; }
-    } else {
-      bgColor = 'bg-none'; cursorClass = 'cursor-not-allowed';
-    }
-
-    return (
-      <div
-        className={`w-5 h-5 sm:w-6 sm:h-6 rounded ${bgColor} ${cursorClass} transition-colors`}
-        onClick={() => available && handleMealToggle(userId, date, mealType)}
-        title={registered ? 'Registered (Click to cancel)' : available ? 'Click to register' : 'Not available'}
-      />
+  const handleUpdateQty = async (registrationId, currentQty, delta) => {
+    const newQty = currentQty + delta;
+    if (newQty < 1) return;
+    toast.promise(
+      axiosSecure.patch(`/users/meals/register/${registrationId}`, { numberOfMeals: newQty }).then(() => refetch()),
+      { loading: 'Updating...', success: `Set to ${newQty}`, error: 'Error' }
     );
   };
 
   if (usersLoading || registrationsLoading) return <Loading />;
 
   return (
-    <div className='p-2 w-[98vw] lg:w-full mx-auto'>
-      {/* Modal */}
-      {editingUser && (
-        <UserEditModal
-          user={editingUser}
-          onClose={() => setEditingUser(null)}
-          onSave={handleSaveUser}
-        />
-      )}
+    <div className='p-4 md:w-full w-[99vw] mx-auto'>
+      {editingUser && <UserEditModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleSaveUser} />}
 
-      {/* Week Navigation */}
-      <div className='flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2'>
-        <div className='flex gap-2 flex-wrap'>
-          <button onClick={handlePreviousWeek} className='btn btn-sm'>← Previous</button>
-          <button onClick={handleThisWeek} className='btn btn-sm btn-outline'>This Week</button>
-          <button onClick={handleNextWeek} className='btn btn-sm'>Next →</button>
+      <div className='flex flex-col md:flex-row justify-between items-center mb-8 gap-4'>
+        <div className='flex items-center gap-2 bg-base-200 p-1 rounded-xl'>
+          <button onClick={() => setCurrentWeekStart(prev => addDays(prev, -7))} className='p-2 hover:bg-base-300 rounded-lg transition-all'><ChevronLeft size={20} /></button>
+          <span className='px-4 font-bold text-sm uppercase tracking-wide'>{format(currentWeekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')}</span>
+          <button onClick={() => setCurrentWeekStart(prev => addDays(prev, 7))} className='p-2 hover:bg-base-300 rounded-lg transition-all'><ChevronRight size={20} /></button>
         </div>
-        <h2 className='text-lg sm:text-xl font-bold'>{format(currentWeekStart, 'MMM dd')} - {format(weekEnd, 'MMM dd, yyyy')}</h2>
+        <h1 className='text-2xl font-black italic tracking-tight flex items-center gap-2'>
+          <MdAdminPanelSettings className='text-primary' /> MEMBER MANAGEMENT
+        </h1>
       </div>
 
-      {/* Legend */}
-      <div className='flex gap-4 mb-4 text-xs sm:text-sm flex-wrap'>
-        <div className='flex items-center gap-2'><div className='w-3 h-3 sm:w-4 sm:h-4 rounded bg-base-200' />Not registered</div>
-        <div className='flex items-center gap-2'><div className='w-3 h-3 sm:w-4 sm:h-4 rounded bg-primary/80' />Registered</div>
-        <div className='flex items-center gap-2'><div className='w-3 h-3 sm:w-4 sm:h-4 rounded bg-base-300' />Unavailable</div>
-      </div>
-
-      {/* Table */}
-      <div className='w-full overflow-x-auto'>
-        <table className='table table-xs sm:table-sm md:table-md min-w-max'>
+      <div className='w-full overflow-x-auto rounded-lg bg-base-300'>
+        <table className='table w-full'>
           <thead>
-            <tr>
-              <th className='bg-base-300 text-center'></th>
-              <th className='bg-base-300'>User</th>
-              <th className='bg-base-300 text-center'>
-                <div><p>Fixed</p><p>Deposit</p></div>
-              </th>
-              <th className='bg-base-300 text-center'>
-                <div><p>Mosque</p><p>Fee</p></div>
-              </th>
+            <tr className='bg-base-300'>
+              <th className='w-16 text-center'>Edit</th>
+              <th>Member Details</th>
               {weekDates.map((date, idx) => (
-                <th key={idx} className='bg-base-300 text-center'>
-                  <div className='flex flex-col items-center'>
-                    <span className='font-bold text-xs sm:text-sm'>{format(date, 'EEE')}</span>
-                    <span className='text-[8px] sm:text-xs'>{format(date, 'dd MMM')}</span>
+                <th key={idx} className='text-center border-l border-base-300/50'>
+                  <div className='flex flex-col'>
+                    <span className='text-sm font-black'>{format(date, 'EEE')}</span>
+                    <span className='text-sm opacity-50'>{format(date, 'dd MMM')}</span>
                   </div>
                 </th>
               ))}
@@ -275,45 +248,71 @@ const MemberManagement = () => {
           </thead>
           <tbody>
             {usersData?.map(user => (
-              <tr key={user._id} className='hover'>
-                <td className={`mx-auto bg-base-300 text-xl transition-colors duration-300 ease-in-out cursor-pointer ${user.role !== 'member' ? 'text-base-content' : 'text-base-content/40'}`}>
-                  <MdAdminPanelSettings onClick={() => setEditingUser(user)} />
+              <tr key={user._id} className='hover:bg-base-200/50 transition-colors'>
+                <td className='text-center'>
+                  <button onClick={() => setEditingUser(user)} className='btn btn-ghost btn-sm btn-circle text-xl text-base-content/30 hover:text-primary'>
+                    <MdAdminPanelSettings />
+                  </button>
                 </td>
-                <td className='font-semibold'>
-                  <div className='flex flex-col text-xs sm:text-sm'>
-                    <span>{user.name}</span>
-                    <span className='text-gray-500'>{user.room}</span>
+                <td>
+                  <div className='flex flex-col'>
+                    <span className='font-bold text-sm'>{user.name}</span>
+                    <span className='text-[10px] uppercase tracking-widest opacity-50'>Room {user.room}</span>
                   </div>
                 </td>
-                <td><p className='text-center'>{user.fixedDeposit ?? 0}</p></td>
-                <td><p className='text-center'>{user.mosqueFee ?? 0}</p></td>
-                {weekDates.map((date, idx) => (
-                  <td key={idx}>
-                    <div className='flex gap-1 justify-center'>
-                      <div className='flex flex-col items-center gap-1'>
-                        <MealBox userId={user._id} date={date} mealType='morning' />
-                        <span className='text-[7px] sm:text-[8px]'>M</span>
+                {weekDates.map((date, idx) => {
+                  const dateStr = format(date, 'yyyy-MM-dd');
+                  const isEditingThis = editingCell?.userId === user._id && editingCell?.dateStr === dateStr;
+
+                  return (
+                    <td key={idx} className='border-l border-base-300/20'>
+                      <div className='flex items-center justify-center gap-3'>
+                        <div className='flex gap-1.5'>
+                          {['morning', 'evening', 'night'].map(type => {
+                            const reg = getRegistration(user._id, date, type);
+                            const available = isMealAvailable(date, type);
+                            const canEditQty = isEditingThis && reg;
+
+                            return (
+                              <div key={type} className='flex flex-col items-center gap-1'>
+                                <div className='relative flex flex-col items-center'>
+                                  {canEditQty && (
+                                    <>
+                                      <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, 1)} className="absolute -top-4 z-10 w-4 h-4 flex items-center justify-center bg-primary text-white rounded-full shadow-md hover:scale-110 transition-transform"><Plus size={8} strokeWidth={4} /></button>
+                                      <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, -1)} disabled={(reg.numberOfMeals || 1) <= 1} className="absolute -bottom-4 z-10 w-4 h-4 flex items-center justify-center bg-base-100 border-2 border-primary text-primary rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-0"><Minus size={8} strokeWidth={4} /></button>
+                                    </>
+                                  )}
+                                  <div
+                                    onClick={() => !isEditingThis && available && handleMealToggle(user._id, date, type)}
+                                    className={`w-7 h-7 flex items-center justify-center rounded-sm font-bold transition-all
+                                                                            ${reg ? 'bg-primary text-white' : available ? 'bg-base-200 text-base-content/20' : 'bg-transparent text-transparent'} 
+                                                                            ${available && !isEditingThis ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'}
+                                                                            ${canEditQty ? 'scale-90 opacity-90' : ''}`}
+                                  >
+                                    {reg && (reg.numberOfMeals > 1 ? `x${reg.numberOfMeals}` : null)}
+                                  </div>
+                                </div>
+                                <span className={`text-[7px] font-black opacity-30 ${canEditQty ? 'mt-3' : ''}`}>{type[0].toUpperCase()}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <button
+                          onClick={() => setEditingCell(isEditingThis ? null : { userId: user._id, dateStr })}
+                          className={`w-6 h-6 flex items-center justify-center rounded-full transition-all border
+                                                        ${isEditingThis ? 'bg-primary border-primary text-white rotate-45' : 'bg-base-100 border-base-300 text-base-content/20 hover:border-primary hover:text-primary'}`}
+                        >
+                          <Plus size={12} strokeWidth={3} />
+                        </button>
                       </div>
-                      <div className='flex flex-col items-center gap-1'>
-                        <MealBox userId={user._id} date={date} mealType='evening' />
-                        <span className='text-[7px] sm:text-[8px]'>E</span>
-                      </div>
-                      <div className='flex flex-col items-center gap-1'>
-                        <MealBox userId={user._id} date={date} mealType='night' />
-                        <span className='text-[7px] sm:text-[8px]'>N</span>
-                      </div>
-                    </div>
-                  </td>
-                ))}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-
-      {(!usersData || usersData.length === 0) && !loading && (
-        <div className='text-center py-8 text-gray-500'>No users found</div>
-      )}
     </div>
   );
 };

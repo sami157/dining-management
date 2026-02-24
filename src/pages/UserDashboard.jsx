@@ -7,7 +7,7 @@ import { GiMeal } from 'react-icons/gi';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
 import { UserMonthlyStats } from '../components/UserDashboard/UserMonthlyStats';
-import { ChevronLeft, ChevronRight, Utensils, Wallet } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus } from 'lucide-react';
 
 
 const getToday = () => {
@@ -30,10 +30,12 @@ const UserDashboard = () => {
         end: lastDate
     });
 
-    const today = getToday(); // Normalize to start of day
+    const [editingDate, setEditingDate] = useState(null);
 
+    const today = getToday();
     const monthString = format(currentMonth, 'yyyy-MM');
 
+    // Queries
     const { data: finalizationData, isLoading: finalizationLoading } = useQuery({
         queryKey: ['myFinalizationData', monthString],
         queryFn: async () => {
@@ -42,7 +44,7 @@ const UserDashboard = () => {
         }
     });
 
-    const { data: depositData, loading: depositLoading } = useQuery({
+    const { data: depositData, isLoading: depositLoading } = useQuery({
         queryKey: ['userDeposit', monthString],
         queryFn: async () => {
             const response = await axiosSecure.get(`/finance/user-deposit/?month=${monthString}`);
@@ -66,55 +68,40 @@ const UserDashboard = () => {
         }
     });
 
-    // Create a map of schedules by date for quick lookup
     const scheduleMap = {};
     data?.schedules?.forEach(schedule => {
         const dateKey = format(new Date(schedule.date), 'yyyy-MM-dd');
         scheduleMap[dateKey] = schedule;
     });
 
-    // Helper function to get meal status
     const getMealStatus = (date, mealType) => {
         const dateKey = format(date, 'yyyy-MM-dd');
         const schedule = scheduleMap[dateKey];
-
-        if (!schedule) {
-            return { available: false, registered: false, menu: '', canRegister: false, registrationId: null };
-        }
+        if (!schedule) return { available: false, registered: false, numberOfMeals: 1 };
 
         const meal = schedule.meals.find(m => m.mealType === mealType);
-
-        if (!meal) {
-            return { available: false, registered: false, menu: '', canRegister: false, registrationId: null };
-        }
+        if (!meal) return { available: false, registered: false, numberOfMeals: 1 };
 
         return {
             available: meal.isAvailable,
             registered: meal.isRegistered,
             menu: meal.menu || '',
+            // FIX: canRegister should ONLY depend on the deadline, 
+            // not whether it's already registered.
             canRegister: meal.canRegister,
             registrationId: meal.registrationId,
-            weight: meal.weight
+            weight: meal.weight,
+            numberOfMeals: meal.numberOfMeals || 1
         };
     };
 
-    const handlePreviousMonth = () => {
-        setCurrentMonth(prev => subMonths(prev, 1));
-    };
-
-    const handleNextMonth = () => {
-        setCurrentMonth(prev => addMonths(prev, 1));
-    };
-
-    // Handle meal registration
+    // Toggle Handlers (For the grid boxes)
     const handleMealClick = async (date, mealType, status) => {
-        // If unavailable, do nothing
         if (!status.available) {
             toast.error('This meal is not available');
             return;
         }
 
-        // If registered, cancel registration (no deadline check needed - if they could register, they can cancel)
         if (status.registered && status.registrationId) {
             toast.promise(
                 async () => {
@@ -122,157 +109,108 @@ const UserDashboard = () => {
                     await refetch();
                 },
                 {
-                    loading: 'Cancelling registration...',
-                    success: 'Registration cancelled',
-                    error: 'Failed to cancel registration'
+                    loading: 'Cancelling...',
+                    success: 'Cancelled',
+                    error: 'Failed to cancel'
                 }
             );
             return;
         }
 
-        // For new registration, check deadline
         if (!status.canRegister) {
             toast.error('Deadline has passed');
             return;
         }
 
-        // Register
         const dateStr = format(date, 'yyyy-MM-dd');
         toast.promise(
             async () => {
-                await axiosSecure.post('/users/meals/register', { date: dateStr, mealType });
+                await axiosSecure.post('/users/meals/register', { date: dateStr, mealType, numberOfMeals: 1 });
                 await refetch();
             },
             {
                 loading: 'Registering...',
-                success: 'Meal registered successfully',
-                error: 'Failed to register meal'
+                success: 'Registered',
+                error: 'Failed to register'
             }
         );
     };
 
-    // Meal Box Component
+    // Modal Edit Handler (For the + / - buttons)
+    const handleUpdateQty = async (registrationId, currentQty, delta) => {
+        const newQty = currentQty + delta;
+        if (newQty < 1) return;
+
+        toast.promise(
+            async () => {
+                await axiosSecure.patch(`/users/meals/register/${registrationId}`, {
+                    numberOfMeals: newQty
+                });
+                await refetch();
+            },
+            {
+                loading: 'Updating quantity...',
+                success: `Updated to ${newQty}`,
+                error: 'Failed to update'
+            }
+        );
+    };
+
     const MealBox = ({ status, date, mealType }) => {
-        let bgColor = 'bg-base-300'; // Unavailable (default)
-        let title = 'Unavailable';
+        let bgColor = 'bg-base-300';
         let cursorClass = 'cursor-not-allowed';
 
         if (status.registered) {
-            // Registered - always clickable to cancel
             bgColor = 'bg-primary/80';
-            title = `Registered${status.menu ? ` - ${status.menu}` : ''} (Click to cancel)`;
             cursorClass = 'cursor-pointer hover:bg-primary';
         } else if (status.available) {
-            // Available meal
             bgColor = 'bg-base-200';
-
-            if (status.canRegister) {
-                // Can register - clickable
-                title = `Available${status.menu ? ` - ${status.menu}` : ''} (Click to register)`;
-                cursorClass = 'cursor-pointer hover:bg-base-100';
-            } else {
-                // Deadline passed - not clickable
-                title = `Not registered - Deadline passed${status.menu ? ` - ${status.menu}` : ''}`;
-                cursorClass = 'cursor-not-allowed';
-            }
+            cursorClass = status.canRegister ? 'cursor-pointer hover:bg-base-100' : 'cursor-not-allowed';
         }
 
-
         return (
-            <div>
-                <div
-                    className={`w-7 flex items-center justify-center h-7 rounded ${bgColor} ${cursorClass} transition-colors duration-400 ease-in-out text-center font-semibold text-[10px]`}
-                    title={title}
-                    onClick={() => handleMealClick(date, mealType, status)}
-                >
-                    {status.available && status.weight}
-                </div>
+            <div
+                className={`w-7 flex items-center justify-center h-7 rounded ${bgColor} ${cursorClass} transition-colors duration-250 ease-in-out text-center font-semibold`}
+                onClick={() => handleMealClick(date, mealType, status)}
+            >
+                {status.available && (status.registered && status.numberOfMeals > 1 ? `x${status.numberOfMeals}` : null)}
             </div>
         );
     };
 
-    const showMenu = (date) => {
-        setSelectedDate(date);
-        setShowModal(true);
-    }
-
-    const closeModal = () => {
-        setShowModal(false);
-        setSelectedDate(null);
-    }
+    const showMenu = (date) => { setSelectedDate(date); setShowModal(true); }
+    const closeModal = () => { setShowModal(false); setSelectedDate(null); }
 
     return (
         <div className='p-4 flex flex-col gap-4 items-center'>
-            {/* Month Navigation & Stats Header */}
+            {/* Header / Stats Navigation */}
             <div className="w-full flex flex-col gap-8 mb-4">
-
-                {/* Floating Month Selector */}
                 <div className='flex items-center justify-between bg-base-200 p-2 rounded-xl max-w-md mx-auto w-full'>
-                    <button
-                        onClick={handlePreviousMonth}
-                        className='p-3 hover:bg-base-200 rounded-full transition-all active:scale-95'
-                    >
-                        <ChevronLeft className='hover:cursor-pointer' size={20} />
+                    <button onClick={() => setCurrentMonth(prev => subMonths(prev, 1))} className='p-3 hover:bg-base-200 rounded-full transition-all active:scale-95'>
+                        <ChevronLeft size={20} />
                     </button>
-
-                    <h2 className='text-sm md:text-base font-bold uppercase'>
-                        {format(currentMonth, 'MMMM yyyy')}
-                    </h2>
-
-                    <button
-                        onClick={handleNextMonth}
-                        className='p-3 hover:bg-base-200 rounded-full transition-all active:scale-95'
-                    >
-                        <ChevronRight className='hover:cursor-pointer' size={20} />
+                    <h2 className='text-sm md:text-base font-bold uppercase'>{format(currentMonth, 'MMMM yyyy')}</h2>
+                    <button onClick={() => setCurrentMonth(prev => addMonths(prev, 1))} className='p-3 hover:bg-base-200 rounded-full transition-all active:scale-95'>
+                        <ChevronRight size={20} />
                     </button>
                 </div>
 
-                {/* Stats Bento Grid */}
                 <div className='grid grid-cols-2 gap-4 max-w-2xl mx-auto'>
-                    {/* Total Meals Card */}
                     <div className='relative overflow-hidden bg-base-100 border border-base-300 p-6 rounded-2xl group transition-all hover:border-primary'>
                         <div className='flex items-center gap-3 mb-2'>
-                            <div className='p-2 bg-primary/10 text-primary rounded-xl'>
-                                <Utensils size={16} />
-                            </div>
-                            <span className='text-[10px] font-black uppercase tracking-widest opacity-40'>Total Meals</span>
+                            <div className='p-2 bg-primary/10 text-primary rounded-xl'><Utensils size={16} /></div>
+                            <span className=' font-black uppercase tracking-widest opacity-40'>Total Meals</span>
                         </div>
-
-                        {countLoading ? (
-                            <div className="h-8 flex items-center"><Loading /></div>
-                        ) : (
-                            <div className='text-3xl text-center font-black tracking-tighter'>
-                                {mealCountData?.totalMeals}
-                            </div>
-                        )}
-                        {/* Decorative background element */}
-                        <div className="absolute -bottom-2 -right-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                            <Utensils size={80} />
-                        </div>
+                        {countLoading ? <Loading /> : <div className='text-3xl text-center font-black tracking-tighter'>{mealCountData?.totalMeals}</div>}
                     </div>
 
-                    {/* Deposit Card */}
                     <div className='relative overflow-hidden bg-base-100 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success'>
                         <div className='flex items-center gap-3 mb-2'>
-                            <div className='p-2 bg-success/10 text-success rounded-xl'>
-                                <Wallet size={16} />
-                            </div>
-                            <span className='text-[10px] font-black uppercase tracking-widest opacity-40'>Your Deposit</span>
+                            <div className='p-2 bg-success/10 text-success rounded-xl'><Wallet size={16} /></div>
+                            <span className=' font-black uppercase tracking-widest opacity-40'>Your Deposit</span>
                         </div>
-
-                        {depositLoading ? (
-                            <div className="h-8 flex items-center"><Loading /></div>
-                        ) : (
-                            <div className='text-3xl text-center font-black tracking-tighter text-success'>
-                                ৳{depositData?.deposit}
-                            </div>
-                        )}
-                        {/* Decorative background element */}
-                        <div className="absolute -bottom-2 -right-2 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                            <Wallet size={80} />
-                        </div>
+                        {depositLoading ? <Loading /> : <div className='text-3xl text-center font-black tracking-tighter text-success'>৳{depositData?.deposit}</div>}
                     </div>
-
                 </div>
             </div>
 
@@ -280,24 +218,16 @@ const UserDashboard = () => {
                 <div className={`${!finalizationData && 'hidden'}`}>
                     <UserMonthlyStats finalizationData={finalizationData} finalizationLoading={finalizationLoading} />
                 </div>
+
                 <div className='flex flex-col gap-4 items-center'>
                     <p className='text-lg font-bold'>Meal Sheet</p>
-                    {/* Legend */}
                     <div className='flex gap-8 text-sm'>
-                        <div className='flex items-center gap-2'>
-                            <div className='w-4 h-4 rounded bg-base-200' />
-                            <span>Not registered</span>
-                        </div>
-                        <div className='flex items-center gap-2'>
-                            <div className='w-4 h-4 rounded bg-primary/80' />
-                            <span>Registered</span>
-                        </div>
+                        <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-base-200' /><span>Not registered</span></div>
+                        <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-primary/80' /><span>Registered</span></div>
                     </div>
 
-                    {/* Table */}
                     <div className="px-8 mx-auto w-full">
                         <table className="table table-pin-rows">
-                            {/* Sticky Head */}
                             <thead>
                                 <tr>
                                     <th className='bg-base-300 text-center'>Date</th>
@@ -306,59 +236,87 @@ const UserDashboard = () => {
                             </thead>
                             <tbody>
                                 {dateArray.map((date, index) => {
-                                    const morningStatus = getMealStatus(date, 'morning');
-                                    const eveningStatus = getMealStatus(date, 'evening');
-                                    const nightStatus = getMealStatus(date, 'night');
+                                    const dateStr = format(date, 'yyyy-MM-dd');
+                                    const isEditing = editingDate === dateStr;
 
                                     return (
-                                        <tr key={index} className='hover'>
-                                            {/* Date Column */}
-                                            <td>
+                                        <tr key={index} className='hover transition-colors'>
+                                            <td className="py-3">
                                                 <div className='flex gap-4 items-center justify-center'>
                                                     <button
                                                         onClick={() => showMenu(date)}
-                                                        className={`text-2xl ${scheduleMap[format(date, 'yyyy-MM-dd')] ? 'hover:text-primary cursor-pointer' : 'opacity-30 cursor-not-allowed'}`}
-                                                        disabled={!scheduleMap[format(date, 'yyyy-MM-dd')]}
+                                                        className={`text-2xl transition-transform active:scale-90 ${scheduleMap[dateStr] ? 'text-primary/80 hover:text-primary cursor-pointer' : 'opacity-20 cursor-not-allowed'}`}
+                                                        disabled={!scheduleMap[dateStr]}
                                                     >
                                                         <GiMeal />
                                                     </button>
                                                     <div className='flex flex-col'>
-                                                        <span className={`${format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd') ? 'font-extrabold' : ''}`}>
-                                                            {format(date, 'dd-MM-yyyy')}
+                                                        <span className={`text-sm ${dateStr === format(today, 'yyyy-MM-dd') ? 'font-black text-primary' : 'font-medium'}`}>
+                                                            {format(date, 'dd MMM')}
                                                         </span>
-                                                        <span className='text-xs text-base-content/60'>
-                                                            {format(date, 'EEEE')}
-                                                        </span>
+                                                        <span className=' uppercase tracking-wider opacity-50'>{format(date, 'EEE')}</span>
                                                     </div>
                                                 </div>
                                             </td>
+                                            <td className="py-3">
+                                                <div className='flex justify-center gap-6 items-center'> {/* Increased gap slightly for vertical controls */}
+                                                    {['morning', 'evening', 'night'].map(type => {
+                                                        const status = getMealStatus(date, type);
+                                                        const canEditQty = isEditing && status.registered && status.canRegister;
 
-                                            {/* Meals Column - 3 boxes */}
-                                            <td>
-                                                <div className='flex justify-center gap-2 items-center'>
-                                                    <div className='flex flex-col items-center gap-1'>
-                                                        <MealBox
-                                                            status={morningStatus}
-                                                            date={date}
-                                                            mealType="morning"
-                                                        />
-                                                        <span className='text-xs text-base-content/60'>M</span>
-                                                    </div>
-                                                    <div className='flex flex-col items-center gap-1'>
-                                                        <MealBox
-                                                            status={eveningStatus}
-                                                            date={date}
-                                                            mealType="evening"
-                                                        />
-                                                        <span className='text-xs text-base-content/60'>E</span>
-                                                    </div>
-                                                    <div className='flex flex-col items-center gap-1'>
-                                                        <MealBox
-                                                            status={nightStatus}
-                                                            date={date}
-                                                            mealType="night"
-                                                        />
-                                                        <span className='text-xs text-base-content/60'>N</span>
+                                                        return (
+                                                            <div key={type} className='flex flex-col items-center gap-1.5'>
+                                                                <div className="relative flex flex-col items-center">
+                                                                    {/* VERTICAL FLOATING CONTROLS */}
+                                                                    {canEditQty && (
+                                                                        <>
+                                                                            <button
+                                                                                onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, 1)}
+                                                                                className="absolute -top-4 z-10 w-5 h-5 flex items-center justify-center bg-primary text-white rounded-full shadow-md border border-base-100 hover:scale-110 transition-transform"
+                                                                            >
+                                                                                <Plus size={10} strokeWidth={4} />
+                                                                            </button>
+
+                                                                            <button
+                                                                                onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, -1)}
+                                                                                disabled={status.numberOfMeals <= 1}
+                                                                                className="absolute -bottom-4 z-10 w-5 h-5 flex items-center justify-center bg-base-100 border-2 border-primary text-primary rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-30 disabled:scale-100"
+                                                                            >
+                                                                                <Minus size={10} strokeWidth={4} />
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+
+                                                                    {/* ORIGINAL BOX */}
+                                                                    <div
+                                                                        onClick={() => !isEditing && handleMealClick(date, type, status)}
+                                                                    >
+                                                                        <MealBox status={status} date={date} mealType={type}></MealBox>
+                                                                        {/* {status.available && (status.registered && status.numberOfMeals > 1 ? `x${status.numberOfMeals}` : null)} */}
+                                                                    </div>
+                                                                </div>
+                                                                {/* Spacing fix for the label so it doesn't overlap the bottom button */}
+                                                                <span className={`text-[9px] font-bold opacity-40 uppercase transition-all ${canEditQty ? 'mt-3' : ''}`}>
+                                                                    {type[0]}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
+
+                                                    {/* EDIT TRIGGER */}
+                                                    <div className="ml-2 pl-3 border-l border-base-300">
+                                                        {scheduleMap[dateStr] && (
+                                                            <button
+                                                                onClick={() => setEditingDate(isEditing ? null : dateStr)}
+                                                                className={`w-8 h-8 flex items-center justify-center rounded-full transition-all border-2
+                                    ${isEditing
+                                                                        ? 'bg-primary border-primary text-white rotate-45'
+                                                                        : 'bg-base-100 border-base-300 text-base-content/30 hover:border-primary hover:text-primary'
+                                                                    }`}
+                                                            >
+                                                                <Plus size={16} strokeWidth={3} />
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </td>
@@ -367,68 +325,123 @@ const UserDashboard = () => {
                                 })}
                             </tbody>
                         </table>
-
-                        {/* Modal for meal details */}
-                        {showModal && (
-                            <div className="modal modal-open">
-                                <div className="modal-box">
-                                    <h3 className="font-bold text-2xl mb-6 text-center">
-                                        {selectedDate && format(selectedDate, 'EEEE, dd MMMM yyyy')}
-                                    </h3>
-
-                                    <div className='flex flex-col gap-4'>
-                                        {['morning', 'evening', 'night'].map((mealType) => {
-                                            const status = getMealStatus(selectedDate, mealType);
-
-                                            return (
-                                                <div>
-                                                    {
-                                                        status.available && (
-                                                            <div key={mealType} className='bg-base-200 p-4 rounded-lg flex flex-col gap-3'>
-                                                                {/* Meal Type Header */}
-                                                                <div className='text-center'>
-                                                                    <h4 className='font-bold text-lg capitalize mb-2'>
-                                                                        {mealType}
-                                                                    </h4>
-
-                                                                    {/* Status Badge */}
-                                                                    {status.registered ? (
-                                                                        <span className='badge badge-primary'>Registered</span>
-                                                                    ) : status.available && status.canRegister ? (
-                                                                        <span className='badge badge-success'>Available</span>
-                                                                    ) : status.available ? (
-                                                                        <span className='badge badge-error'>Deadline Passed</span>
-                                                                    ) : (
-                                                                        <span className='badge badge-ghost'>Unavailable</span>
-                                                                    )}
-                                                                </div>
-
-                                                                {/* Menu */}
-                                                                {status.menu && (
-                                                                    <div className='bg-base-100 p-2 rounded text-center'>
-                                                                        <p className='text-sm font-medium'>Menu</p>
-                                                                        <p className='text-sm'>{status.menu}</p>
-                                                                    </div>
-                                                                )}
-
-                                                            </div>
-                                                        )
-                                                    }
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    <div className="modal-action">
-                                        <button className="btn btn-primary btn-wide mx-auto" onClick={closeModal}>Close</button>
-                                    </div>
-                                </div>
-                                <div className="modal-backdrop" onClick={closeModal}></div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
+
+            {/* Modal for Menu & Quantity Editing */}
+            {showModal && (
+                <div className="modal modal-open">
+                    <div className="modal-box max-w-md p-0 overflow-hidden border border-base-300 shadow-2xl">
+                        {/* Modal Header */}
+                        <div className="bg-primary/10 p-6 text-center border-b border-base-300">
+                            <h3 className="font-black text-xl text-primary flex flex-col gap-1">
+                                <span className="text-xs uppercase tracking-[0.2em] opacity-60">Meal Schedule</span>
+                                {selectedDate && format(selectedDate, 'EEEE, dd MMMM yyyy')}
+                            </h3>
+                        </div>
+
+                        <div className="p-6 flex flex-col gap-4 bg-base-100">
+                            {['morning', 'evening', 'night'].map((mealType) => {
+                                const status = getMealStatus(selectedDate, mealType);
+                                if (!status.available) return null;
+
+                                return (
+                                    <div
+                                        key={mealType}
+                                        className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${status.registered
+                                            ? 'bg-primary/[0.03] border-primary/30 shadow-md'
+                                            : 'bg-base-200/50 border-base-300'
+                                            }`}
+                                    >
+                                        {/* Registration Indicator */}
+                                        {status.registered && (
+                                            <div className="absolute top-0 right-0 bg-primary font-bold text-white px-3 py-1 rounded-bl-xl uppercase tracking-tighter">
+                                                Registered
+                                            </div>
+                                        )}
+
+                                        <div className="p-4 flex flex-col gap-3">
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex flex-col">
+                                                    <h4 className="font-black text-lg capitalize tracking-tight flex items-center gap-2">
+                                                        {mealType}
+                                                        <span className=" bg-base-300 px-2 py-0.5 rounded-full font-medium opacity-70">
+                                                            Weight: {status.weight}
+                                                        </span>
+                                                    </h4>
+                                                    {!status.canRegister && !status.registered && (
+                                                        <span className=" text-error font-bold uppercase mt-1">Deadline Passed</span>
+                                                    )}
+                                                </div>
+
+                                                {/* Action Area: Controls or Status */}
+                                                {status.registered ? (
+                                                    <div className="flex items-center gap-1 bg-base-100 p-1 rounded-xl shadow-inner border border-base-300">
+                                                        <button
+                                                            onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, -1)}
+                                                            disabled={status.numberOfMeals <= 1 || !status.canRegister}
+                                                            className="btn btn-xs btn-circle btn-ghost text-primary disabled:opacity-20"
+                                                        >
+                                                            <Minus size={14} strokeWidth={3} />
+                                                        </button>
+
+                                                        <div className="px-2 min-w-[32px] text-center">
+                                                            <span className="font-black text-primary text-sm">
+                                                                {status.numberOfMeals}
+                                                            </span>
+                                                        </div>
+
+                                                        <button
+                                                            onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, 1)}
+                                                            disabled={!status.canRegister}
+                                                            className="btn btn-xs btn-circle btn-ghost text-primary disabled:opacity-20"
+                                                        >
+                                                            <Plus size={14} strokeWidth={3} />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className={` font-bold px-3 py-1.5 rounded-lg uppercase ${status.canRegister ? 'bg-success/10 text-success' : 'bg-base-300 text-base-content/40'
+                                                        }`}>
+                                                        {status.canRegister ? 'Available' : 'Closed'}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Menu section - only show if menu exists */}
+                                            {status.menu ? (
+                                                <div className="bg-base-100/50 rounded-xl p-3 border border-dashed border-base-300">
+                                                    <p className="text-xs italic text-center text-base-content/70">
+                                                        "{status.menu}"
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-1">
+                                                    <p className=" text-base-content/30 uppercase font-bold tracking-widest">No Menu Set</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-6 pt-0 bg-base-100 flex flex-col gap-3">
+                            <button
+                                className="btn btn-primary w-full rounded-xl font-bold shadow-lg shadow-primary/20"
+                                onClick={closeModal}
+                            >
+                                Done
+                            </button>
+                            <p className=" text-center opacity-40 font-medium">
+                                Changes are saved automatically
+                            </p>
+                        </div>
+                    </div>
+                    <div className="modal-backdrop bg-black/40 backdrop-blur-sm" onClick={closeModal}></div>
+                </div>
+            )}
         </div>
     );
 };

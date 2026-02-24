@@ -103,7 +103,7 @@ const UpcomingMeals = () => {
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-base-content/40 animate-pulse">Loading Kitchen</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                             {weekDates.map((date) => {
                                 const key = format(date, 'yyyy-MM-dd');
                                 const schedule = scheduleMap[key];
