@@ -34,10 +34,10 @@ const Registration = () => {
     }
 
     return (
-        <div className='flex flex-col gap-4 m-10 items-center'>
-            <p className='text-3xl font-semibold'>Registration</p>
+        <div className='flex flex-col gap-4 min-h-screen mt-8 items-center'>
+            <p className='text-4xl font-bold'>Registration</p>
             <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
+                <div className="card bg-base-100 w-full max-w-sm shadow-2xl">
                     <div className="card-body">
                         <fieldset className="fieldset">
                             {/* Name */}
@@ -99,7 +99,7 @@ const Registration = () => {
                             {errors.password && <p className='text-error font-semibold' role="alert">{errors.password.message}</p>}
 
 
-                            <div><a onClick={() => navigate('/login')} className="link link-hover">Already registered? Click here to Login</a></div>
+                            <div><a onClick={() => navigate('/login')} className="link link-info">Already registered? Click here to Login</a></div>
 
                             <button type='submit' className="btn btn-primary mt-4">Register</button>
 
