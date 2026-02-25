@@ -103,7 +103,7 @@ const FundManagement = () => {
   }
 
   return (
-    <div className='p-4 w-11/12 mx-auto'>
+    <div className='p-4 w-99/100 mx-auto'>
       <h1 className='text-2xl text-center font-bold mb-6'>Fund Management - {format(new Date(currentMonth + '-01'), 'MMMM yyyy')}</h1>
       {/* Monthly Summary */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>

@@ -55,7 +55,7 @@ const MealSchedule = () => {
     };
 
     return (
-        <div className='max-w-6xl mx-auto p-4 md:p-6 lg:p-8 transition-all duration-300'>
+        <div className='max-w-6xl mx-auto w-[98vw] md:w-full p-4 md:p-6 lg:p-8 transition-all duration-300'>
             
             {/* Header Section */}
             <header className='flex flex-col gap-6 mb-8'>
