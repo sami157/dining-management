@@ -116,7 +116,6 @@ const UpcomingMeals = () => {
                                             date={date}
                                             schedule={schedule}
                                             refetch={refetch}
-                                            counts={countsForDate} // New Prop
                                         />
                                     </div>
                                 );
