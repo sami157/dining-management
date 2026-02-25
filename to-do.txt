@@ -1,8 +1,9 @@
 Server:
-1. Api to undo finalization
+1. fix bad api responses for each page
 
-User Dashboard:
-1. User Profile Page, showing basic info (Name, email, fixed deposit)
+Homepage
+1. Make the meal sheet table properly responsive on mobile (adjust wodth to prevent any horizoantal scrolling)
+2. Add date switcher on the top of meal sheet
 
 Fund Management:
-1. Show the current number of meals registered
+1. 

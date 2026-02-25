@@ -314,7 +314,7 @@ const UserDashboard = () => {
                                                             onClick={() => setEditingDate(isEditing ? null : dateStr)}
                                                             className={`w-8 h-8 flex items-center justify-center rounded-full transition-all border-2
                                     ${isEditing
-                                                                    ? 'bg-primary border-primary text-white rotate-45'
+                                                                    ? 'bg-primary border-primary text-white'
                                                                     : 'bg-base-100 border-base-300 text-base-content/30 hover:border-primary hover:text-primary'
                                                                 }`}
                                                         >
@@ -335,7 +335,7 @@ const UserDashboard = () => {
             {/* Modal for Menu & Quantity Editing */}
             {showModal && (
                 <div className="modal modal-open">
-                    <div className="modal-box max-w-[98vw] p-0 overflow-hidden border border-base-300 shadow-2xl">
+                    <div className="modal-box max-w-[98vw] md:w-100 p-0 overflow-hidden border border-base-300 shadow-2xl">
                         {/* Modal Header */}
                         <div className="bg-primary/10 p-6 text-center border-b border-base-300">
                             <h3 className="font-black text-xl text-primary flex flex-col gap-1">
