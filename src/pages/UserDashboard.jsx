@@ -7,7 +7,7 @@ import { GiMeal } from 'react-icons/gi';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
 import { UserMonthlyStats } from '../components/UserDashboard/UserMonthlyStats';
-import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine } from 'lucide-react';
 
 
 const getToday = () => {
@@ -199,7 +199,7 @@ const UserDashboard = () => {
                     <div className='relative overflow-hidden bg-base-100 border border-base-300 p-6 rounded-2xl group transition-all hover:border-primary'>
                         <div className='flex items-center gap-3 mb-2'>
                             <div className='p-2 bg-primary/10 text-primary rounded-xl'><Utensils size={16} /></div>
-                            <span className=' font-black uppercase tracking-widest opacity-40'>Total Meals</span>
+                            <span className=' font-black text-xs md:text-lg uppercase tracking-widest opacity-40'>Total Meals</span>
                         </div>
                         {countLoading ? <Loading /> : <div className='text-3xl text-center font-black tracking-tighter'>{mealCountData?.totalMeals}</div>}
                     </div>
@@ -207,7 +207,7 @@ const UserDashboard = () => {
                     <div className='relative overflow-hidden bg-base-100 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success'>
                         <div className='flex items-center gap-3 mb-2'>
                             <div className='p-2 bg-success/10 text-success rounded-xl'><Wallet size={16} /></div>
-                            <span className=' font-black uppercase tracking-widest opacity-40'>Your Deposit</span>
+                            <span className=' font-black uppercase text-xs md:text-lg tracking-widest opacity-40'>Your Deposit</span>
                         </div>
                         {depositLoading ? <Loading /> : <div className='text-3xl text-center font-black tracking-tighter text-success'>৳{depositData?.deposit}</div>}
                     </div>
@@ -226,12 +226,13 @@ const UserDashboard = () => {
                         <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-primary/80' /><span>Registered</span></div>
                     </div>
 
-                    <div className="px-8 mx-auto w-full">
-                        <table className="table table-pin-rows">
+                    <div className="max-w-[98vw]">
+                        <table className="table table-xs md:table-auto overflow-x-auto max-w-[98vw] table-pin-rows">
                             <thead>
                                 <tr>
                                     <th className='bg-base-300 text-center'>Date</th>
                                     <th className='bg-base-300 text-center'>Meals</th>
+                                    <th className='bg-base-300 text-center'>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -262,7 +263,7 @@ const UserDashboard = () => {
                                                 <div className='flex justify-center gap-6 items-center'> {/* Increased gap slightly for vertical controls */}
                                                     {['morning', 'evening', 'night'].map(type => {
                                                         const status = getMealStatus(date, type);
-                                                        const canEditQty = isEditing && status.registered && status.canRegister;
+                                                        const canEditQty = isEditing && status.registered;
 
                                                         return (
                                                             <div key={type} className='flex flex-col items-center gap-1.5'>
@@ -272,15 +273,19 @@ const UserDashboard = () => {
                                                                         <>
                                                                             <button
                                                                                 onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, 1)}
-                                                                                className="absolute -top-4 z-10 w-5 h-5 flex items-center justify-center bg-primary text-white rounded-full shadow-md border border-base-100 hover:scale-110 transition-transform"
+                                                                                // FIX: Removed !status.canRegister check here so it's not disabled 
+                                                                                // if the meal is already registered or available
+                                                                                disabled={!status.available}
+                                                                                className="absolute -top-4 z-10 w-5 h-5 flex items-center justify-center bg-primary text-white rounded-full shadow-md border border-base-100 hover:scale-110 transition-transform disabled:opacity-50"
                                                                             >
                                                                                 <Plus size={10} strokeWidth={4} />
                                                                             </button>
 
                                                                             <button
                                                                                 onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, -1)}
-                                                                                disabled={status.numberOfMeals <= 1}
-                                                                                className="absolute -bottom-4 z-10 w-5 h-5 flex items-center justify-center bg-base-100 border-2 border-primary text-primary rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-30 disabled:scale-100"
+                                                                                // FIX: Only disable if qty is 1 or meal isn't available
+                                                                                disabled={status.numberOfMeals <= 1 || !status.available}
+                                                                                className="absolute -bottom-4 z-10 w-5 h-5 flex items-center justify-center bg-base-100 border-2 border-primary text-primary rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-30"
                                                                             >
                                                                                 <Minus size={10} strokeWidth={4} />
                                                                             </button>
@@ -288,35 +293,34 @@ const UserDashboard = () => {
                                                                     )}
 
                                                                     {/* ORIGINAL BOX */}
-                                                                    <div
-                                                                    >
+                                                                    <div>
                                                                         <MealBox status={status} date={date} mealType={type}></MealBox>
-                                                                        {/* {status.available && (status.registered && status.numberOfMeals > 1 ? `x${status.numberOfMeals}` : null)} */}
                                                                     </div>
                                                                 </div>
-                                                                {/* Spacing fix for the label so it doesn't overlap the bottom button */}
+
                                                                 <span className={`text-[9px] font-bold opacity-40 uppercase transition-all ${canEditQty ? 'mt-3' : ''}`}>
                                                                     {type[0]}
                                                                 </span>
                                                             </div>
                                                         );
                                                     })}
-
-                                                    {/* EDIT TRIGGER */}
-                                                    <div className="ml-2 pl-3 border-l border-base-300">
-                                                        {scheduleMap[dateStr] && (
-                                                            <button
-                                                                onClick={() => setEditingDate(isEditing ? null : dateStr)}
-                                                                className={`w-8 h-8 flex items-center justify-center rounded-full transition-all border-2
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {/* EDIT TRIGGER */}
+                                                <div className="ml-2 pl-3 border-l border-base-300">
+                                                    {scheduleMap[dateStr] && (
+                                                        <button
+                                                            onClick={() => setEditingDate(isEditing ? null : dateStr)}
+                                                            className={`w-8 h-8 flex items-center justify-center rounded-full transition-all border-2
                                     ${isEditing
-                                                                        ? 'bg-primary border-primary text-white rotate-45'
-                                                                        : 'bg-base-100 border-base-300 text-base-content/30 hover:border-primary hover:text-primary'
-                                                                    }`}
-                                                            >
-                                                                <Plus size={16} strokeWidth={3} />
-                                                            </button>
-                                                        )}
-                                                    </div>
+                                                                    ? 'bg-primary border-primary text-white rotate-45'
+                                                                    : 'bg-base-100 border-base-300 text-base-content/30 hover:border-primary hover:text-primary'
+                                                                }`}
+                                                        >
+                                                            <PenLine size={14} strokeWidth={3} />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -331,7 +335,7 @@ const UserDashboard = () => {
             {/* Modal for Menu & Quantity Editing */}
             {showModal && (
                 <div className="modal modal-open">
-                    <div className="modal-box max-w-md p-0 overflow-hidden border border-base-300 shadow-2xl">
+                    <div className="modal-box max-w-[98vw] p-0 overflow-hidden border border-base-300 shadow-2xl">
                         {/* Modal Header */}
                         <div className="bg-primary/10 p-6 text-center border-b border-base-300">
                             <h3 className="font-black text-xl text-primary flex flex-col gap-1">
@@ -349,62 +353,23 @@ const UserDashboard = () => {
                                     <div
                                         key={mealType}
                                         className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${status.registered
-                                            ? 'bg-primary/[0.03] border-primary/30 shadow-md'
+                                            ? 'bg-primary/3 border-primary/30 shadow-md'
                                             : 'bg-base-200/50 border-base-300'
                                             }`}
                                     >
-                                        {/* Registration Indicator */}
-                                        {status.registered && (
-                                            <div className="absolute top-0 right-0 bg-primary font-bold text-white px-3 py-1 rounded-bl-xl uppercase tracking-tighter">
-                                                Registered
-                                            </div>
-                                        )}
-
                                         <div className="p-4 flex flex-col gap-3">
                                             <div className="flex justify-between items-start">
                                                 <div className="flex flex-col">
                                                     <h4 className="font-black text-lg capitalize tracking-tight flex items-center gap-2">
                                                         {mealType}
-                                                        <span className=" bg-base-300 px-2 py-0.5 rounded-full font-medium opacity-70">
+                                                        <div className="bg-base-300 px-2 py-1 rounded-xl text-xs font-semibold opacity-70">
                                                             Weight: {status.weight}
-                                                        </span>
+                                                        </div>
                                                     </h4>
                                                     {!status.canRegister && !status.registered && (
                                                         <span className=" text-error font-bold uppercase mt-1">Deadline Passed</span>
                                                     )}
                                                 </div>
-
-                                                {/* Action Area: Controls or Status */}
-                                                {status.registered ? (
-                                                    <div className="flex items-center gap-1 bg-base-100 p-1 rounded-xl shadow-inner border border-base-300">
-                                                        <button
-                                                            onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, -1)}
-                                                            disabled={status.numberOfMeals <= 1 || !status.canRegister}
-                                                            className="btn btn-xs btn-circle btn-ghost text-primary disabled:opacity-20"
-                                                        >
-                                                            <Minus size={14} strokeWidth={3} />
-                                                        </button>
-
-                                                        <div className="px-2 min-w-[32px] text-center">
-                                                            <span className="font-black text-primary text-sm">
-                                                                {status.numberOfMeals}
-                                                            </span>
-                                                        </div>
-
-                                                        <button
-                                                            onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, 1)}
-                                                            disabled={!status.canRegister}
-                                                            className="btn btn-xs btn-circle btn-ghost text-primary disabled:opacity-20"
-                                                        >
-                                                            <Plus size={14} strokeWidth={3} />
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div className={` font-bold px-3 py-1.5 rounded-lg uppercase ${status.canRegister ? 'bg-success/10 text-success' : 'bg-base-300 text-base-content/40'
-                                                        }`}>
-                                                        {status.canRegister ? 'Available' : 'Closed'}
-                                                    </div>
-                                                )}
                                             </div>
 
                                             {/* Menu section - only show if menu exists */}
@@ -423,19 +388,6 @@ const UserDashboard = () => {
                                     </div>
                                 );
                             })}
-                        </div>
-
-                        {/* Modal Footer */}
-                        <div className="p-6 pt-0 bg-base-100 flex flex-col gap-3">
-                            <button
-                                className="btn btn-primary w-full rounded-xl font-bold shadow-lg shadow-primary/20"
-                                onClick={closeModal}
-                            >
-                                Done
-                            </button>
-                            <p className=" text-center opacity-40 font-medium">
-                                Changes are saved automatically
-                            </p>
                         </div>
                     </div>
                     <div className="modal-backdrop bg-black/40 backdrop-blur-sm" onClick={closeModal}></div>
