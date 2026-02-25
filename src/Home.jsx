@@ -1,4 +1,3 @@
-import Navbar from './components/Navbar'
 import UpcomingMeals from './components/UpcomingMeals'
 import useAuth from './hooks/useAuth'
 import Loading from './components/Loading'
@@ -10,7 +9,7 @@ const Home = () => {
   return (
     <div>
       {
-        loading ? <Loading /> :
+        loading ? <Loading className='min-h-screen' /> :
           user
             ?
             <div className='flex flex-col md:flex-row justify-center'>
