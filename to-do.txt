@@ -1,3 +1,6 @@
+Common:
+1. Implement proper refetching on all pages
+
 Server:
 1. fix bad api responses for each page
 
