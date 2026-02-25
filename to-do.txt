@@ -4,6 +4,10 @@ Server:
 Homepage
 1. Make the meal sheet table properly responsive on mobile (adjust wodth to prevent any horizoantal scrolling)
 2. Add date switcher on the top of meal sheet
+3. Add per card loading skeletons on Upcoming meal cards
+
+User Dashboard:
+1. Add loading skeletons for the table and stats
 
 Fund Management:
 1. 
