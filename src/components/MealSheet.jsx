@@ -74,7 +74,7 @@ export const MealSheet = () => {
     };
 
     return (
-        <div className='flex flex-col h-full m-2 rounded-lg overflow-hidden p-2 sm:p-4 transition-all duration-300 border border-base-300'>
+        <div className='flex flex-col m-2 rounded-lg overflow-hidden p-2 sm:p-4 transition-all duration-300 border border-base-300'>
             <div>
                 {/* Header */}
                 <div className='p-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6'>
@@ -119,12 +119,12 @@ export const MealSheet = () => {
                     ) : (
                         // Table and Footer
                         <div>
-                            <div className='overflow-x-auto grow border border-base-300'>
+                            <div className='overflow-x-auto h-100 md:h-screen grow border border-base-300'>
                                 <table className='table p-2 w-full table-sm sm:table-md'>
-                                    <thead className='rounded bg-base-200/40 top-0'>
+                                    <thead className='rounded top-0'>
                                         <tr className='text-base-content/70'>
-                                            <th className='w-20 text-center font-black uppercase tracking-widest'>Room</th>
-                                            <th className='font-black uppercase tracking-widest'>Member</th>
+                                            <th className='text-center font-black uppercase'>Room</th>
+                                            <th className='font-black uppercase'>Member</th>
                                             <th className='text-center py-4'>
                                                 <div className='flex  gap-8 justify-center items-center'>
                                                     {/* M Column Header */}
@@ -182,19 +182,19 @@ export const MealSheet = () => {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className='p-3 flex justify-between items-center bg-base-200/30 rounded-b-xl border-t border-base-300'>
-                                <div className='flex gap-4'>
-                                    <div className='flex items-center gap-1.5 text-[9px] font-black opacity-50 uppercase'>
-                                        <div className='w-2 h-2 rounded-full bg-primary'></div> Registered
+                                <div className='p-3 flex justify-between items-center bg-base-200/70 border border-base-200 rounded-lg'>
+                                    <div className='flex gap-4'>
+                                        <div className='flex items-center gap-1.5 text-xs font-black opacity-50 uppercase'>
+                                            <div className='w-2 h-2 rounded-full bg-primary'></div> Registered
+                                        </div>
+                                        <div className='flex items-center gap-1.5 text-xs font-black opacity-50 uppercase'>
+                                            <div className='w-2 h-2 rounded-full bg-base-300'></div> Off
+                                        </div>
                                     </div>
-                                    <div className='flex items-center gap-1.5 text-[9px] font-black opacity-50 uppercase'>
-                                        <div className='w-2 h-2 rounded-full bg-base-300'></div> Off
-                                    </div>
+                                    <span className='text-sm font-semibold opacity-40 uppercase tracking-widest'>
+                                        <span className='font-black text-lg'>{filteredUsers?.length || 0}</span> Members
+                                    </span>
                                 </div>
-                                <span className='text-[9px] font-black opacity-30 uppercase tracking-widest'>
-                                    Displaying {filteredUsers?.length || 0} Members
-                                </span>
-                            </div>
                         </div>
 
                     )

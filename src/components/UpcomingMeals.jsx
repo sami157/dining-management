@@ -81,7 +81,7 @@ const UpcomingMeals = () => {
 
                     <div className="flex w-fit items-center bg-base-200/50 p-1.5 rounded-2xl border border-base-300 shadow-none">
                         <button onClick={handlePreviousWeek} className="btn btn-ghost btn-sm btn-circle"><ChevronLeft size={18} /></button>
-                        <button onClick={handleThisWeek} className="btn btn-ghost btn-sm px-4 font-bold text-[10px] uppercase tracking-widest">Today</button>
+                        <button onClick={handleThisWeek} className="btn btn-ghost btn-sm px-4 font-bold text-[10px] uppercase tracking-widest">This Week</button>
                         <button onClick={handleNextWeek} className="btn btn-ghost btn-sm btn-circle"><ChevronRight size={18} /></button>
                     </div>
                 </header>
@@ -115,6 +115,7 @@ const UpcomingMeals = () => {
                                         <UpcomingMealCard
                                             date={date}
                                             schedule={schedule}
+                                            counts={countsForDate}
                                             refetch={refetch}
                                         />
                                     </div>
