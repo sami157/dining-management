@@ -87,7 +87,7 @@ export const MealSheet = () => {
     };
 
     return (
-        <div className='flex flex-col rounded-lg overflow-auto sm:p-4 transition-all duration-300 border border-base-300'>
+        <div className='flex w-[99vw] md:w-full flex-col rounded-lg overflow-auto sm:p-4 transition-all duration-300 border border-base-300'>
             <div>
                 {/* Header */}
                 <div className='p-2 flex flex-col lg:flex-row justify-center lg:items-center gap-6'>
