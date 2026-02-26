@@ -2,15 +2,18 @@ import React, { useState, useMemo } from 'react'
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
 import useAuth from '../hooks/useAuth';
-import { format } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import Loading from './Loading';
-import { UserSearch, UserCheck, Utensils, Sunrise, Sunset, Moon } from 'lucide-react';
+import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export const MealSheet = () => {
     const axiosSecure = useAxiosSecure()
     const { loading } = useAuth()
     const [searchTerm, setSearchTerm] = useState('');
-    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const [tomorrow, setTomorrow] = useState(false)
+    const [day, setDay] = useState(new Date());
+    const todayStr = format(day, 'yyyy-MM-dd');
 
     // 1. Fetch all users
     const { data: usersData, isLoading: usersLoading } = useQuery({
@@ -23,14 +26,25 @@ export const MealSheet = () => {
     });
 
     // 2. Fetch today's registrations
-    const { data: registrationsData, isLoading: registrationsLoading } = useQuery({
-        queryKey: ['todayRegistrations'],
+    const { data: registrationsData, isLoading: registrationsLoading, refetch: refetchRegistrations } = useQuery({
+        queryKey: ['todayRegistrations',todayStr],
         enabled: !loading,
         queryFn: async () => {
             const response = await axiosSecure.get(`/managers/registrations?startDate=${todayStr}&endDate=${todayStr}`);
             return response.data.registrations;
         },
     });
+
+    const handleTomorrowToggle = () => {
+        if (tomorrow) {
+            setDay(new Date());
+            setTomorrow(false);
+        } else {
+            setDay(addDays(new Date(), 1));
+            setTomorrow(true);
+        }
+        refetchRegistrations();
+    }
 
     // 3. Calculate Totals for the Brackets
     const mealTotals = useMemo(() => {
@@ -74,18 +88,21 @@ export const MealSheet = () => {
     };
 
     return (
-        <div className='flex flex-col m-2 rounded-lg overflow-hidden p-2 sm:p-4 transition-all duration-300 border border-base-300'>
+        <div className='flex flex-col rounded-lg overflow-auto sm:p-4 transition-all duration-300 border border-base-300'>
             <div>
                 {/* Header */}
-                <div className='p-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6'>
-                    <div>
-                        <h1 className='text-xl font-black italic flex items-center gap-2 uppercase tracking-tighter'>
-                            <Utensils className="text-primary" size={22} />
-                            Daily Meal Sheet
-                        </h1>
-                        <p className='text-[10px] text-base-content/40 font-black uppercase tracking-widest'>
-                            {format(new Date(), 'EEEE, MMMM dd, yyyy')}
-                        </p>
+                <div className='p-2 flex flex-col lg:flex-row justify-center lg:items-center gap-6'>
+                    <div className='flex justify-between gap-4'>
+                        <div className='flex gap-2 items-center'>
+                            <Utensils className="text-primary" size={40} />
+                            <div className='text-xl min-w-60 font-black italic flex flex-col uppercase tracking-tighter'>
+                                Daily Meal Sheet
+                                <p className='text-xs text-base-content/40 font-black uppercase transition-all tracking-widest'>
+                                    {format(day, 'EEEE, MMMM dd, yyyy')}
+                                </p>
+                            </div>
+                        </div>
+                        <ArrowRightLeft onClick={handleTomorrowToggle} className='text-primary hover:scale-105 cursor-pointer px-2 py-1 bg-base-200/50 rounded-lg' size={40} />
                     </div>
 
                     {/* Search Input */}
@@ -93,7 +110,7 @@ export const MealSheet = () => {
                         <input
                             type="text"
                             placeholder="Search by Name/Room.."
-                            className='input input-bordered w-full focus:input-primary font-semibold h-10 text-sm'
+                            className='input w-full input-bordered focus:input-primary font-semibold h-10 text-sm'
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -119,7 +136,7 @@ export const MealSheet = () => {
                     ) : (
                         // Table and Footer
                         <div>
-                            <div className='overflow-x-auto h-100 md:h-screen grow border border-base-300'>
+                            <div className='overflow-x-auto h-102 md:h-screen grow border border-base-300'>
                                 <table className='table p-2 w-full table-sm sm:table-md'>
                                     <thead className='rounded top-0'>
                                         <tr className='text-base-content/70'>
@@ -128,17 +145,17 @@ export const MealSheet = () => {
                                             <th className='text-center py-4'>
                                                 <div className='flex  gap-8 justify-center items-center'>
                                                     {/* M Column Header */}
-                                                    <div className="flex flex-col justify-center items-center">
+                                                    <div className="flex flex-col font-black justify-center items-center">
                                                         <span>M</span>
                                                         <span className=" font-bold text-lg rounded-md">{mealTotals.morning}</span>
                                                     </div>
                                                     {/* E Column Header */}
-                                                    <div className="flex flex-col justify-center items-center">
+                                                    <div className="flex flex-col font-black justify-center items-center">
                                                         <span>E</span>
                                                         <span className=" font-bold text-lg">{mealTotals.evening}</span>
                                                     </div>
                                                     {/* N Column Header */}
-                                                    <div className="flex flex-col justify-center items-center">
+                                                    <div className="flex flex-col font-black justify-center items-center">
                                                         <span>N</span>
                                                         <span className=" font-bold text-lg">{mealTotals.night}</span>
                                                     </div>
@@ -151,8 +168,10 @@ export const MealSheet = () => {
                                             filteredUsers.map(user => (
                                                 <tr key={user._id} className='group'>
                                                     <td className='text-center'>
-                                                        <span className='bg-base-300/40 px-2 py-0.1 rounded text-xs font-black font-mono transition-colors'>
-                                                            {user.room || '??'}
+                                                        <span className='rounded text-xs font-semibold text-center'>
+                                                            {
+                                                                `${user.building.slice(0, 1).toUpperCase()}-${user.room}`
+                                                            }
                                                         </span>
                                                     </td>
                                                     <td>
@@ -182,19 +201,19 @@ export const MealSheet = () => {
                                     </tbody>
                                 </table>
                             </div>
-                                <div className='p-3 flex justify-between items-center bg-base-200/70 border border-base-200 rounded-lg'>
-                                    <div className='flex gap-4'>
-                                        <div className='flex items-center gap-1.5 text-xs font-black opacity-50 uppercase'>
-                                            <div className='w-2 h-2 rounded-full bg-primary'></div> Registered
-                                        </div>
-                                        <div className='flex items-center gap-1.5 text-xs font-black opacity-50 uppercase'>
-                                            <div className='w-2 h-2 rounded-full bg-base-300'></div> Off
-                                        </div>
+                            <div className='px-2 py-1 mx-3 flex justify-between items-center bg-base-200/70 border border-base-200 rounded-lg'>
+                                <div className='flex gap-8'>
+                                    <div className='flex items-center gap-1.5 text-xs font-black uppercase'>
+                                        <div className='w-2 h-2 rounded-full bg-primary'></div><span className='opacity-50'>Registered</span>
                                     </div>
-                                    <span className='text-sm font-semibold opacity-40 uppercase tracking-widest'>
-                                        <span className='font-black text-lg'>{filteredUsers?.length || 0}</span> Members
-                                    </span>
+                                    <div className='flex items-center gap-1.5 text-xs font-black uppercase'>
+                                        <div className='w-2 h-2 rounded-full bg-base-300'></div><span className='opacity-50'>Off</span>
+                                    </div>
                                 </div>
+                                <span className='text-sm font-semibold opacity-40 uppercase tracking-widest'>
+                                    <span className='font-black text-lg'>{filteredUsers?.length || 0}</span> Members
+                                </span>
+                            </div>
                         </div>
 
                     )

@@ -5,7 +5,6 @@ Server:
 1. fix bad api responses for each page
 
 Homepage
-1. Make the meal sheet table properly responsive on mobile (adjust wodth to prevent any horizoantal scrolling)
 2. Add date switcher on the top of meal sheet
 3. Add per card loading skeletons on Upcoming meal cards
 

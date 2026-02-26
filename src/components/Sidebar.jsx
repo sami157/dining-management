@@ -21,8 +21,8 @@ const Sidebar = () => {
     <div className='h-full flex flex-col bg-base-100 border-r border-base-300 p-4 w-full rounded-lg md:min-h-screen'>
       {/* Brand/Logo Section */}
       <div className='flex items-center gap-3 px-2 mb-10'>
-        <div className='bg-primary p-2 rounded-xl'>
-          <LayoutDashboard size={24} className='text-primary-content' />
+        <div className='p-2 rounded-xl'>
+          <LayoutDashboard size={24} className='text-primary' />
         </div>
         <div className='flex flex-col'>
           <span className='font-black tracking-tighter text-xl leading-none italic uppercase'>Admin</span>
