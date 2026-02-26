@@ -15,7 +15,7 @@ const UpcomingMeals = () => {
     const weekDates = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
     // 1. Fetch Available Meals (Schedules)
-    const { data, isLoading, refetch } = useQuery({
+    const { data, isLoading: mealLoading, refetch } = useQuery({
         queryKey: ['userMealsWeek', currentWeekStart],
         enabled: !loading,
         queryFn: async () => {
@@ -59,11 +59,12 @@ const UpcomingMeals = () => {
     const handlePreviousWeek = () => setCurrentWeekStart((prev) => addDays(prev, -7));
     const handleNextWeek = () => setCurrentWeekStart((prev) => addDays(prev, 7));
     const handleThisWeek = () => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 0 }));
+    const dataLoading = mealLoading || registrationsLoading;
 
     return (
         <div className="min-h-screen bg-base-300 p-4 md:p-8 transition-colors duration-300">
             <div className="max-w-7xl mx-auto">
-                
+
                 {/* Header Section */}
                 <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-base-300 pb-10">
                     <div className="space-y-1">
@@ -97,41 +98,32 @@ const UpcomingMeals = () => {
                 </div>
 
                 <main className="relative min-h-[50vh]">
-                    {isLoading || registrationsLoading ? (
-                        <div className="flex flex-col justify-center items-center h-96 gap-4">
-                            <span className="loading loading-ring loading-lg text-primary"></span>
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-base-content/40 animate-pulse">Loading Kitchen</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {weekDates.map((date) => {
-                                const key = format(date, 'yyyy-MM-dd');
-                                const schedule = scheduleMap[key];
-                                // Pass the specific counts for this date
-                                const countsForDate = registrationCounts[key] || { morning: 0, evening: 0, night: 0 };
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {weekDates.map((date) => {
+                            const key = format(date, 'yyyy-MM-dd');
+                            const schedule = scheduleMap[key];
+                            // Pass the specific counts for this date
+                            const countsForDate = registrationCounts[key] || { morning: 0, evening: 0, night: 0 };
 
-                                return (
-                                    <div key={key} className="h-full">
-                                        <UpcomingMealCard
-                                            date={date}
-                                            schedule={schedule}
-                                            counts={countsForDate}
-                                            refetch={refetch}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
+                            return (
+                                <div key={key} className="h-full">
+                                    <UpcomingMealCard
+                                        date={date}
+                                        schedule={schedule}
+                                        counts={countsForDate}
+                                        dataLoading={dataLoading}
+                                        refetch={refetch}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
                 </main>
-
-                {!isLoading && (
-                    <footer className="mt-16 text-center border-t border-base-300 pt-10">
-                        <p className="text-[10px] text-base-content/30 font-black uppercase tracking-[0.2em]">
-                            Deadlines are managed by the mess committee
-                        </p>
-                    </footer>
-                )}
+                <footer className="mt-16 text-center border-t border-base-300 pt-10">
+                    <p className="text-[10px] text-base-content/30 font-black uppercase tracking-[0.2em]">
+                        Deadlines are managed by the mess managers
+                    </p>
+                </footer>
             </div>
         </div>
     );
