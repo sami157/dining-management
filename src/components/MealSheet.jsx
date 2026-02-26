@@ -5,7 +5,6 @@ import useAuth from '../hooks/useAuth';
 import { addDays, format } from 'date-fns';
 import Loading from './Loading';
 import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 export const MealSheet = () => {
     const axiosSecure = useAxiosSecure()
@@ -135,8 +134,8 @@ export const MealSheet = () => {
                         </div>
                     ) : (
                         // Table and Footer
-                        <div>
-                            <div className='overflow-x-auto h-102 md:h-screen grow border border-base-300'>
+                            <div className='space-y-2'>
+                                <div className='overflow-x-auto h-95 md:h-screen grow border border-base-300 mask-b-from-95% mask-b-to-100%'>
                                 <table className='table p-2 w-full table-sm sm:table-md'>
                                     <thead className='rounded top-0'>
                                         <tr className='text-base-content/70'>
@@ -201,7 +200,7 @@ export const MealSheet = () => {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className='px-2 py-1 mx-3 flex justify-between items-center bg-base-200/70 border border-base-200 rounded-lg'>
+                            <div className='px-2 py-2 mx-3 flex justify-between items-center bg-base-200/70 border border-base-200 rounded-lg'>
                                 <div className='flex gap-8'>
                                     <div className='flex items-center gap-1.5 text-xs font-black uppercase'>
                                         <div className='w-2 h-2 rounded-full bg-primary'></div><span className='opacity-50'>Registered</span>

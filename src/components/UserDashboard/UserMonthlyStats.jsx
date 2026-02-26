@@ -39,24 +39,24 @@ export const UserMonthlyStats = ({ finalizationData, finalizationLoading }) => {
                 <div className='grid grid-cols-2 gap-4'>
                     <StatBox 
                         label="Meal Rate" 
-                        value={mealRate} 
+                        value={mealRate || 0}
                         icon={<TrendingUp size={14}/>} 
                     />
                     <StatBox 
                         label="Meal Cost" 
-                        value={mealCost} 
+                        value={mealCost || 0} 
                         isNegative 
                         icon={<Receipt size={14}/>} 
                     />
                     <StatBox 
                         label="Mosque Fee" 
-                        value={mosqueFee} 
+                        value={mosqueFee || 0} 
                         isNegative 
                         icon={<Landmark size={14}/>} 
                     />
                     <StatBox 
                         label="Prev. Balance" 
-                        value={previousBalance} 
+                        value={previousBalance || 0} 
                         isDynamic 
                         icon={<History size={14}/>} 
                     />

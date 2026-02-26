@@ -18,7 +18,7 @@ const getToday = () => {
 
 const UserDashboard = () => {
     const axiosSecure = useAxiosSecure();
-    const { user } = useAuth()
+    const { user, loading } = useAuth()
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const firstDate = startOfMonth(currentMonth);
     const lastDate = lastDayOfMonth(currentMonth);
@@ -38,16 +38,22 @@ const UserDashboard = () => {
     // Queries
     const { data: finalizationData, isLoading: finalizationLoading } = useQuery({
         queryKey: ['myFinalizationData', monthString],
+        enabled: !loading,
+        retry: false, // stop retrying on failure (this is why the console was flooding)
+        throwOnError: false, // prevent crashing the component
         queryFn: async () => {
-            const response = await axiosSecure.get(`/finance/user-finalization/?month=${monthString}`);
+            const response = await axiosSecure.get(`/finance/user-finalization?month=${monthString}`);
             return response.data.finalization;
         }
     });
 
     const { data: depositData, isLoading: depositLoading } = useQuery({
         queryKey: ['userDeposit', monthString],
+        retry: false, // stop retrying on failure (this is why the console was flooding)
+        throwOnError: false, // prevent crashing the component
+        enabled: !loading,
         queryFn: async () => {
-            const response = await axiosSecure.get(`/finance/user-deposit/?month=${monthString}`);
+            const response = await axiosSecure.get(`/finance/user-deposit?month=${monthString}`);
             return response.data;
         }
     });
