@@ -98,7 +98,7 @@ const UpcomingMeals = () => {
                 </div>
 
                 <main className="relative min-h-[50vh]">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                         {weekDates.map((date) => {
                             const key = format(date, 'yyyy-MM-dd');
                             const schedule = scheduleMap[key];

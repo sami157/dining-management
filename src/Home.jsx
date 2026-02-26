@@ -9,10 +9,14 @@ const Home = () => {
   return (
     <div>
       {
-        loading ? <Loading className='min-h-screen' /> :
+        loading ?
+          <div className='flex items-center scale-500 justify-center h-screen'>
+            <Loading />
+          </div>
+          :
           user
             ?
-            <div className='flex flex-col md:flex-row justify-center'>
+            <div className={`flex flex-col md:flex-row justify-center ${loading && 'opacity-0'}`}>
               <MealSheet />
               <UpcomingMeals />
             </div>

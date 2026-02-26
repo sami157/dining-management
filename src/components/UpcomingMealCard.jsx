@@ -91,9 +91,9 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                     {
                         dataLoading
                             ? <div className='space-y-6'>
-                                <div className='skeleton w-88 h-32'></div>
-                                <div className='skeleton w-88 h-32'></div>
-                                <div className='skeleton w-88 h-32'></div>
+                                <div className='skeleton bg-base-200 w-88 h-32'></div>
+                                <div className='skeleton bg-base-200 w-88 h-32'></div>
+                                <div className='skeleton bg-base-200 w-88 h-32'></div>
                             </div>
                             : meals.length > 0 
                             ? 
