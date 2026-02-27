@@ -248,7 +248,7 @@ const MemberManagement = () => {
           </thead>
           <tbody>
             {usersData?.map(user => (
-              <tr key={user._id}>
+              <tr key={user._id} className='hover:bg-base-200/40'>
                 <td className='text-center'>
                   <button onClick={() => setEditingUser(user)} className='btn btn-ghost btn-sm btn-circle text-xl text-base-content/30 hover:text-primary'>
                     <MdAdminPanelSettings />
@@ -257,7 +257,9 @@ const MemberManagement = () => {
                 <td>
                   <div className='flex flex-col'>
                     <span className='font-bold text-sm'>{user.name}</span>
-                    <span className='text-[10px] uppercase tracking-widest opacity-50'>Room {user.room}</span>
+                    <span className='text-[10px] uppercase tracking-widest opacity-50'>{user.building.slice(0,1)}-{user.room}</span>
+                    <span className='text-[10px] uppercase tracking-widest opacity-50'>Fixed Deposit: {user.fixedDeposit}</span>
+                    <span className='text-[10px] uppercase tracking-widest opacity-50'>Mosque Fee: {user.mosqueFee}</span>
                   </div>
                 </td>
                 {weekDates.map((date, idx) => {
