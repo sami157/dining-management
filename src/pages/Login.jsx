@@ -23,7 +23,7 @@ const Login = () => {
     }
 
     return (
-        <div className='flex flex-col gap-4 min-h-screen justify-center items-center'>
+        <div className='flex flex-col gap-4 min-h-screen items-center mt-[calc(100vh/4)]'>
             <p className='text-4xl font-bold'>Login</p>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="card bg-base-100 w-full shadow-2xl">
@@ -39,7 +39,7 @@ const Login = () => {
                             <input {...register("password", { required: "Password is required" })} type="password" className="input" placeholder="Password" />
                             {errors.password && <p className='text-error font-semibold' role="alert">{errors.password.message}</p>}
 
-                            <div><a onClick={() => navigate('/register')} className="link link-info">Not regitered yet? Click here</a></div>
+                            <div><a onClick={() => navigate('/register')} className="link link-info">Not registered yet? Click here</a></div>
                             <button type='submit' className="btn btn-primary mt-4">Login</button>
 
                             {/* Designation

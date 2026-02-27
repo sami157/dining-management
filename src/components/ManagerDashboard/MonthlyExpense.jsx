@@ -245,11 +245,11 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                             <div>
                                 <label className='label'>Associated Person</label>
                                 <select
-                                    value={expenseData.category}
+                                    value={expenseData.person}
                                     onChange={(e) => setExpenseData({ ...expenseData, person: e.target.value })}
                                     className='select select-bordered w-full'
                                 >
-                                    <option value="none">Select Person</option>
+                                    <option value="">Select Person</option>
                                     <option value="jakir">Jakir</option>
                                     <option value="sohan">Sohan</option>
                                     <option value="kawsar">Kawsar</option>

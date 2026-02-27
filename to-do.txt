@@ -2,14 +2,13 @@ Common:
 1. Implement proper refetching on all pages
 
 Server:
-1. fix bad api responses for each page
 
-Homepage
-2. Add date switcher on the top of meal sheet
-3. Add per card loading skeletons on Upcoming meal cards
+Homepage:
 
 User Dashboard:
 1. Add loading skeletons for the table and stats
+2. Add running meal rate, current balance display
+3. Mobile responsive table
 
 Fund Management:
-1. 
+1. Mobile responsive tables
