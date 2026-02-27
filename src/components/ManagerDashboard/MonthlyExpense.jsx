@@ -201,7 +201,7 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
             {/* Expense Modal */}
             {showExpenseModal && (
                 <div className="modal modal-open">
-                    <div className="modal-box">
+                    <div className="modal-box w-[94vw] mx-auto">
                         <h3 className="font-bold text-lg mb-4">
                             {editingExpense ? 'Edit Expense' : 'Add Expense'}
                         </h3>

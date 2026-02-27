@@ -207,7 +207,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
             {/* Deposit Modal */}
             {showDepositModal && (
                 <div className="modal modal-open">
-                    <div className="modal-box">
+                    <div className="modal-box w-[94vw] mx-auto">
                         <h3 className="font-bold text-lg mb-4">
                             {editingDeposit ? 'Edit Deposit' : 'Add Deposit'} - {selectedUser?.name}
                         </h3>

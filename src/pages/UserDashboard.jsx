@@ -232,9 +232,9 @@ const UserDashboard = () => {
                         <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-primary/80' /><span>Registered</span></div>
                     </div>
 
-                    <div className="max-w-[98vw]">
-                        <table className="table table-xs md:table-auto overflow-x-auto max-w-[98vw] table-pin-rows">
-                            <thead>
+                    <div className="overflow-x-auto h-[60vh] md:h-screen mask-b-from-95% mask-b-to-100%">
+                        <table className="table table-xs table-pin-rows">
+                            <thead className='top-0'>
                                 <tr>
                                     <th className='bg-base-300 text-center'>Date</th>
                                     <th className='bg-base-300 text-center'>Meals</th>
