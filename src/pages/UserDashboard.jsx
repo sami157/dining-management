@@ -279,8 +279,6 @@ const UserDashboard = () => {
                                                                         <>
                                                                             <button
                                                                                 onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, 1)}
-                                                                                // FIX: Removed !status.canRegister check here so it's not disabled 
-                                                                                // if the meal is already registered or available
                                                                                 disabled={!status.available}
                                                                                 className="absolute -top-4 z-10 w-5 h-5 flex items-center justify-center bg-primary text-white rounded-full shadow-md border border-base-100 hover:scale-110 transition-transform disabled:opacity-50"
                                                                             >
@@ -305,7 +303,12 @@ const UserDashboard = () => {
                                                                 </div>
 
                                                                 <span className={`text-[9px] font-bold opacity-40 uppercase transition-all ${canEditQty ? 'mt-3' : ''}`}>
-                                                                    {type[0]}
+                                                                    {/* Ramadan */}
+                                                                    {
+                                                                        type[0] === 'm' ? 'S' :
+                                                                        type[0] === 'e' ? 'I' :
+                                                                        'N'
+                                                                    }
                                                                 </span>
                                                             </div>
                                                         );

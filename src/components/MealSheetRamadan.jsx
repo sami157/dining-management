@@ -6,7 +6,7 @@ import { addDays, format } from 'date-fns';
 import Loading from './Loading';
 import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
 
-export const MealSheet = () => {
+export const MealSheetRamadan = () => {
     const axiosSecure = useAxiosSecure()
     const { loading } = useAuth()
     const [searchTerm, setSearchTerm] = useState('');
@@ -128,7 +128,7 @@ export const MealSheet = () => {
                                         <div className='flex  gap-7 items-center justify-center'>
                                             {/* M Column Header */}
                                             <div className="flex flex-col font-black justify-center items-center">
-                                                <span>M</span>
+                                                <span>S</span>
                                                 {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>
@@ -139,7 +139,7 @@ export const MealSheet = () => {
                                             </div>
                                             {/* E Column Header */}
                                             <div className="flex flex-col font-black justify-center items-center">
-                                                <span>E</span>
+                                                <span>I</span>
                                                 {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>

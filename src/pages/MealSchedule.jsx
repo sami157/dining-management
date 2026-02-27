@@ -6,6 +6,7 @@ import MealCard from '../components/MealCard';
 import toast from 'react-hot-toast';
 import Loading from '../components/Loading';
 import { ChevronLeft, ChevronRight, Calendar, PlusCircle } from 'lucide-react'; // Optional: icon library
+import MealCardRamadan from '../components/MealCardRamadan';
 
 const MealSchedule = () => {
     const axiosSecure = useAxiosSecure();
@@ -103,7 +104,11 @@ const MealSchedule = () => {
                     <div className='grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500'>
                         {schedules.map((schedule, index) => (
                             <div key={schedule._id || index} className="group">
-                                <MealCard
+                                {/* <MealCard
+                                    schedule={schedule}
+                                    onUpdate={handleUpdateSchedule}
+                                /> */}
+                                <MealCardRamadan
                                     schedule={schedule}
                                     onUpdate={handleUpdateSchedule}
                                 />
