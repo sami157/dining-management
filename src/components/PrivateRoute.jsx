@@ -10,7 +10,7 @@ export const PrivateRoute = ({ children }) => {
         return <Loading/>;
     }
     
-    if (!user) {
+    if (!user && !loading) {
         return <Navigate to="/login" replace />;
     }
     

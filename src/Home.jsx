@@ -11,9 +11,7 @@ const Home = () => {
     <div>
       {
         loading ?
-          <div className='flex items-center scale-500 justify-center h-screen'>
             <Loading />
-          </div>
           :
           user
             ?
