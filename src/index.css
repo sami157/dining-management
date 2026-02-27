@@ -99,32 +99,18 @@ a.active {
   border-radius: 40px;
 }
 
-/* ::view-transition-old(root) {
-  animation: slide-out 300ms ease;
-}
-
-::view-transition-new(root) {
-  animation: slide-in 300ms ease;
-}
-
-@keyframes slide-out {
-  from {
-    transform: translateX(0);
-    opacity: 1;
+@layer utilities {
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: scale(0.9);
+    }
+    50% {
+      transform: scale(1.1);
+    }
   }
-  to {
-    transform: translateX(-20px);
-    opacity: 0;
+
+  .animate-wiggle {
+    animation: wiggle 0.7s ease-in-out infinite;
   }
 }
-
-@keyframes slide-in {
-  from {
-    transform: translateX(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-} */
