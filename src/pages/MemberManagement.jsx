@@ -248,7 +248,7 @@ const MemberManagement = () => {
           </thead>
           <tbody>
             {usersData?.map(user => (
-              <tr key={user._id} className='hover:bg-base-200/50 transition-colors'>
+              <tr key={user._id}>
                 <td className='text-center'>
                   <button onClick={() => setEditingUser(user)} className='btn btn-ghost btn-sm btn-circle text-xl text-base-content/30 hover:text-primary'>
                     <MdAdminPanelSettings />
