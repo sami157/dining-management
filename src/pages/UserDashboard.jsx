@@ -24,6 +24,7 @@ const UserDashboard = () => {
     const lastDate = lastDayOfMonth(currentMonth);
     const [selectedDate, setSelectedDate] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [requested, setRequested] = useState(false);
 
     const dateArray = eachDayOfInterval({
         start: firstDate,
@@ -103,6 +104,7 @@ const UserDashboard = () => {
 
     // Toggle Handlers (For the grid boxes)
     const handleMealClick = async (date, mealType, status) => {
+        setRequested(true)
         if (!status.available) {
             toast.error('This meal is not available');
             return;
@@ -113,6 +115,7 @@ const UserDashboard = () => {
                 async () => {
                     await axiosSecure.delete(`/users/meals/register/cancel/${status.registrationId}`);
                     await refetch();
+                    setRequested(false)
                 },
                 {
                     loading: 'Cancelling...',
@@ -130,10 +133,10 @@ const UserDashboard = () => {
 
         const dateStr = format(date, 'yyyy-MM-dd');
         toast.promise(
-            async () => {
-                await axiosSecure.post('/users/meals/register', { date: dateStr, mealType, numberOfMeals: 1 });
-                await refetch();
-            },
+            axiosSecure.post('/users/meals/register', { date: dateStr, mealType, numberOfMeals: 1 }).then(() => {
+                refetch();
+                setRequested(false)
+            }),
             {
                 loading: 'Registering...',
                 success: 'Registered',
@@ -175,12 +178,13 @@ const UserDashboard = () => {
         }
 
         return (
-            <div
+            <button
+                disabled={requested}
                 className={`w-7 flex items-center justify-center h-7 rounded ${bgColor} ${cursorClass} transition-colors duration-250 ease-in-out text-center font-semibold`}
                 onClick={() => handleMealClick(date, mealType, status)}
             >
                 {status.available && (status.registered && status.numberOfMeals > 1 ? `x${status.numberOfMeals}` : null)}
-            </div>
+            </button>
         );
     };
 
@@ -306,8 +310,8 @@ const UserDashboard = () => {
                                                                     {/* Ramadan */}
                                                                     {
                                                                         type[0] === 'm' ? 'S' :
-                                                                        type[0] === 'e' ? 'I' :
-                                                                        'N'
+                                                                            type[0] === 'e' ? 'I' :
+                                                                                'N'
                                                                     }
                                                                 </span>
                                                             </div>

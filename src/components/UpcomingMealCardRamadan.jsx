@@ -3,19 +3,25 @@ import { Utensils, CheckCircle2, Circle, Plus, Minus } from 'lucide-react'; // A
 import toast from 'react-hot-toast';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import useAuth from '../hooks/useAuth';
+import { useState } from 'react';
 
 const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) => {
     const axiosSecure = useAxiosSecure();
     const { loading } = useAuth();
+    const [requested, setRequested] = useState(false)
 
     const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
     const meals = schedule?.meals || [];
     const dateStr = format(date, 'yyyy-MM-dd');
 
     const handleMealAction = async (meal) => {
+        setRequested(true)
         if (meal.isRegistered && meal.registrationId) {
             toast.promise(
-                axiosSecure.delete(`/users/meals/register/cancel/${meal.registrationId}`).then(() => refetch()),
+                axiosSecure.delete(`/users/meals/register/cancel/${meal.registrationId}`).then(() => {
+                    refetch()
+                    setRequested(false)
+                }),
                 {
                     loading: 'Cancelling...',
                     success: 'Registration removed',
@@ -35,7 +41,10 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
                 date: dateStr,
                 mealType: meal.mealType,
                 numberOfMeals: 1 // Default to 1
-            }).then(() => refetch()),
+            }).then(() => {
+                refetch()
+                setRequested(false)
+            }),
             {
                 loading: 'Registering...',
                 success: 'Meal booked!',
@@ -164,7 +173,7 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
 
                                                         <button
                                                             onClick={() => handleMealAction(meal)}
-                                                            disabled={!meal.canRegister && !isReg}
+                                                            disabled={!meal.canRegister && !isReg || requested}
                                                             className={`transition-all active:scale-90 ${!meal.canRegister && !isReg ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'
                                                                 }`}
                                                         >

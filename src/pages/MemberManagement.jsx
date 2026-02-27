@@ -116,13 +116,14 @@ const UserEditModal = ({ user, onClose, onSave }) => {
   );
 };
 
-// ─── Main Component ─────────────────────────────────────────────────────────
+// Main Component 
 const MemberManagement = () => {
   const axiosSecure = useAxiosSecure();
   const { loading } = useAuth();
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }));
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 0 });
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
+  const [requested, setRequested] = useState(false);
 
   const [editingUser, setEditingUser] = useState(null);
   const [editingCell, setEditingCell] = useState(null);
@@ -187,18 +188,25 @@ const MemberManagement = () => {
   };
 
   const handleMealToggle = async (userId, date, mealType) => {
+    setRequested(true)
     const reg = getRegistration(userId, date, mealType);
     const available = isMealAvailable(date, mealType);
     if (!available) return toast.error('Meal not available');
 
     if (reg) {
       toast.promise(
-        axiosSecure.delete(`/users/meals/register/cancel/${reg._id}`).then(() => refetch()),
+        axiosSecure.delete(`/users/meals/register/cancel/${reg._id}`).then(() => {
+          refetch()
+          setRequested(false)
+        }),
         { loading: 'Cancelling...', success: 'Cancelled', error: 'Error' }
       );
     } else {
       toast.promise(
-        axiosSecure.post('/users/meals/register', { userId, date: format(date, 'yyyy-MM-dd'), mealType, numberOfMeals: 1 }).then(() => refetch()),
+        axiosSecure.post('/users/meals/register', { userId, date: format(date, 'yyyy-MM-dd'), mealType, numberOfMeals: 1 }).then(() => {
+          refetch()
+          setRequested(false)
+        }),
         { loading: 'Registering...', success: 'Registered', error: 'Error' }
       );
     }
@@ -284,7 +292,8 @@ const MemberManagement = () => {
                                       <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, -1)} disabled={(reg.numberOfMeals || 1) <= 1} className="absolute -bottom-4 z-10 w-4 h-4 flex items-center justify-center bg-base-100 border-2 border-primary text-primary rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-0"><Minus size={8} strokeWidth={4} /></button>
                                     </>
                                   )}
-                                  <div
+                                  <button
+                                    disabled={requested}
                                     onClick={() => !isEditingThis && available && handleMealToggle(user._id, date, type)}
                                     className={`w-7 h-7 flex items-center justify-center rounded-sm font-bold transition-all
                                                                             ${reg ? 'bg-primary text-white' : available ? 'bg-base-200 text-base-content/20' : 'bg-transparent text-transparent'} 
@@ -292,7 +301,7 @@ const MemberManagement = () => {
                                                                             ${canEditQty ? 'scale-90 opacity-90' : ''}`}
                                   >
                                     {reg && (reg.numberOfMeals > 1 ? `x${reg.numberOfMeals}` : null)}
-                                  </div>
+                                  </button>
                                 </div>
                                 <span className={`text-[7px] font-black opacity-30 ${canEditQty ? 'mt-3' : ''}`}>{type[0].toUpperCase()}</span>
                               </div>
