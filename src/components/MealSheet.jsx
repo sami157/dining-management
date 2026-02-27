@@ -70,6 +70,26 @@ export const MealSheet = () => {
         );
     };
 
+    const SkeletonRow = () => {
+        return (
+            <tbody className='text-sm animate-pulse text-base-200/40'>
+                <tr className='h-15 group'>
+                    <td>
+                        <span className='h-12 py-2 px-6 bg-base-200/40 rounded-lg animate-pulse'></span>
+                    </td>
+                    <td>
+                        <span className='h-12 py-2 px-12 lg:px-20 text-left bg-base-200/40 rounded-lg animate-pulse'></span>
+                    </td>
+                    <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
+                        <MealBox />
+                        <MealBox />
+                        <MealBox />
+                    </td>
+                </tr>
+            </tbody>
+        )
+    }
+
     // 5. Refined Meal indicator Component
     const MealBox = ({ userId, mealType }) => {
         const reg = getRegistration(userId, mealType);
@@ -92,7 +112,7 @@ export const MealSheet = () => {
             <div>
                 {/* Header */}
                 <div className='p-2 flex flex-col justify-center gap-6'>
-                    <div className='flex justify-between items-center gap-4'>
+                    <div className='flex justify-between items-center'>
                         <div className='flex gap-2 items-center'>
                             <Utensils className="text-primary" size={40} />
                             <div className='text-xl min-w-60 font-black italic flex flex-col uppercase tracking-tighter'>
@@ -166,151 +186,18 @@ export const MealSheet = () => {
                             {
                                 // Loading skeleton for user list
                                 usersLoading ? (
-                                    <tbody className='text-sm animate-pulse text-base-200/40'>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                        <tr className='h-15 group'>
-                                            <td>
-                                                <span className='h-12 py-2 bg-base-200/40 rounded-lg animate-pulse'>E-100</span>
-                                            </td>
-                                            <td>
-                                                <span className='h-12 py-2 pl-2 text-left bg-base-200/40 rounded-lg animate-pulse'>User Name User Name</span>
-                                            </td>
-                                            <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
-                                                <MealBox />
-                                                <MealBox />
-                                                <MealBox />
-                                            </td>
-                                        </tr>
-                                    </tbody>
+                                    <>
+                                        <SkeletonRow />
+                                        <SkeletonRow />
+                                        <SkeletonRow />
+                                        <SkeletonRow />
+                                        <SkeletonRow />
+                                        <SkeletonRow />
+                                        <SkeletonRow />
+                                        <SkeletonRow />
+                                        <SkeletonRow />
+                                        <SkeletonRow />
+                                    </>
                                 ) : (
                                     <tbody className='text-sm'>
                                         {
