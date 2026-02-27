@@ -64,7 +64,7 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
     if (loading) return null;
 
     return (
-        <div className={`h-full w-[94vw] md:w-100 bg-base-100 border ${isToday ? 'border-primary' : 'border-base-300'} rounded-2xl overflow-hidden transition-all duration-500 ease-in-out`}>
+        <div className={`h-full mx-auto md:w-100 bg-base-100 border ${isToday ? 'border-primary' : 'border-base-300'} rounded-2xl overflow-hidden transition-all duration-500 ease-in-out`}>
             <div className="p-6 flex flex-col h-full">
 
                 {/* Card Header */}
@@ -91,9 +91,9 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
                     {
                         dataLoading
                             ? <div className='space-y-6'>
-                                <div className='skeleton bg-base-200 w-88 h-32'></div>
-                                <div className='skeleton bg-base-200 w-88 h-32'></div>
-                                <div className='skeleton bg-base-200 w-88 h-32'></div>
+                                <div className='skeleton bg-base-200 w-70 mx-auto md:w-88 h-32'></div>
+                                <div className='skeleton bg-base-200 w-70 mx-auto md:w-88 h-32'></div>
+                                <div className='skeleton bg-base-200 w-70 mx-auto md:w-88 h-32'></div>
                             </div>
                             : meals.length > 0 
                             ? 
