@@ -107,6 +107,7 @@ const UserDashboard = () => {
         setRequested(true)
         if (!status.available) {
             toast.error('This meal is not available');
+            setRequested(false)
             return;
         }
 
@@ -128,6 +129,7 @@ const UserDashboard = () => {
 
         if (!status.canRegister) {
             toast.error('Deadline has passed');
+            setRequested(false)
             return;
         }
 
@@ -236,9 +238,9 @@ const UserDashboard = () => {
                         <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-primary/80' /><span>Registered</span></div>
                     </div>
 
-                    <div className="overflow-x-auto h-[60vh] md:h-screen mask-b-from-95% mask-b-to-100%">
+                    <div className="overflow-x-auto h-[60vh] mask-b-from-98% mask-b-to-100%">
                         <table className="table table-xs table-pin-rows">
-                            <thead className='top-0'>
+                            <thead className=''>
                                 <tr>
                                     <th className='bg-base-300 text-center'>Date</th>
                                     <th className='bg-base-300 text-center'>Meals</th>

@@ -33,6 +33,7 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
 
         if (!meal.canRegister) {
             toast.error('Registration deadline passed', { icon: '🚫' });
+            setRequested(false)
             return;
         }
 

@@ -191,7 +191,11 @@ const MemberManagement = () => {
     setRequested(true)
     const reg = getRegistration(userId, date, mealType);
     const available = isMealAvailable(date, mealType);
-    if (!available) return toast.error('Meal not available');
+    if (!available) {
+      toast.error('Meal not available')
+      setRequested(false)
+      return
+    }
 
     if (reg) {
       toast.promise(
