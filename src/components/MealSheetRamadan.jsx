@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
 import useAuth from '../hooks/useAuth';
-import { addDays, format } from 'date-fns';
+import { addDays, format, set, isSameDay } from 'date-fns';
 import Loading from './Loading';
 import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
 
@@ -10,9 +10,21 @@ export const MealSheetRamadan = () => {
     const axiosSecure = useAxiosSecure()
     const { loading } = useAuth()
     const [searchTerm, setSearchTerm] = useState('');
-    const [tomorrow, setTomorrow] = useState(false)
-    const [day, setDay] = useState(new Date());
+    const getInitialDay = () => {
+        const now = new Date();
+        const threshold = set(now, {
+            hours: 22,
+            minutes: 0,
+            seconds: 0,
+            milliseconds: 0,
+        });
+
+        return now >= threshold ? addDays(now, 1) : now;
+    };
+    const [day, setDay] = useState(getInitialDay);
     const todayStr = format(day, 'yyyy-MM-dd');
+    const isTomorrow = isSameDay(day, addDays(new Date(), 1));
+
 
     // 1. Fetch all users
     const { data: usersData, isLoading: usersLoading } = useQuery({
@@ -25,7 +37,7 @@ export const MealSheetRamadan = () => {
     });
 
     // 2. Fetch today's registrations
-    const { data: registrationsData, isLoading: registrationsLoading, refetch: refetchRegistrations } = useQuery({
+    const { data: registrationsData, isLoading: registrationsLoading } = useQuery({
         queryKey: ['todayRegistrations', todayStr],
         enabled: !loading,
         queryFn: async () => {
@@ -35,15 +47,13 @@ export const MealSheetRamadan = () => {
     });
 
     const handleTomorrowToggle = () => {
-        if (tomorrow) {
+        if (isTomorrow) {
             setDay(new Date());
-            setTomorrow(false);
         } else {
             setDay(addDays(new Date(), 1));
-            setTomorrow(true);
         }
-        refetchRegistrations();
-    }
+    };
+
 
     // 3. Calculate Totals for the Brackets
     const mealTotals = useMemo(() => {

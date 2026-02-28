@@ -4,12 +4,11 @@ import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { MdAdminPanelSettings } from "react-icons/md";
-import { Plus, Minus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Minus, ChevronLeft, ChevronRight, Cog } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
 
-// ─── User Edit Modal ────────────────────────────────────────────────────────
-// ─── User Edit Modal (Mobile Optimized) ──────────────────────────────────────
+// ─── User Edit Modal 
 const UserEditModal = ({ user, onClose, onSave }) => {
   const [role, setRole] = useState(user.role);
   const [fixedDeposit, setFixedDeposit] = useState(user.fixedDeposit ?? 1000);
@@ -33,9 +32,8 @@ const UserEditModal = ({ user, onClose, onSave }) => {
   };
 
   return (
-    // Added modal-bottom for mobile (slides up) and sm:modal-middle for desktop
     <dialog open className="modal modal-open">
-      <div className="modal-box relative w-full max-w-md mx-auto border-t sm:border border-base-300 rounded-xl p-6">
+      <div className="modal-box relative w-[94vw] md:w-full max-w-md mx-auto border-t sm:border border-base-300 rounded-xl p-6">
         {/* Close button - larger touch target for mobile */}
         <button
           className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
@@ -109,7 +107,7 @@ const UserEditModal = ({ user, onClose, onSave }) => {
         </div>
       </div>
       {/* Backdrop for mobile tapping to close */}
-      <form method="dialog" className="modal-backdrop bg-black/40" onClick={onClose}>
+      <form method="dialog" className="modal-backdrop" onClick={onClose}>
         <button>close</button>
       </form>
     </dialog>
@@ -156,7 +154,7 @@ const MemberManagement = () => {
     },
   });
 
-  // ── Save handler for the User Modal ──────────────────────────────────────
+  // ── Save handler for the User Modal
   const handleSaveUser = async ({ userId, role, fixedDeposit, mosqueFee, originalRole }) => {
     const promises = [];
     if (role !== originalRole) promises.push(axiosSecure.put(`users/role/${userId}`, { role }));
@@ -228,7 +226,7 @@ const MemberManagement = () => {
   if (usersLoading || registrationsLoading) return <Loading />;
 
   return (
-    <div className='p-4 md:w-full w-[99vw] mx-auto'>
+    <div className='p-4 md:w-full w-[94vw] mx-auto'>
       {editingUser && <UserEditModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleSaveUser} />}
 
       <div className='flex flex-col md:flex-row justify-between items-center mb-8 gap-4'>
@@ -242,12 +240,12 @@ const MemberManagement = () => {
         </h1>
       </div>
 
-      <div className='w-full overflow-x-auto rounded-lg bg-base-300'>
-        <table className='table w-full'>
-          <thead>
+      <div className='w-full overflow-auto max-h-screen rounded-lg bg-base-300'>
+        <table className='w-full'>
+          <thead className='sticky top-0 z-10'>
             <tr className='bg-base-300'>
-              <th className='w-16 text-center'>Edit</th>
-              <th>Member Details</th>
+              <th className='text-center'></th>
+              <th className='text-start'>Member Details</th>
               {weekDates.map((date, idx) => (
                 <th key={idx} className='text-center border-l border-base-300/50'>
                   <div className='flex flex-col'>
@@ -261,15 +259,15 @@ const MemberManagement = () => {
           <tbody>
             {usersData?.map(user => (
               <tr key={user._id} className='hover:bg-base-200/40'>
-                <td className='text-center'>
-                  <button onClick={() => setEditingUser(user)} className='btn btn-ghost btn-sm btn-circle text-xl text-base-content/30 hover:text-primary'>
-                    <MdAdminPanelSettings />
+                <td className='text-center px-3'>
+                  <button onClick={() => setEditingUser(user)} className='cursor-pointer text-xl text-base-content/30 hover:text-primary'>
+                    <Cog size={20} />
                   </button>
                 </td>
                 <td>
-                  <div className='flex flex-col'>
+                  <div className='flex flex-col my-4'>
                     <span className='font-bold text-sm'>{user.name}</span>
-                    <span className='text-[10px] uppercase tracking-widest opacity-50'>{user.building.slice(0,1)}-{user.room}</span>
+                    <span className='text-[10px] uppercase tracking-widest opacity-50'>{user.building.slice(0, 1)}-{user.room}</span>
                     <span className='text-[10px] uppercase tracking-widest opacity-50'>Fixed Deposit: {user.fixedDeposit}</span>
                     <span className='text-[10px] uppercase tracking-widest opacity-50'>Mosque Fee: {user.mosqueFee}</span>
                   </div>
@@ -280,37 +278,40 @@ const MemberManagement = () => {
 
                   return (
                     <td key={idx} className='border-l border-base-300/20'>
-                      <div className='flex items-center justify-center gap-3'>
-                        <div className='flex gap-1.5'>
-                          {['morning', 'evening', 'night'].map(type => {
-                            const reg = getRegistration(user._id, date, type);
-                            const available = isMealAvailable(date, type);
-                            const canEditQty = isEditingThis && reg;
+                      <div className='flex items-center justify-center min-w-40 gap-3'>
+                        <div className='space-y-1'>
+                          <p className='text-center text-[7px] font-black opacity-30'>{user.room}</p>
+                          <div className='flex gap-1'>
+                            {['morning', 'evening', 'night'].map(type => {
+                              const reg = getRegistration(user._id, date, type);
+                              const available = isMealAvailable(date, type);
+                              const canEditQty = isEditingThis && reg;
 
-                            return (
-                              <div key={type} className='flex flex-col items-center gap-1'>
-                                <div className='relative flex flex-col items-center'>
-                                  {canEditQty && (
-                                    <>
-                                      <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, 1)} className="absolute -top-4 z-10 w-4 h-4 flex items-center justify-center bg-primary text-white rounded-full shadow-md hover:scale-110 transition-transform"><Plus size={8} strokeWidth={4} /></button>
-                                      <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, -1)} disabled={(reg.numberOfMeals || 1) <= 1} className="absolute -bottom-4 z-10 w-4 h-4 flex items-center justify-center bg-base-100 border-2 border-primary text-primary rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-0"><Minus size={8} strokeWidth={4} /></button>
-                                    </>
-                                  )}
-                                  <button
-                                    disabled={requested}
-                                    onClick={() => !isEditingThis && available && handleMealToggle(user._id, date, type)}
-                                    className={`w-7 h-7 flex items-center justify-center rounded-sm font-bold transition-all
+                              return (
+                                <div key={type} className='flex flex-col items-center gap-1'>
+                                  <div className='relative flex flex-col items-center'>
+                                    {canEditQty && (
+                                      <>
+                                        <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, 1)} className="absolute -top-4 z-10 w-4 h-4 flex items-center justify-center bg-primary text-white rounded-full shadow-md hover:scale-110 transition-transform"><Plus size={8} strokeWidth={4} /></button>
+                                        <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, -1)} disabled={(reg.numberOfMeals || 1) <= 1} className="absolute -bottom-4 z-10 w-4 h-4 flex items-center justify-center bg-base-100 border-2 border-primary text-primary rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-0"><Minus size={8} strokeWidth={4} /></button>
+                                      </>
+                                    )}
+                                    <button
+                                      disabled={requested}
+                                      onClick={() => !isEditingThis && available && handleMealToggle(user._id, date, type)}
+                                      className={`w-7 h-7 flex items-center justify-center rounded-sm font-bold transition-all
                                                                             ${reg ? 'bg-primary text-white' : available ? 'bg-base-200 text-base-content/20' : 'bg-transparent text-transparent'} 
                                                                             ${available && !isEditingThis ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'}
                                                                             ${canEditQty ? 'scale-90 opacity-90' : ''}`}
-                                  >
-                                    {reg && (reg.numberOfMeals > 1 ? `x${reg.numberOfMeals}` : null)}
-                                  </button>
+                                    >
+                                      {reg && (reg.numberOfMeals > 1 ? `x${reg.numberOfMeals}` : null)}
+                                    </button>
+                                  </div>
+                                  <span className={`text-[7px] font-black opacity-30 ${canEditQty ? 'mt-3' : ''}`}>{type[0].toUpperCase()}</span>
                                 </div>
-                                <span className={`text-[7px] font-black opacity-30 ${canEditQty ? 'mt-3' : ''}`}>{type[0].toUpperCase()}</span>
-                              </div>
-                            );
-                          })}
+                              );
+                            })}
+                          </div>
                         </div>
                         <button
                           onClick={() => setEditingCell(isEditingThis ? null : { userId: user._id, dateStr })}

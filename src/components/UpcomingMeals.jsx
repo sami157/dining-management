@@ -67,8 +67,8 @@ const UpcomingMeals = () => {
             <div className="max-w-7xl mx-auto">
 
                 {/* Header Section */}
-                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-base-300 pb-10">
-                    <div className="space-y-1">
+                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-base-300">
+                    <div className="space-y-2">
                         <div className="flex items-center gap-2 text-primary mb-1">
                             <LayoutGrid size={20} />
                             <span className="text-xs font-black uppercase tracking-[0.2em]">User Portal</span>
@@ -80,21 +80,18 @@ const UpcomingMeals = () => {
                             Plan your week & join the table
                         </p>
                     </div>
-
-                    <div className="flex w-fit items-center bg-base-200/50 p-1.5 rounded-2xl border border-base-300 shadow-none">
-                        <button onClick={handlePreviousWeek} className="btn btn-ghost btn-sm btn-circle"><ChevronLeft size={18} /></button>
-                        <button onClick={handleThisWeek} className="btn btn-ghost btn-sm px-4 font-bold text-[10px] uppercase tracking-widest">This Week</button>
-                        <button onClick={handleNextWeek} className="btn btn-ghost btn-sm btn-circle"><ChevronRight size={18} /></button>
-                    </div>
                 </header>
 
                 {/* Date Range Badge */}
                 <div className="flex justify-center mb-8">
-                    <div className="flex items-center gap-3 bg-base-200 px-6 py-2 rounded-full border border-base-300">
-                        <CalendarDays size={16} className="text-primary" />
-                        <span className="text-sm font-black uppercase tracking-tight">
-                            {format(currentWeekStart, 'MMM dd')} — {format(weekEnd, 'MMM dd, yyyy')}
+                    <div className="flex w-fit items-center bg-base-200/50 p-1.5 rounded-2xl border border-base-300 shadow-none">
+                        <button onClick={handlePreviousWeek} className="btn btn-ghost btn-sm btn-circle"><ChevronLeft size={18} /></button>
+                        <button onClick={handleThisWeek} className="btn btn-ghost btn-sm px-4 font-bold uppercase tracking-widest">
+                            <span className="text-sm font-bold uppercase tracking-tight">
+                            {format(currentWeekStart, 'MMM dd')} — {format(weekEnd, 'MMM dd')}
                         </span>
+                        </button>
+                        <button onClick={handleNextWeek} className="btn btn-ghost btn-sm btn-circle"><ChevronRight size={18} /></button>
                     </div>
                 </div>
 
