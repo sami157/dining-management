@@ -240,12 +240,12 @@ const MemberManagement = () => {
         </h1>
       </div>
 
-      <div className='w-full overflow-auto max-h-screen rounded-lg bg-base-300'>
-        <table className='w-full'>
+      <div className='overflow-auto max-w-screen lg:max-w-max max-h-screen mx-auto rounded-lg bg-base-300'>
+        <table>
           <thead className='sticky top-0 z-10'>
             <tr className='bg-base-300'>
               <th className='text-center'></th>
-              <th className='text-start'>Member Details</th>
+              <th className='text-start bg-base-300 sticky left-0 z-10'>Member Details</th>
               {weekDates.map((date, idx) => (
                 <th key={idx} className='text-center border-l border-base-300/50'>
                   <div className='flex flex-col'>
@@ -258,13 +258,13 @@ const MemberManagement = () => {
           </thead>
           <tbody>
             {usersData?.map(user => (
-              <tr key={user._id} className='hover:bg-base-200/40'>
+              <tr key={user._id}>
                 <td className='text-center px-3'>
                   <button onClick={() => setEditingUser(user)} className='cursor-pointer text-xl text-base-content/30 hover:text-primary'>
                     <Cog size={20} />
                   </button>
                 </td>
-                <td>
+                <td className='sticky bg-base-300 left-0 z-5'>
                   <div className='flex flex-col my-4'>
                     <span className='font-bold text-sm'>{user.name}</span>
                     <span className='text-[10px] uppercase tracking-widest opacity-50'>{user.building.slice(0, 1)}-{user.room}</span>

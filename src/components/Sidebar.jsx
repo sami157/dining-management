@@ -31,7 +31,7 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation Links */}
-      <nav className='flex flex-col gap-2 grow'>
+      <nav className='grid grid-cols-2 gap-2 lg:grid-cols-1'>
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -64,14 +64,6 @@ const Sidebar = () => {
           </NavLink>
         ))}
       </nav>
-
-      {/* Footer / System Info */}
-      {/* <div className='mt-auto p-4 bg-base-200/50 rounded-[2rem] border border-base-300'>
-        <div className='flex items-center gap-3'>
-          <div className='w-2 h-2 rounded-full bg-success animate-pulse' />
-          <span className='text-[9px] font-black uppercase tracking-widest opacity-50'>System Active</span>
-        </div>
-      </div> */}
     </div>
   )
 }

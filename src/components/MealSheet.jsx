@@ -72,13 +72,13 @@ export const MealSheet = () => {
 
     const SkeletonRow = () => {
         return (
-            <tbody className='text-sm animate-pulse text-base-200/40'>
+            <tbody className='text-sm skeleton text-base-200/40'>
                 <tr className='h-15 group'>
                     <td>
-                        <span className='h-12 py-2 px-6 bg-base-200/40 rounded-lg animate-pulse'></span>
+                        <span className='h-12 py-2 px-6 bg-base-200/40 rounded-lg skeleton'></span>
                     </td>
                     <td>
-                        <span className='h-12 py-2 px-12 lg:px-20 text-left bg-base-200/40 rounded-lg animate-pulse'></span>
+                        <span className='h-12 py-2 px-12 lg:px-20 text-left bg-base-200/40 rounded-lg skeleton'></span>
                     </td>
                     <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
                         <MealBox />
