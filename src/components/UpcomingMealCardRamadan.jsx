@@ -70,7 +70,6 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
             }
         );
     };
-    console.log(meals)
     if (loading) return null;
 
     return (
