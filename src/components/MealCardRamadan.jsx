@@ -141,8 +141,8 @@ const MealCardRamadan = ({ schedule, onUpdate }) => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <p className='text-sm text-base-content/80 leading-snug'>
-                                            {meal.menu || <span className="text-base-content/30 italic">No menu set</span>}
+                                        <p className='text-sm text-center text-base-content/80 bangla-text leading-snug'>
+                                            {meal.menu || <span className="text-base-content/30 italic">মেন্যু পেন্ডিং</span>}
                                         </p>
                                     )}
                                 </div>

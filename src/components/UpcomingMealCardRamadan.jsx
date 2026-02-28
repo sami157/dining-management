@@ -114,31 +114,32 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
                                     return (
                                         <div
                                             key={meal.mealType}
-                                            className={`relative min-h-32 group rounded-xl border transition-all duration-300 overflow-hidden ${isReg ? 'bg-primary/5 border-primary/30' : 'bg-base-200/50 border-base-300'
+                                            className={`relative min-h-32 group rounded-xl transition-all duration-300 overflow-hidden ${isReg ? 'bg-primary/10 border-primary/30' : 'bg-base-200 border-base-300'
                                                 }`}
                                         >
                                             <div className="p-4">
-                                                <div className="flex justify-between items-start mb-3">
+                                                <div className="flex justify-between items-center mb-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`p-2 rounded-xl ${isReg ? 'bg-primary text-white' : 'bg-base-100 border border-base-300'}`}>
-                                                            <Utensils size={16} />
+                                                        <div className={`p-3 rounded-full ${isReg ? 'bg-primary text-white' : 'bg-base-100 border border-base-300'}`}>
+                                                            <Utensils size={18} />
                                                         </div>
-                                                        <div>
-                                                            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                                                        <div className='flex flex-col items-start'>
+                                                            <h3 className="font-bold uppercase tracking-wide text-sm flex items-center gap-2">
                                                                 {
                                                                 meal.mealType === 'morning' ? 'Sehri' :
                                                                 meal.mealType === 'evening' ? 'Iftaar' : 'Night'
                                                                 }
-                                                                {meal.weight && <span className="opacity-40 text-[9px] font-bold">({meal.weight})</span>}
                                                             </h3>
+                                                            <div>
+                                                                {meal.weight && <span className="opacity-40 text-xs font-bold">({meal.weight})</span>}
+                                                            </div>
                                                         </div>
                                                     </div>
 
                                                     {/* Action Area: Qty Controls + Toggle */}
-                                                    {/* Action Area: Qty Controls + Toggle */}
                                                     <div className="flex items-center gap-3">
                                                         {isReg && (
-                                                            <div className="flex items-center gap-1 bg-base-100 p-1 rounded-lg border border-base-300 shadow-sm">
+                                                            <div className="flex items-center gap-1 bg-base-100 px-2 py-1 rounded-lg border border-base-300 shadow-sm">
                                                                 <button
                                                                     type="button" // Explicitly set type to prevent form issues
                                                                     onClick={(e) => {
@@ -154,7 +155,7 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
                                                                     <Minus size={12} strokeWidth={3} />
                                                                 </button>
 
-                                                                <span className="text-[10px] font-black min-w-3 text-center text-primary">
+                                                                <span className="font-black min-w-3 text-center text-primary">
                                                                     {meal.numberOfMeals || 1}
                                                                 </span>
 
@@ -188,9 +189,9 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
                                                 </div>
 
                                                 {/* Menu Description */}
-                                                <div className={`p-3 rounded-xl text-[11px] font-medium leading-relaxed ${isReg ? 'bg-white/50 border border-primary/10 text-primary text-center' : 'bg-base-100 border border-base-300 opacity-70 text-center'
+                                                <div className={`p-3 bangla-text rounded-xl text-sm font-medium text-center leading-relaxed ${isReg ? 'bg-white/80 text-primary-content border border-primary/30' : 'bg-base-100 border text-base-content border-base-300 opacity-70'
                                                     }`}>
-                                                    {meal.menu || "Menu Pending"}
+                                                    {meal.menu || <span className="text-base-content/25 italic">মেন্যু পেন্ডিং</span>}
                                                 </div>
                                             </div>
                                         </div>
