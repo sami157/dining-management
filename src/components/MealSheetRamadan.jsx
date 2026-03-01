@@ -14,7 +14,7 @@ export const MealSheetRamadan = () => {
         const now = new Date();
         const threshold = set(now, {
             hours: 22,
-            minutes: 0,
+            minutes: 30,
             seconds: 0,
             milliseconds: 0,
         });
