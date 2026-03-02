@@ -310,7 +310,7 @@ const UserDashboard = () => {
                     </div>
 
                     <div className='flex flex-col gap-4 items-center'>
-                        <p className='text-2xl uppercase tracking-widest font-black'>Meal Sheet</p>
+                        {/* <p className='text-2xl uppercase tracking-widest font-black'>Meal Sheet</p> */}
                         {/* <div className='flex justify-between gap-8 uppercase text-xs px-2 py-2 bg-base-200/60 rounded-md'>
                             <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-primary/80' /><span>Registered</span></div>
                             <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-base-200' /><span>Not registered</span></div>

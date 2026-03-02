@@ -6,12 +6,12 @@ import toast from 'react-hot-toast';
 import MemberInfoTable from '../components/ManagerDashboard/MemberInfoTable';
 import MonthlySummary from '../components/ManagerDashboard/MonthlySummary';
 import MonthlyExpense from '../components/ManagerDashboard/MonthlyExpense';
-import Loading from '../components/Loading';
 
 const FundManagement = () => {
 
   const axiosSecure = useAxiosSecure();
   const [currentMonth] = useState(format(new Date(), 'yyyy-MM'));
+  // const [amount, setAmount] = useState(0)
 
 
   // Fetch all users
@@ -22,6 +22,12 @@ const FundManagement = () => {
       return response.data.users;
     },
   });
+
+  const amount = usersData?.reduce(
+    (sum, user) => sum + (Number(user.fixedDeposit) || 0),
+    0
+  ) || 0;
+
 
   // Fetch all balances
   const { data: balancesData } = useQuery({
@@ -108,14 +114,7 @@ const FundManagement = () => {
       {/* Monthly Summary */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         <div className='flex flex-col gap-4'>
-          {
-            !monthFinalized ?
-            !mealRateLoading ? 
-              <p className='text-center text-lg p-2 rounded-xl'>{`Meal Rate: ৳${runningMealRate}`}</p>
-              : <Loading/>
-              : null
-          }
-          <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} />
+          <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} totalFixedDeposit={amount} mealRate={runningMealRate} />
           <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} />
         </div>
         <div className='grid grid-cols-1 gap-8'>
