@@ -18,5 +18,5 @@ Profile:
 3. Alternative meal preference
 
 Fund Management:
-1. Show meal counts on rows and columns
-2. Show small date over each meal box group
+1. Responsive scrollable tables
+2. Display total fixed deposit

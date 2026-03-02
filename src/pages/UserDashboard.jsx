@@ -7,7 +7,7 @@ import { GiMeal } from 'react-icons/gi';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
 import { UserMonthlyStats } from '../components/UserDashboard/UserMonthlyStats';
-import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins } from 'lucide-react';
 
 
 const getToday = () => {
@@ -67,6 +67,14 @@ const UserDashboard = () => {
         }
     });
 
+    const { data: userData, isLoading: userDataLoading } = useQuery({
+        queryKey: ['userData', user?.email],
+        queryFn: async () => {
+            const response = await axiosSecure.get(`/users/profile`);
+            return response.data.user;
+        }
+    });
+
     const { data: mealCountData, isLoading: countLoading } = useQuery({
         queryKey: ['userMealsData', user?.email, monthString],
         queryFn: async () => {
@@ -74,6 +82,8 @@ const UserDashboard = () => {
             return response.data;
         }
     });
+
+
 
     const scheduleMap = {};
     data?.schedules?.forEach(schedule => {
@@ -167,6 +177,8 @@ const UserDashboard = () => {
         );
     };
 
+    const dataLoading = depositLoading || countLoading || userDataLoading
+
     const MealBox = ({ status, date, mealType }) => {
         let bgColor = 'bg-base-300';
         let cursorClass = 'cursor-not-allowed';
@@ -192,9 +204,9 @@ const UserDashboard = () => {
 
     const TotalMeals = () => {
         return (
-            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-primary ${countLoading && 'animate-pulse'}`}>
+            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-primary ${countLoading && 'skeleton'}`}>
                 <div className='flex items-center gap-3 mb-2'>
-                    <div className='p-2 bg-primary/10 text-primary rounded-xl'><Utensils size={16} /></div>
+                    <div className='p-2 bg-primary/10 text-primary rounded-full'><Utensils size={16} /></div>
                     <span className=' font-black text-xs md:text-lg uppercase tracking-widest opacity-40'>Meals</span>
                 </div>
                 <div className={`${countLoading && 'text-base-100'} text-3xl text-center font-black tracking-tighter`}>
@@ -204,12 +216,38 @@ const UserDashboard = () => {
         )
 
     }
+    const FixedDeposit = () => {
+        return (
+            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success ${dataLoading && 'skeleton'}`}>
+                <div className='flex items-center gap-3 mb-2'>
+                    <div className='p-2 bg-primary/10 text-primary-content rounded-full'><BanknoteArrowUp size={16} /></div>
+                    <span className=' font-black uppercase text-xs md:text-lg tracking-widest opacity-40'>Fixed Deposit</span>
+                </div>
+                <div className={`${dataLoading ? 'text-base-100' : 'text-primary-content'} text-3xl text-center font-black tracking-tighter`}>
+                    <span>৳ </span>{userData?.fixedDeposit}
+                </div>
+            </div>
+        )
+    }
 
+    const MosqueContribution = () => {
+        return (
+            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success ${depositLoading || countLoading && 'skeleton'}`}>
+                <div className='flex items-center gap-3 mb-2'>
+                    <div className='p-2 bg-primary/10 text-primary-content rounded-full'><HandCoins size={16} /></div>
+                    <span className=' font-black uppercase text-xs md:text-lg tracking-widest opacity-40'>Mosque</span>
+                </div>
+                <div className={`${depositLoading || countLoading ? 'text-base-100' : 'text-primary-content'} text-3xl text-center font-black tracking-tighter`}>
+                    <span>৳ </span>{userData?.mosqueFee}
+                </div>
+            </div>
+        )
+    }
     const Deposit = () => {
         return (
-            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success ${depositLoading || countLoading && 'animate-pulse'}`}>
+            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success ${depositLoading || countLoading && 'skeleton'}`}>
                 <div className='flex items-center gap-3 mb-2'>
-                    <div className='p-2 bg-success/10 text-success rounded-xl'><Wallet size={16} /></div>
+                    <div className='p-2 bg-success/10 text-success rounded-full'><Wallet size={16} /></div>
                     <span className=' font-black uppercase text-xs md:text-lg tracking-widest opacity-40'>Deposit</span>
                 </div>
                 <div className={`${depositLoading || countLoading ? 'text-base-100' : 'text-success'} text-3xl text-center font-black tracking-tighter`}>
@@ -237,9 +275,32 @@ const UserDashboard = () => {
                         </button>
                     </div>
 
-                    <div className='grid grid-cols-2 gap-4 max-w-2xl mx-auto'>
-                        <TotalMeals />
-                        <Deposit />
+                    <div className="grid grid-cols-2 w-fit self-center gap-4 p-4 bg-base-200 rounded-xl">
+
+                        {/* Total Meals */}
+                        <div className="flex flex-col items-center p-4 bg-primary/10 rounded-lg">
+                            <span className="text-xs uppercase tracking-wider font-semibold text-primary/70">Total Meals</span>
+                            <p className="text-2xl font-black text-primary">{mealCountData?.totalMeals || 0}</p>
+                        </div>
+
+                        {/* Monthly Deposit */}
+                        <div className="flex flex-col items-center p-4 bg-success/10 rounded-lg">
+                            <span className="text-xs uppercase tracking-wider font-semibold text-success/70">Deposit</span>
+                            <p className="text-2xl font-black text-success">৳{depositData?.deposit || 0}</p>
+                        </div>
+
+                        {/* Fixed Deposit */}
+                        <div className="flex flex-col items-center p-4 bg-info/10 rounded-lg">
+                            <span className="text-xs uppercase tracking-wider font-semibold text-info/70">Fixed Deposit</span>
+                            <p className="text-2xl font-black text-info">৳{userData?.fixedDeposit || 0}</p>
+                        </div>
+
+                        {/* Mosque Contribution */}
+                        <div className="flex flex-col items-center p-4 bg-base-300 rounded-lg">
+                            <span className="text-xs uppercase tracking-wider font-semibold text-base-content/70">Mosque</span>
+                            <p className="text-2xl font-black text-base-content">৳{userData?.mosqueFee || 0}</p>
+                        </div>
+
                     </div>
                 </div>
 

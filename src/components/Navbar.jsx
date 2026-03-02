@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import { NavLink, Link } from 'react-router';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
-import { LayoutDashboard, UserCircle, LogOut, Menu, X, Settings } from "lucide-react"; 
+import { LayoutDashboard, UserCog, LogOut, Settings } from "lucide-react"; 
 import { GiCampCookingPot } from "react-icons/gi";
 import useRole from '../hooks/useRole';
 
@@ -97,6 +97,11 @@ const Navbar = () => {
                                             <LayoutDashboard size={18} /> User Dashboard
                                         </NavLink>
                                     </li>
+                                    {/* <li>
+                                        <NavLink to="/user-profile" onClick={closeDropdown} className="py-3 rounded-xl">
+                                            <UserCog size={18} /> Profile
+                                        </NavLink>
+                                    </li> */}
                                     <div className="divider my-1"></div>
                                     <li>
                                         <button onClick={logOut} className="text-error py-3 rounded-xl hover:bg-error/10">

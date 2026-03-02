@@ -12,6 +12,7 @@ import Loading from "../components/Loading";
 import { NotFound } from "../components/NotFound";
 import { PrivateRoute } from "../components/PrivateRoute";
 import PreviousData from "../pages/PreviousData";
+import { UserProfile } from "../pages/UserProfile";
 
 export const router = createBrowserRouter([
     {
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
             {
                 path: '/user-dashboard',
                 element: <PrivateRoute><UserDashboard /></PrivateRoute>
+            },
+            {
+                path: '/user-profile',
+                element: <PrivateRoute><UserProfile /></PrivateRoute>
             },
             {
                 path: '/admin-dashboard',
