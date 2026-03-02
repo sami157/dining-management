@@ -27,30 +27,6 @@ const UpcomingMeals = () => {
         }
     });
 
-    // 2. Fetch All Registrations for the week to calculate counts
-    const { data: registrationsData, isLoading: registrationsLoading } = useQuery({
-        queryKey: ['registrationsWeek', currentWeekStart],
-        enabled: !loading,
-        queryFn: async () => {
-            const res = await axiosSecure.get(
-                `/managers/registrations?startDate=${format(currentWeekStart, 'yyyy-MM-dd')}&endDate=${format(weekEnd, 'yyyy-MM-dd')}`
-            );
-            return res.data.registrations;
-        }
-    });
-
-    // 3. Process registrations into a lookup map: { "2024-05-20": { morning: 5, evening: 10, night: 8 } }
-    const registrationCounts = registrationsData?.reduce((acc, reg) => {
-        const dateKey = format(new Date(reg.date), 'yyyy-MM-dd');
-        const type = reg.mealType; // morning, evening, or night
-
-        if (!acc[dateKey]) acc[dateKey] = { morning: 0, evening: 0, night: 0 };
-        if (acc[dateKey][type] !== undefined) {
-            acc[dateKey][type] += 1;
-        }
-        return acc;
-    }, {}) || {};
-
     const scheduleMap = {};
     data?.schedules?.forEach((s) => {
         const key = format(new Date(s.date), 'yyyy-MM-dd');
@@ -60,7 +36,7 @@ const UpcomingMeals = () => {
     const handlePreviousWeek = () => setCurrentWeekStart((prev) => addDays(prev, -7));
     const handleNextWeek = () => setCurrentWeekStart((prev) => addDays(prev, 7));
     const handleThisWeek = () => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 0 }));
-    const dataLoading = mealLoading || registrationsLoading;
+    const dataLoading = mealLoading;
 
     return (
         <div className="min-h-screen bg-base-300 p-4 md:p-8 transition-colors duration-300">
@@ -96,26 +72,22 @@ const UpcomingMeals = () => {
                 </div>
 
                 <main className="relative min-h-[50vh]">
-                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {weekDates.map((date) => {
                             const key = format(date, 'yyyy-MM-dd');
                             const schedule = scheduleMap[key];
-                            // Pass the specific counts for this date
-                            const countsForDate = registrationCounts[key] || { morning: 0, evening: 0, night: 0 };
 
                             return (
                                 <div key={key} className="h-full">
                                     {/* <UpcomingMealCard
                                         date={date}
                                         schedule={schedule}
-                                        counts={countsForDate}
                                         dataLoading={dataLoading}
                                         refetch={refetch}
                                     /> */}
                                     <UpcomingMealCardRamadan
                                         date={date}
                                         schedule={schedule}
-                                        counts={countsForDate}
                                         dataLoading={dataLoading}
                                         refetch={refetch}
                                     />
@@ -125,7 +97,7 @@ const UpcomingMeals = () => {
                     </div>
                 </main>
                 <footer className="mt-16 text-center border-t border-base-300 pt-10">
-                    <p className="text-[10px] text-base-content/30 font-black uppercase tracking-[0.2em]">
+                    <p className="text-sm text-base-content/30 font-black uppercase tracking-[0.2em]">
                         Deadlines are managed by the mess managers
                     </p>
                 </footer>
