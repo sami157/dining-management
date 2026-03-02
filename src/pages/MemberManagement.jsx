@@ -223,7 +223,7 @@ const MemberManagement = () => {
     );
   };
 
-  if (usersLoading || registrationsLoading) return <Loading />;
+  if (usersLoading) return <Loading />;
 
   return (
     <div className='p-4 md:w-full w-[94vw] mx-auto'>
@@ -280,7 +280,6 @@ const MemberManagement = () => {
                     <td key={idx} className='border-l border-base-300/20'>
                       <div className='flex items-center justify-center min-w-40 gap-3'>
                         <div className='space-y-1'>
-                          <p className='text-center text-[7px] font-black opacity-30'>{user.room}</p>
                           <div className='flex gap-1'>
                             {['morning', 'evening', 'night'].map(type => {
                               const reg = getRegistration(user._id, date, type);
@@ -302,7 +301,8 @@ const MemberManagement = () => {
                                       className={`w-7 h-7 flex items-center justify-center rounded-sm font-bold transition-all
                                                                             ${reg ? 'bg-primary text-white' : available ? 'bg-base-200 text-base-content/20' : 'bg-transparent text-transparent'} 
                                                                             ${available && !isEditingThis ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'}
-                                                                            ${canEditQty ? 'scale-90 opacity-90' : ''}`}
+                                                                            ${canEditQty ? 'scale-90 opacity-90' : ''} 
+                                                                            ${registrationsLoading && 'border skeleton'}`}
                                     >
                                       {reg && (reg.numberOfMeals > 1 ? `x${reg.numberOfMeals}` : null)}
                                     </button>

@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Check, X, Edit2, Save, XCircle, Info } from 'lucide-react'; // Modern icons
-import toast from 'react-hot-toast';
+import { Check, X, Edit2, Trash2, XCircle, Info } from 'lucide-react'; // Modern icons
 
-const MealCardRamadan = ({ schedule, onUpdate }) => {
+const MealCardRamadan = ({ schedule, onUpdate, onDelete }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedSchedule, setEditedSchedule] = useState({
         isHoliday: schedule.isHoliday,
@@ -37,14 +36,12 @@ const MealCardRamadan = ({ schedule, onUpdate }) => {
         }));
     };
 
-    const handleSave = () => {
-        toast.promise(
-            async () => {
-                await onUpdate(schedule._id, editedSchedule);
-                setIsEditing(false);
-            },
-            { loading: 'Updating...', success: 'Saved!', error: 'Failed to save' }
-        );
+    const handleDelete = async () => {
+        await onDelete(schedule._id);
+    };
+    const handleSave = async () => {
+        await onUpdate(schedule._id, editedSchedule);
+        setIsEditing(false)
     };
 
     const handleCancel = () => {
@@ -59,14 +56,23 @@ const MealCardRamadan = ({ schedule, onUpdate }) => {
 
     return (
         <div className={`group flex flex-col bg-base-100 rounded-2xl border transition-all duration-200 
-            ${isEditing ? 'border-primary ring-1 ring-primary/20' : 'border-base-300'}`}>
+            ${isEditing ? 'border-primary shadow-2xl ring-1 ring-primary/20' : 'border-base-300'}`}>
 
             {/* Top Header: Date and Actions */}
-            <div className='flex items-center justify-between p-4 border-b border-base-200 bg-base-50/30'>
+            <div className='flex items-start justify-between p-4 border-b border-base-200 bg-base-50/30'>
                 <div>
-                    <h2 className='font-bold text-base md:text-lg'>
-                        {format(new Date(schedule.date), 'MMM dd, yyyy')}
-                    </h2>
+                    <div className='flex gap-2'>
+                        <h2 className='font-bold text-base md:text-lg'>
+                            {format(new Date(schedule.date), 'MMM dd, yyyy')}
+                        </h2>
+                        <button
+                            disabled={isEditing}
+                            onClick={handleDelete}
+                            className='text-error cursor-pointer rounded-full'
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    </div>
                     <p className='text-xs font-medium uppercase tracking-wider text-base-content/50'>
                         {format(new Date(schedule.date), 'EEEE')}
                     </p>
@@ -75,20 +81,21 @@ const MealCardRamadan = ({ schedule, onUpdate }) => {
                 <div className='flex gap-1'>
                     {isEditing ? (
                         <>
-                            <button onClick={handleCancel} className='btn btn-ghost btn-xs text-error'>
-                                <X size={14} className="mr-1" /> Cancel
+                            <button onClick={handleCancel} className='hover:bg-base-300 border border-base-200 cursor-pointer p-2 rounded-lg text-error'>
+                                <X size={18} />
                             </button>
-                            <button onClick={handleSave} className='btn btn-primary btn-xs'>
-                                <Check size={14} className="mr-1" /> Save
+                            <button onClick={handleSave} className='hover:bg-base-300 border border-base-200 cursor-pointer p-2 rounded-lg'>
+                                <Check size={18} />
                             </button>
                         </>
                     ) : (
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className='btn btn-ghost btn-sm opacity-0 group-hover:opacity-100 transition-opacity'
-                        >
-                            <Edit2 size={14} className="mr-2" /> Edit
-                        </button>
+                            <button
+                                disabled={isEditing}
+                                onClick={() => setIsEditing(true)}
+                                className='hover:bg-base-300 border border-base-200 cursor-pointer p-2 rounded-lg'
+                            >
+                                <Edit2 size={16} />
+                            </button>
                     )}
                 </div>
             </div>

@@ -197,7 +197,7 @@ const UpcomingMealCardRamadan = ({ date, schedule = {}, dataLoading, refetch }) 
                                                     </div>
 
                                                     {/* Menu Description */}
-                                                    <div className={`p-3 bangla-text text-sm rounded-lg font-medium text-center leading-relaxed ${isReg ? 'bg-white/80 text-primary-content border border-primary/30' : 'bg-base-100 border text-base-content border-base-300 opacity-70'
+                                                    <div className={`p-3 bangla-text text-sm rounded-lg font-medium text-center leading-relaxed ${isReg ? 'bg-base-100/60 text-base-content border border-primary/30' : 'bg-base-100 border text-base-content border-base-300 opacity-70'
                                                         }`}>
                                                         {
                                                             meal.menu || <span className="text-base-content/25 italic">

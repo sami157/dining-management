@@ -49,8 +49,21 @@ const MealSchedule = () => {
             },
             {
                 loading: 'Updating...',
-                success: 'Updated!',
+                success: 'Updated Successfully',
                 error: 'Update failed.',
+            }
+        )
+    };
+    const handleDeleteSchedule = async (scheduleId) => {
+        toast.promise(
+            async () => {
+                await axiosSecure.delete(`/managers/schedules/${scheduleId}`);
+                await refetch();
+            },
+            {
+                loading: 'Deleting...',
+                success: 'Deleted Successfully',
+                error: 'Operation failed',
             }
         )
     };
@@ -111,6 +124,7 @@ const MealSchedule = () => {
                                 <MealCardRamadan
                                     schedule={schedule}
                                     onUpdate={handleUpdateSchedule}
+                                    onDelete={handleDeleteSchedule}
                                 />
                             </div>
                         ))}

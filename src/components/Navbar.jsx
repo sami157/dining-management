@@ -82,8 +82,8 @@ const Navbar = () => {
                                 </div>
                                 <ul tabIndex={0} className="dropdown-content menu p-2 shadow-2xl bg-base-100 border border-base-300 rounded-2xl w-60 mt-4">
                                     <li className="px-4 py-3 border-b border-base-200 mb-2">
-                                        <p className="text-[10px] font-black uppercase text-base-content/40 tracking-widest">Signed in as</p>
-                                        <p className="text-xs font-bold truncate">{user.email}</p>
+                                        <p className="text-sm font-black uppercase text-base-content/40 hover:bg-transparent tracking-widest cursor-default">Signed in as</p>
+                                        <p className="text-xs hover:bg-transparent font-bold truncate cursor-default">{user.email}</p>
                                     </li>
                                     {role !== "member" && (
                                         <li>
