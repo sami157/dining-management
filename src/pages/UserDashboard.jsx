@@ -262,7 +262,7 @@ const UserDashboard = () => {
 
     return (
         <div>
-            <div className='p-4 flex flex-col gap-4 items-center'>
+            <div className='p-4 flex flex-col items-center'>
                 {/* Header / Stats Navigation */}
                 <div className="w-full flex flex-col gap-4 mb-4">
                     <div className='flex items-center justify-between bg-base-200 p-2 rounded-xl max-w-md mx-auto w-full'>
@@ -275,28 +275,28 @@ const UserDashboard = () => {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-2 w-fit self-center gap-4 p-4 bg-base-200 rounded-xl">
+                    <div className="grid grid-cols-2 w-fit self-center gap-2 p-2 bg-base-200 rounded-xl">
 
                         {/* Total Meals */}
-                        <div className="flex flex-col items-center p-4 bg-primary/10 rounded-lg">
+                        <div className="flex flex-col items-center p-2 bg-primary/10 rounded-lg">
                             <span className="text-xs uppercase tracking-wider font-semibold text-primary/70">Total Meals</span>
                             <p className="text-2xl font-black text-primary">{mealCountData?.totalMeals || 0}</p>
                         </div>
 
                         {/* Monthly Deposit */}
-                        <div className="flex flex-col items-center p-4 bg-success/10 rounded-lg">
+                        <div className="flex flex-col items-center p-2 bg-success/10 rounded-lg">
                             <span className="text-xs uppercase tracking-wider font-semibold text-success/70">Deposit</span>
                             <p className="text-2xl font-black text-success">৳{depositData?.deposit || 0}</p>
                         </div>
 
                         {/* Fixed Deposit */}
-                        <div className="flex flex-col items-center p-4 bg-info/10 rounded-lg">
+                        <div className="flex flex-col items-center p-2 bg-info/10 rounded-lg">
                             <span className="text-xs uppercase tracking-wider font-semibold text-info/70">Fixed Deposit</span>
                             <p className="text-2xl font-black text-info">৳{userData?.fixedDeposit || 0}</p>
                         </div>
 
                         {/* Mosque Contribution */}
-                        <div className="flex flex-col items-center p-4 bg-base-300 rounded-lg">
+                        <div className="flex flex-col items-center p-2 bg-base-300 rounded-lg">
                             <span className="text-xs uppercase tracking-wider font-semibold text-base-content/70">Mosque</span>
                             <p className="text-2xl font-black text-base-content">৳{userData?.mosqueFee || 0}</p>
                         </div>
@@ -304,17 +304,17 @@ const UserDashboard = () => {
                     </div>
                 </div>
 
-                <div className={`${finalizationData ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'grid-cols-1 w-[90vw] md:w-2/5'}`}>
+                <div className={`${finalizationData ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'grid-cols-1 w-[94vw] md:w-2/5'}`}>
                     <div className={`${!finalizationData && 'hidden'}`}>
                         <UserMonthlyStats finalizationData={finalizationData} finalizationLoading={finalizationLoading} />
                     </div>
 
                     <div className='flex flex-col gap-4 items-center'>
                         <p className='text-2xl uppercase tracking-widest font-black'>Meal Sheet</p>
-                        <div className='flex justify-between gap-8 uppercase text-xs px-2 py-2 bg-base-200/60 rounded-md'>
+                        {/* <div className='flex justify-between gap-8 uppercase text-xs px-2 py-2 bg-base-200/60 rounded-md'>
                             <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-primary/80' /><span>Registered</span></div>
                             <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-base-200' /><span>Not registered</span></div>
-                        </div>
+                        </div> */}
 
                         <div className="overflow-x-auto h-[60vh] mask-b-from-98% mask-b-to-100%">
                             <table className="table table-xs table-pin-rows">
