@@ -5,9 +5,8 @@ import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { GiMeal } from 'react-icons/gi';
 import useAuth from '../hooks/useAuth';
-import Loading from '../components/Loading';
 import { UserMonthlyStats } from '../components/UserDashboard/UserMonthlyStats';
-import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, BadgeInfo } from 'lucide-react';
 
 
 const getToday = () => {
@@ -40,7 +39,7 @@ const UserDashboard = () => {
     const { data: finalizationData, isLoading: finalizationLoading } = useQuery({
         queryKey: ['myFinalizationData', monthString],
         enabled: !loading,
-        retry: false, // stop retrying on failure (this is why the console was flooding)
+        retry: false,
         throwOnError: false, // prevent crashing the component
         queryFn: async () => {
             const response = await axiosSecure.get(`/finance/user-finalization?month=${monthString}`);
@@ -50,7 +49,7 @@ const UserDashboard = () => {
 
     const { data: depositData, isLoading: depositLoading } = useQuery({
         queryKey: ['userDeposit', monthString],
-        retry: false, // stop retrying on failure (this is why the console was flooding)
+        retry: false,
         throwOnError: false, // prevent crashing the component
         enabled: !loading,
         queryFn: async () => {
@@ -116,17 +115,17 @@ const UserDashboard = () => {
     const handleMealClick = async (date, mealType, status) => {
         setRequested(true)
         if (!status.available) {
-            toast.error('This meal is not available');
             setRequested(false)
+            toast.error('This meal is not available');
             return;
         }
 
         if (status.registered && status.registrationId) {
+            setRequested(false)
             toast.promise(
                 async () => {
                     await axiosSecure.delete(`/users/meals/register/cancel/${status.registrationId}`);
                     await refetch();
-                    setRequested(false)
                 },
                 {
                     loading: 'Cancelling...',
@@ -138,8 +137,8 @@ const UserDashboard = () => {
         }
 
         if (!status.canRegister) {
-            toast.error('Deadline has passed');
             setRequested(false)
+            toast.error('Deadline has passed');
             return;
         }
 
@@ -153,6 +152,21 @@ const UserDashboard = () => {
                 loading: 'Registering...',
                 success: 'Registered',
                 error: 'Failed to register'
+            }
+        );
+    };
+
+    const handleBulkToggle = async () => {
+        toast.promise(
+            async () => {
+                const response = await axiosSecure.post(`/users/meals/bulk-register?month=${monthString}`);
+                await refetch();
+                return response.data;
+            },
+            {
+                loading: 'Processing...',
+                success: (data) => data.message,
+                error: 'Failed to toggle meals'
             }
         );
     };
@@ -309,19 +323,24 @@ const UserDashboard = () => {
                         <UserMonthlyStats finalizationData={finalizationData} finalizationLoading={finalizationLoading} />
                     </div>
 
-                    <div className='flex flex-col gap-4 items-center'>
-                        {/* <p className='text-2xl uppercase tracking-widest font-black'>Meal Sheet</p> */}
-                        {/* <div className='flex justify-between gap-8 uppercase text-xs px-2 py-2 bg-base-200/60 rounded-md'>
-                            <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-primary/80' /><span>Registered</span></div>
-                            <div className='flex items-center gap-2'><div className='w-4 h-4 rounded bg-base-200' /><span>Not registered</span></div>
-                        </div> */}
-
+                    <div className='flex flex-col gap-4 justify-center items-center'>
+                        <div className='p-2 flex flex-col items-center gap-2'>
+                            <button
+                                disabled={finalizationData}
+                                onClick={handleBulkToggle} className='btn w-fit btn-primary shadow-lg'><SquareCheckBig size={18} />Bulk Register
+                            </button>
+                            <div className='flex items-center w-3/5 text-xs text-base-content/40 text-center'><span><BadgeInfo size={20}/></span>Click here to register for all the remaining meals of this month</div>
+                        </div>
                         <div className="overflow-x-auto h-[60vh] mask-b-from-98% mask-b-to-100%">
                             <table className="table table-xs table-pin-rows">
                                 <thead className=''>
                                     <tr>
                                         <th className='bg-base-300 text-center'>Date</th>
-                                        <th className='bg-base-300 text-center'>Meals</th>
+                                        <th className='bg-base-300 text-center'>
+                                            <div className='flex gap-2 items-center justify-center'>
+                                                Meals
+                                            </div>
+                                        </th>
                                         <th className='bg-base-300 text-center'>Action</th>
                                     </tr>
                                 </thead>

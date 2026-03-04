@@ -50,7 +50,7 @@ const FundManagement = () => {
   const monthFinalized = finalizationData?.isFinalized || false;
 
   //Running Meal Rate
-  const { data: mealRateData, loading: mealRateLoading } = useQuery({
+  const { data: mealRateData } = useQuery({
     queryKey: ['runningMealRate', currentMonth],
     queryFn: async () => {
       const response = await axiosSecure.get(`/finance/meal-rate?month=${currentMonth}&date=${format(new Date(), 'yyyy-MM-dd')}`);
