@@ -13,7 +13,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
     const queryClient = useQueryClient();
     const [showDepositModal, setShowDepositModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [depositAmount, setDepositAmount] = useState('');
+    const [depositAmount, setDepositAmount] = useState(0);
     const [depositNotes, setDepositNotes] = useState('');
     const [editingDeposit, setEditingDeposit] = useState(false);
 
@@ -106,18 +106,16 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
         <div className='w-full'>
             {/* Member List with Balances and Deposit Actions */}
             <div>
-                <div className='flex justify-between items-center mb-4'>
-                    <h2 className='text-xl font-semibold'>Member Information</h2>
-                </div>
+                <h2 className='text-xl mb-4 font-semibold'>Member Information</h2>
 
-                <div className='overflow-x-auto'>
+                <div className='overflow-auto max-h-screen'>
                     <table className='table table-sm'>
-                        <thead>
+                        <thead className='sticky top-0 z-10 bg-base-300'>
                             <tr>
                                 <th>Member</th>
                                 <th className='text-center'>Balance</th>
                                 <th className='text-center'>Deposit</th>
-                                <th className='text-center'>Actions</th>
+                                <th className='text-center'>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -168,7 +166,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                     <th>Member</th>
                                     <th>Amount</th>
                                     <th>Notes</th>
-                                    <th>Actions</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -179,23 +177,12 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                         <td className='font-medium'>৳{deposit.amount.toFixed(2)}</td>
                                         <td className='text-xs'>{deposit.notes || '-'}</td>
                                         <td>
-                                            <div className='flex gap-1'>
-                                                <button
-                                                    onClick={() => {
-                                                        const user = usersData?.find(u => u._id.toString() === deposit.userId);
-                                                        if (user) openDepositModal(user, deposit);
-                                                    }}
-                                                    className='btn btn-xs btn-ghost'
-                                                >
-                                                    <FiEdit2 />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteDeposit(deposit._id)}
-                                                    className='btn btn-xs btn-ghost text-error'
-                                                >
-                                                    <FiTrash2 />
-                                                </button>
-                                            </div>
+                                            <button
+                                                onClick={() => handleDeleteDeposit(deposit._id)}
+                                                className=' cursor-pointer text-error self-center hover:bg-base-200 p-2 rounded-full text-sm'
+                                            >
+                                                <FiTrash2 />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}

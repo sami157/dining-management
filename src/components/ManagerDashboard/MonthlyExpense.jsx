@@ -25,15 +25,17 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                 date: format(new Date(existingExpense.date), 'yyyy-MM-dd'),
                 category: existingExpense.category,
                 amount: existingExpense.amount,
-                description: existingExpense.description
+                description: existingExpense.description,
+                person: existingExpense.person
             });
         } else {
             setEditingExpense(null);
             setExpenseData({
                 date: format(new Date(), 'yyyy-MM-dd'),
                 category: 'Bazar',
-                amount: '',
-                description: ''
+                amount: 0,
+                description: '',
+                person: ''
             });
         }
         setShowExpenseModal(true);
@@ -163,6 +165,7 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                     <th>Date</th>
                                     <th>Category</th>
                                     <th>Amount</th>
+                                    <th>Person</th>
                                     <th>Description</th>
                                     <th>Actions</th>
                                 </tr>
@@ -173,6 +176,7 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                         <td>{format(new Date(expense.date), 'dd MMM')}</td>
                                         <td className='capitalize'>{expense.category}</td>
                                         <td className='font-medium'>৳{expense.amount}</td>
+                                        <td className='text-xs'>{expense.person || '-'}</td>
                                         <td className='text-xs'>{expense.description || '-'}</td>
                                         <td>
                                             <div className='flex gap-1'>
@@ -236,7 +240,7 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                 <input
                                     type="number"
                                     value={expenseData.amount}
-                                    onChange={(e) => setExpenseData({ ...expenseData, amount: e.target.value })}
+                                    onChange={(e) => setExpenseData({ ...expenseData, amount: parseFloat(e.target.value) })}
                                     className='input input-bordered w-full'
                                     placeholder='Enter amount'
                                 />
@@ -254,6 +258,8 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                     <option value="sohan">Sohan</option>
                                     <option value="kawsar">Kawsar</option>
                                     <option value="sifat">Sifat</option>
+                                    <option value="rashed">Rashed</option>
+                                    <option value="hamid">Hamid</option>
                                 </select>
                             </div>
 
