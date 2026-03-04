@@ -6,7 +6,7 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
     const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
     const balance = totalDeposit - totalExpenses;
     const isPositive = balance >= 0;
-
+    const uniqueEmailCount = new Set(depositsData?.map(item => item.userEmail)).size;
     return (
         <div className="w-full">
             <div className="bg-base-100 border border-base-300 rounded-2xl overflow-hidden">
@@ -110,7 +110,7 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                                 <span className="text-[10px] font-black uppercase tracking-widest text-base-content">Deposit Received Count</span>
                             </div>
                             <div className={`text-3xl font-black tracking-tighter text-base-content`}>
-                                {depositsData?.length} <span className='text-lg tracking-normal font-normal'>People</span>
+                                {uniqueEmailCount} <span className='text-lg tracking-normal font-normal'>People</span>
                             </div>
                         </div>
                     </div>
