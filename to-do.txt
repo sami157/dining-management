@@ -2,21 +2,12 @@ Common:
 1. Implement proper refetching on all pages
 
 Server:
-1. When meal schedules are generated, populate meal registration db based on user default preference
 
 Homepage:
 1. Add a General information section with manager list and meal deadlines
-2. Auto change to next date after 8 pm (For meal sheet and upcoming cards both)
 
 User Dashboard:
-1. Add running meal rate, cost and current balance display
-2. Total meals should be shown untill today only an not for full month
 
 Profile:
-1. Editing Info
-2. Adding Meal preference
-3. Alternative meal preference
+1. Viewing and Editing Info
 
-Fund Management:
-1. Responsive scrollable tables
-2. Display total fixed deposit
