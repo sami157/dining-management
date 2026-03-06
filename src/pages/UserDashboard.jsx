@@ -50,7 +50,7 @@ const UserDashboard = () => {
     const { data: depositData, isLoading: depositLoading } = useQuery({
         queryKey: ['userDeposit', monthString],
         retry: false,
-        throwOnError: false, // prevent crashing the component
+        throwOnError: false,
         enabled: !loading,
         queryFn: async () => {
             const response = await axiosSecure.get(`/finance/user-deposit?month=${monthString}`);
@@ -74,7 +74,7 @@ const UserDashboard = () => {
         }
     });
 
-    const { data: mealCountData, isLoading: countLoading } = useQuery({
+    const { data: mealCountData, isLoading: countLoading, refetch: refetchCount } = useQuery({
         queryKey: ['userMealsData', user?.email, monthString],
         queryFn: async () => {
             const response = await axiosSecure.get(`/users/meals/total/${user.email}?month=${monthString}`);
@@ -125,7 +125,8 @@ const UserDashboard = () => {
             toast.promise(
                 async () => {
                     await axiosSecure.delete(`/users/meals/register/cancel/${status.registrationId}`);
-                    await refetch();
+                    refetch();
+                    refetchCount();
                 },
                 {
                     loading: 'Cancelling...',
@@ -146,6 +147,7 @@ const UserDashboard = () => {
         toast.promise(
             axiosSecure.post('/users/meals/register', { date: dateStr, mealType, numberOfMeals: 1 }).then(() => {
                 refetch();
+                refetchCount();
                 setRequested(false)
             }),
             {
@@ -160,7 +162,8 @@ const UserDashboard = () => {
         toast.promise(
             async () => {
                 const response = await axiosSecure.post(`/users/meals/bulk-register?month=${monthString}`);
-                await refetch();
+                refetch()
+                refetchCount();
                 return response.data;
             },
             {
@@ -191,7 +194,7 @@ const UserDashboard = () => {
         );
     };
 
-    const dataLoading = depositLoading || countLoading || userDataLoading
+    const dataLoading = depositLoading || countLoading || userDataLoading || mealLoading
 
     const MealBox = ({ status, date, mealType }) => {
         let bgColor = 'bg-base-300';
@@ -216,61 +219,6 @@ const UserDashboard = () => {
         );
     };
 
-    const TotalMeals = () => {
-        return (
-            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-primary ${countLoading && 'skeleton'}`}>
-                <div className='flex items-center gap-3 mb-2'>
-                    <div className='p-2 bg-primary/10 text-primary rounded-full'><Utensils size={16} /></div>
-                    <span className=' font-black text-xs md:text-lg uppercase tracking-widest opacity-40'>Meals</span>
-                </div>
-                <div className={`${countLoading && 'text-base-100'} text-3xl text-center font-black tracking-tighter`}>
-                    {mealCountData?.totalMeals}
-                </div>
-            </div>
-        )
-
-    }
-    const FixedDeposit = () => {
-        return (
-            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success ${dataLoading && 'skeleton'}`}>
-                <div className='flex items-center gap-3 mb-2'>
-                    <div className='p-2 bg-primary/10 text-primary-content rounded-full'><BanknoteArrowUp size={16} /></div>
-                    <span className=' font-black uppercase text-xs md:text-lg tracking-widest opacity-40'>Fixed Deposit</span>
-                </div>
-                <div className={`${dataLoading ? 'text-base-100' : 'text-primary-content'} text-3xl text-center font-black tracking-tighter`}>
-                    <span>৳ </span>{userData?.fixedDeposit}
-                </div>
-            </div>
-        )
-    }
-
-    const MosqueContribution = () => {
-        return (
-            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success ${depositLoading || countLoading && 'skeleton'}`}>
-                <div className='flex items-center gap-3 mb-2'>
-                    <div className='p-2 bg-primary/10 text-primary-content rounded-full'><HandCoins size={16} /></div>
-                    <span className=' font-black uppercase text-xs md:text-lg tracking-widest opacity-40'>Mosque</span>
-                </div>
-                <div className={`${depositLoading || countLoading ? 'text-base-100' : 'text-primary-content'} text-3xl text-center font-black tracking-tighter`}>
-                    <span>৳ </span>{userData?.mosqueFee}
-                </div>
-            </div>
-        )
-    }
-    const Deposit = () => {
-        return (
-            <div className={`bg-base-100 h-30 border border-base-300 p-6 rounded-2xl group transition-all hover:border-success ${depositLoading || countLoading && 'skeleton'}`}>
-                <div className='flex items-center gap-3 mb-2'>
-                    <div className='p-2 bg-success/10 text-success rounded-full'><Wallet size={16} /></div>
-                    <span className=' font-black uppercase text-xs md:text-lg tracking-widest opacity-40'>Deposit</span>
-                </div>
-                <div className={`${depositLoading || countLoading ? 'text-base-100' : 'text-success'} text-3xl text-center font-black tracking-tighter`}>
-                    <span>৳ </span>{depositData?.deposit}
-                </div>
-            </div>
-        )
-    }
-
     const showMenu = (date) => { setSelectedDate(date); setShowModal(true); }
     const closeModal = () => { setShowModal(false); setSelectedDate(null); }
 
@@ -279,40 +227,40 @@ const UserDashboard = () => {
             <div className='p-4 flex flex-col items-center'>
                 {/* Header / Stats Navigation */}
                 <div className="w-full flex flex-col gap-4 mb-4">
-                    <div className='flex items-center justify-between bg-base-200 p-2 rounded-xl max-w-md mx-auto w-full'>
-                        <button onClick={() => setCurrentMonth(prev => subMonths(prev, 1))} className='p-3 hover:bg-base-200 rounded-full transition-all active:scale-95'>
+                    <div className='flex items-center justify-between bg-base-200 p-2 rounded-lg max-w-md mx-auto w-full'>
+                        <button onClick={() => setCurrentMonth(prev => subMonths(prev, 1))} className='p-1.5 cursor-pointer hover:bg-base-300 rounded-full transition-all active:scale-95'>
                             <ChevronLeft size={20} />
                         </button>
                         <h2 className='text-sm md:text-base font-bold uppercase'>{format(currentMonth, 'MMMM yyyy')}</h2>
-                        <button onClick={() => setCurrentMonth(prev => addMonths(prev, 1))} className='p-3 hover:bg-base-200 rounded-full transition-all active:scale-95'>
+                        <button onClick={() => setCurrentMonth(prev => addMonths(prev, 1))} className='p-1.5 cursor-pointer hover:bg-base-300 rounded-full transition-all active:scale-95'>
                             <ChevronRight size={20} />
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-2 w-fit self-center gap-2 p-2 bg-base-200 rounded-xl">
+                    <div className={`${dataLoading && 'animate-pulse'} grid grid-cols-1 self-center gap-2 p-2 bg-base-200/80 rounded-xl`}>
 
                         {/* Total Meals */}
-                        <div className="flex flex-col items-center p-2 bg-primary/10 rounded-lg">
-                            <span className="text-xs uppercase tracking-wider font-semibold text-primary/70">Total Meals</span>
-                            <p className="text-2xl font-black text-primary">{mealCountData?.totalMeals || 0}</p>
+                        <div className={`flex gap-6 items-center justify-between p-2 bg-primary/15 rounded-lg ${dataLoading && 'animate-pulse'}`}>
+                            <span className={`text-xs uppercase tracking-wider font-semibold text-primary`}>Total Meals</span>
+                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-primary' }`}>{mealCountData?.totalMeals || 1000}</p>
                         </div>
 
                         {/* Monthly Deposit */}
-                        <div className="flex flex-col items-center p-2 bg-success/10 rounded-lg">
-                            <span className="text-xs uppercase tracking-wider font-semibold text-success/70">Deposit</span>
-                            <p className="text-2xl font-black text-success">৳{depositData?.deposit || 0}</p>
+                        <div className={`flex gap-8 justify-between items-center p-2 bg-success/15 rounded-lg ${dataLoading && 'animate-pulse'}`}>
+                            <span className={`text-xs uppercase tracking-wider font-semibold text-success`}>Deposit</span>
+                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-success' }`}>৳{depositData?.deposit || 1000}</p>
                         </div>
 
                         {/* Fixed Deposit */}
-                        <div className="flex flex-col items-center p-2 bg-info/10 rounded-lg">
-                            <span className="text-xs uppercase tracking-wider font-semibold text-info/70">Fixed Deposit</span>
-                            <p className="text-2xl font-black text-info">৳{userData?.fixedDeposit || 0}</p>
+                        <div className={`flex gap-8 justify-between items-center p-2 bg-info/15 rounded-lg ${dataLoading && 'animate-pulse'}`}>
+                            <span className={`text-xs uppercase tracking-wider font-semibold text-info`}>Fixed Deposit</span>
+                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-info' }`}>৳{userData?.fixedDeposit || 1000}</p>
                         </div>
 
                         {/* Mosque Contribution */}
-                        <div className="flex flex-col items-center p-2 bg-base-300 rounded-lg">
-                            <span className="text-xs uppercase tracking-wider font-semibold text-base-content/70">Mosque</span>
-                            <p className="text-2xl font-black text-base-content">৳{userData?.mosqueFee || 0}</p>
+                        <div className={`flex gap-8 justify-between items-center p-2 bg-base-300 rounded-lg ${dataLoading && 'animate-pulse'}`}>
+                            <span className={`text-xs uppercase tracking-wider font-semibold text-base-content/70`}>Mosque</span>
+                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-base-content' }`}>৳{userData?.mosqueFee || 1000}</p>
                         </div>
 
                     </div>
@@ -327,21 +275,18 @@ const UserDashboard = () => {
                         <div className='p-2 flex flex-col items-center gap-2'>
                             <button
                                 disabled={finalizationData}
-                                onClick={handleBulkToggle} className='btn w-fit btn-primary shadow-lg'><SquareCheckBig size={18} />Bulk Register
+                                onClick={handleBulkToggle} className='btn w-fit btn-primary btn-sm shadow-lg'><SquareCheckBig size={18} />Bulk Register
                             </button>
-                            <div className='flex items-center w-3/5 text-xs text-base-content/40 text-center'><span><BadgeInfo size={20}/></span>Click here to register for all the remaining meals of this month</div>
+                            <div className='flex items-center w-2/3 text-xs text-base-content/40 text-center'><span><BadgeInfo size={20}/></span>Click this button to register for all the remaining meals of this month</div>
                         </div>
                         <div className="overflow-x-auto h-[60vh] mask-b-from-98% mask-b-to-100%">
                             <table className="table table-xs table-pin-rows">
-                                <thead className=''>
-                                    <tr>
-                                        <th className='bg-base-300 text-center'>Date</th>
-                                        <th className='bg-base-300 text-center'>
-                                            <div className='flex gap-2 items-center justify-center'>
-                                                Meals
-                                            </div>
+                                <thead>
+                                    <tr className='bg-base-300'>
+                                        <th className='text-center'>Date</th>
+                                        <th className='text-center'>Meals
                                         </th>
-                                        <th className='bg-base-300 text-center'>Action</th>
+                                        <th className='text-center'>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>

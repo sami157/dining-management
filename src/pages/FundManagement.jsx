@@ -30,7 +30,7 @@ const FundManagement = () => {
 
 
   // Fetch all balances
-  const { data: balancesData } = useQuery({
+  const { data: balancesData, refetch: refetchBalances } = useQuery({
     queryKey: ['allBalances'],
     queryFn: async () => {
       const response = await axiosSecure.get('/finance/balances');
@@ -118,7 +118,7 @@ const FundManagement = () => {
           <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} />
         </div>
         <div className='grid grid-cols-1 gap-8'>
-          <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} currentMonth={currentMonth} />
+          <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} refetchBalances={refetchBalances} currentMonth={currentMonth} />
         </div>
       </div>
     </div>

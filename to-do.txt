@@ -1,10 +1,12 @@
 Common:
 1. Implement proper refetching on all pages
+2. Implement 'Forgot Password' feature
 
 Server:
+1. Chech auth middleware role protection for all routes
 
 Homepage:
-1. Add a General information section with manager list and meal deadlines
+
 
 User Dashboard:
 

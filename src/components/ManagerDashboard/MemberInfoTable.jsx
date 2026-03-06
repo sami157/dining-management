@@ -8,7 +8,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 
 
-const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized, refetchDeposits, currentMonth }) => {
+const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized, refetchDeposits, refetchBalances, currentMonth }) => {
     const axiosSecure = useAxiosSecure();
     const queryClient = useQueryClient();
     const [showDepositModal, setShowDepositModal] = useState(false);
@@ -50,6 +50,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                         });
                         setShowDepositModal(false);
                         refetchDeposits();
+                        refetchBalances();
                     },
                     {
                         loading: 'Updating deposit',
@@ -69,6 +70,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                         });
                         setShowDepositModal(false);
                         refetchDeposits();
+                        refetchBalances();
                     },
                     {
                         loading: 'Adding deposit',

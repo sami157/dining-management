@@ -49,12 +49,9 @@ const UpcomingMeals = () => {
                             <LayoutGrid size={20} />
                             <span className="text-xs font-black uppercase tracking-[0.2em]">User Portal</span>
                         </div>
-                        <h1 className="text-4xl font-black tracking-tight text-base-content">
+                        <h1 className="text-3xl font-black tracking-tight uppercase text-base-content">
                             Upcoming Meals
                         </h1>
-                        <p className="text-base-content/60 text-xs font-bold uppercase tracking-wide">
-                            Plan your week & join the table
-                        </p>
                     </div>
                 </header>
 

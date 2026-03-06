@@ -3,8 +3,8 @@ import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
 import useAuth from '../hooks/useAuth';
 import { addDays, format, set, isSameDay } from 'date-fns';
-import Loading from './Loading';
 import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
+import GeneralInfo from './GeneralInfo';
 
 export const MealSheetRamadan = () => {
     const axiosSecure = useAxiosSecure()
@@ -35,6 +35,8 @@ export const MealSheetRamadan = () => {
             return response.data.users;
         },
     });
+
+    const managers = usersData?.filter(user => user.role === 'admin' && user.name !== 'Kawsar Molla') || [];
 
     // 2. Fetch today's registrations
     const { data: registrationsData, isLoading: registrationsLoading } = useQuery({
@@ -148,7 +150,7 @@ export const MealSheetRamadan = () => {
                 </div>
                 {/* Table and Footer */}
                 <div className='space-y-2'>
-                    <div className='overflow-x-auto h-95 md:h-screen grow border border-base-300 mask-b-from-95% mask-b-to-100%'>
+                    <div className='overflow-x-auto h-95 md:h-screen grow border border-base-300 mask-b-from-98% mask-b-to-100%'>
                         <table className='table table-sm'>
                             <thead className='rounded top-0'>
                                 <tr className='text-base-content/70'>
@@ -263,6 +265,7 @@ export const MealSheetRamadan = () => {
                             <span className='font-black text-lg'>{filteredUsers?.length || 0}</span> Members
                         </span>
                     </div>
+                    <GeneralInfo managerList={managers} isLoading={usersLoading} />
                 </div>
             </div>
         </div>

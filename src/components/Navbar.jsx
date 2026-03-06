@@ -37,11 +37,11 @@ const Navbar = () => {
 
     return (
         <div className="w-full flex justify-center">
-            <nav className="w-[98vw] bg-base-100 border border-base-300 rounded-xl px-2 py-2 flex items-center justify-between shadow-sm relative">
+            <nav className="w-[98vw] bg-base-100 border border-base-300 rounded-xl px-2 py-2 flex items-center justify-between relative">
                 
                 {/* Logo Section */}
                 <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
-                    <div className="bg-primary text-primary-content p-2 rounded-md shadow-md">
+                    <div className="bg-primary text-primary-content p-2 rounded-md">
                         <GiCampCookingPot size={28} />
                     </div>
                     <div className="hidden sm:flex flex-col">
