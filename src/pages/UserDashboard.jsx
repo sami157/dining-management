@@ -121,12 +121,13 @@ const UserDashboard = () => {
         }
 
         if (status.registered && status.registrationId) {
-            setRequested(false)
+            setRequested(true)
             toast.promise(
                 async () => {
                     await axiosSecure.delete(`/users/meals/register/cancel/${status.registrationId}`);
                     refetch();
                     refetchCount();
+                    setRequested(false)
                 },
                 {
                     loading: 'Cancelling...',
@@ -159,11 +160,13 @@ const UserDashboard = () => {
     };
 
     const handleBulkToggle = async () => {
+        setRequested(true)
         toast.promise(
             async () => {
                 const response = await axiosSecure.post(`/users/meals/bulk-register?month=${monthString}`);
                 refetch()
                 refetchCount();
+                setRequested(false)
                 return response.data;
             },
             {
@@ -310,7 +313,7 @@ const UserDashboard = () => {
                     <div className='flex flex-col gap-4 justify-center items-center'>
                         <div className='p-2 flex flex-col items-center gap-2'>
                             <button
-                                disabled={finalizationData || mealLoading}
+                                disabled={finalizationData || mealLoading || requested}
                                 onClick={handleBulkToggle} className='btn w-fit btn-primary btn-sm font-black uppercase  tracking-tight shadow-lg'><SquareCheckBig size={18} />Bulk Register
                             </button>
                             <div className='flex items-center w-2/3 text-xs text-base-content/40 text-center'><span><BadgeInfo size={20} /></span>Click this button to register for all the remaining meals of this month</div>
