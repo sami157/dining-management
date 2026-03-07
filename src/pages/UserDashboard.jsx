@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { GiMeal } from 'react-icons/gi';
 import useAuth from '../hooks/useAuth';
 import { UserMonthlyStats } from '../components/UserDashboard/UserMonthlyStats';
-import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, BadgeInfo } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, BadgeInfo, Info } from 'lucide-react';
 
 
 const getToday = () => {
@@ -237,30 +237,66 @@ const UserDashboard = () => {
                         </button>
                     </div>
 
-                    <div className={`${dataLoading && 'animate-pulse'} grid grid-cols-1 self-center gap-2 p-2 bg-base-200/80 rounded-xl`}>
+                    <div className={`grid grid-cols-1 self-center gap-2 p-2 bg-base-200/80 rounded-xl`}>
 
                         {/* Total Meals */}
                         <div className={`flex gap-6 items-center justify-between p-2 bg-primary/15 rounded-lg ${dataLoading && 'animate-pulse'}`}>
                             <span className={`text-xs uppercase tracking-wider font-semibold text-primary`}>Total Meals</span>
-                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-primary' }`}>{mealCountData?.totalMeals || 1000}</p>
+                            {
+                                dataLoading ? (
+                                    <p className={`${dataLoading && 'animate-pulse text-transparent'}`}>1000</p>
+                                ) : (
+                                    <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-primary font-black'}`}>{
+                                        mealCountData?.totalMeals || 0
+                                    }</p>
+                                )
+                            }
                         </div>
 
                         {/* Monthly Deposit */}
                         <div className={`flex gap-8 justify-between items-center p-2 bg-success/15 rounded-lg ${dataLoading && 'animate-pulse'}`}>
                             <span className={`text-xs uppercase tracking-wider font-semibold text-success`}>Deposit</span>
-                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-success' }`}>৳{depositData?.deposit || 1000}</p>
+                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-success font-black'}`}>
+                                {
+                                    dataLoading ? (
+                                        <p className={`${dataLoading && 'animate-pulse text-transparent'}`}>1000</p>
+                                    ) : (
+                                        <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-success'}`}>
+                                            ৳{depositData?.deposit || 0
+                                            }</p>
+                                    )
+                                }
+                            </p>
                         </div>
 
                         {/* Fixed Deposit */}
                         <div className={`flex gap-8 justify-between items-center p-2 bg-info/15 rounded-lg ${dataLoading && 'animate-pulse'}`}>
                             <span className={`text-xs uppercase tracking-wider font-semibold text-info`}>Fixed Deposit</span>
-                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-info' }`}>৳{userData?.fixedDeposit || 1000}</p>
+                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-info font-black'}`}>
+                                {
+                                    dataLoading ? (
+                                        <p className={`${dataLoading && 'animate-pulse text-transparent'}`}>1000</p>
+                                    ) : (
+                                        <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-info'}`}>
+                                            ৳{userData?.fixedDeposit || 0}</p>
+                                    )
+                                }
+                            </p>
                         </div>
 
                         {/* Mosque Contribution */}
                         <div className={`flex gap-8 justify-between items-center p-2 bg-base-300 rounded-lg ${dataLoading && 'animate-pulse'}`}>
                             <span className={`text-xs uppercase tracking-wider font-semibold text-base-content/70`}>Mosque</span>
-                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-base-content' }`}>৳{userData?.mosqueFee || 1000}</p>
+                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-base-content font-black'}`}>
+                                {
+                                    dataLoading ? (
+                                        <p className={`${dataLoading && 'animate-pulse text-transparent'}`}>1000</p>
+                                    ) : (
+                                        <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-base-content'}`}>
+                                            ৳{userData?.mosqueFee || 0}</p>
+                                    )
+                                }
+                            </p>
                         </div>
 
                     </div>
@@ -274,10 +310,10 @@ const UserDashboard = () => {
                     <div className='flex flex-col gap-4 justify-center items-center'>
                         <div className='p-2 flex flex-col items-center gap-2'>
                             <button
-                                disabled={finalizationData}
-                                onClick={handleBulkToggle} className='btn w-fit btn-primary btn-sm shadow-lg'><SquareCheckBig size={18} />Bulk Register
+                                disabled={finalizationData || mealLoading}
+                                onClick={handleBulkToggle} className='btn w-fit btn-primary btn-sm font-black uppercase  tracking-tight shadow-lg'><SquareCheckBig size={18} />Bulk Register
                             </button>
-                            <div className='flex items-center w-2/3 text-xs text-base-content/40 text-center'><span><BadgeInfo size={20}/></span>Click this button to register for all the remaining meals of this month</div>
+                            <div className='flex items-center w-2/3 text-xs text-base-content/40 text-center'><span><BadgeInfo size={20} /></span>Click this button to register for all the remaining meals of this month</div>
                         </div>
                         <div className="overflow-x-auto h-[60vh] mask-b-from-98% mask-b-to-100%">
                             <table className="table table-xs table-pin-rows">
@@ -300,13 +336,13 @@ const UserDashboard = () => {
                                                     <div className='flex gap-4 items-center justify-center'>
                                                         <button
                                                             onClick={() => showMenu(date)}
-                                                            className={`text-2xl transition-transform active:scale-90 ${scheduleMap[dateStr] ? 'text-base-content hover:text-primary cursor-pointer' : 'opacity-20 cursor-not-allowed'}`}
+                                                            className={`text-2xl transition-transform active:scale-90 ${scheduleMap[dateStr] ? 'text-base-content hover:scale-110 cursor-pointer' : 'opacity-20 cursor-not-allowed'}`}
                                                             disabled={!scheduleMap[dateStr]}
                                                         >
-                                                            <GiMeal />
+                                                            <Info size={20}/>
                                                         </button>
-                                                        <div className='flex flex-col'>
-                                                            <span className={`text-sm ${dateStr === format(today, 'yyyy-MM-dd') ? 'font-black' : 'font-medium'}`}>
+                                                        <div className='flex tracking-tighter uppercase flex-col'>
+                                                            <span className={`text-sm ${dateStr === format(today, 'yyyy-MM-dd') ? 'font-bold' : 'font-medium'}`}>
                                                                 {format(date, 'dd MMM')}
                                                             </span>
                                                             <span className=' uppercase tracking-wider opacity-50'>{format(date, 'EEE')}</span>
@@ -409,9 +445,9 @@ const UserDashboard = () => {
                                     return (
                                         <div
                                             key={mealType}
-                                            className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${status.registered
-                                                ? 'bg-primary/3 border-primary/30 shadow-md'
-                                                : 'bg-base-200/50 border-base-300'
+                                            className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${status.registered
+                                                ? 'bg-primary/20'
+                                                : 'bg-base-300/80'
                                                 }`}
                                         >
                                             <div className="p-4 flex flex-col gap-3">
@@ -419,8 +455,8 @@ const UserDashboard = () => {
                                                     <div className="flex flex-col">
                                                         <h4 className="font-black text-lg capitalize tracking-tight flex items-center gap-2">
                                                             {mealType}
-                                                            <div className="bg-base-300 px-2 py-1 rounded-xl text-xs font-semibold opacity-70">
-                                                                Weight: {status.weight}
+                                                            <div className="bg-base-300 px-4 py-1 rounded-full text-xs font-bold opacity-70">
+                                                                {status.weight}
                                                             </div>
                                                         </h4>
                                                         {!status.canRegister && !status.registered && (
