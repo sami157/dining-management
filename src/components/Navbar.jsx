@@ -1,30 +1,39 @@
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, Link } from 'react-router';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
-import { LayoutDashboard, UserCog, LogOut, Settings } from "lucide-react"; 
+import { AnimatePresence, motion } from "motion/react"
+import { LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { GiCampCookingPot } from "react-icons/gi";
 import useRole from '../hooks/useRole';
 
 const Navbar = () => {
     const { user, loading, signOutUser } = useAuth();
     const { role } = useRole();
-    const [mobileMenu, setMobileMenu] = React.useState(false);
-    
-    // Reference to the dropdown to close it manually on link click
-    const dropdownRef = useRef(null);
+    const [visible, setVisible] = useState(false)
+    const dropdownRef = useRef(null)
 
-    const closeDropdown = () => {
-        if (document.activeElement instanceof HTMLElement) {
-            document.activeElement.blur();
+    useEffect(() => {
+    const handleClickOutside = (e) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+            setVisible(false)
         }
-        setMobileMenu(false);
-    };
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+}, [])
+
+    // const closeDropdown = () => {
+    //     if (document.activeElement instanceof HTMLElement) {
+    //         document.activeElement.blur();
+    //     }
+    // };
 
     const logOut = async () => {
         await signOutUser();
         toast.success('Logged out successfully');
-        closeDropdown();
+        setVisible(false);
     };
 
     const themeController = (
@@ -38,7 +47,7 @@ const Navbar = () => {
     return (
         <div className="w-full flex justify-center">
             <nav className="w-[98vw] bg-base-100 border border-base-300 rounded-xl px-2 py-2 flex items-center justify-between relative">
-                
+
                 {/* Logo Section */}
                 <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
                     <div className="bg-primary text-primary-content p-2 rounded-md">
@@ -59,10 +68,8 @@ const Navbar = () => {
                     ) : user ? (
                         <>
                             {/* Polished User Avatar & Dropdown */}
-                            <div className="dropdown cursor-pointer dropdown-end" ref={dropdownRef}>
-                                <div 
-                                    tabIndex={0} 
-                                    role="button" 
+                            <button ref={dropdownRef} onClick={() => setVisible(!visible)} className="dropdown cursor-pointer dropdown-end" >
+                                <div
                                     className="flex items-center gap-2 p-2 rounded-full bg-base-300/80 hover:bg-base-200 transition-colors"
                                 >
                                     <span className="hidden cursor-pointer md:block text-sm font-semibold p-0 md:px-2">
@@ -80,44 +87,44 @@ const Navbar = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <ul tabIndex={0} className="dropdown-content menu p-2 shadow-2xl bg-base-100 border border-base-300 rounded-2xl w-60 mt-4">
-                                    <li className="px-4 py-3 border-b border-base-200 mb-2">
-                                        <p className="text-sm font-black uppercase text-base-content/40 hover:bg-transparent tracking-widest cursor-default">Signed in as</p>
-                                        <p className="text-xs hover:bg-transparent font-bold truncate cursor-default">{user.email}</p>
-                                    </li>
-                                    {role !== "member" && (
-                                        <li>
-                                            <NavLink to="/admin-dashboard" onClick={closeDropdown} className="py-3 rounded-xl">
-                                                <Settings size={18} /> Manager Dashboard
-                                            </NavLink>
-                                        </li>
-                                    )}
-                                    <li>
-                                        <NavLink to="/user-dashboard" onClick={closeDropdown} className="py-3 rounded-xl">
-                                            <LayoutDashboard size={18} /> User Dashboard
-                                        </NavLink>
-                                    </li>
-                                    {/* <li>
+                                <AnimatePresence>
+                                    {visible ? (
+                                        <motion.ul
+                                            initial={{ filter: "blur(10px)",y: -30, opacity: 1 }}
+                                            animate={{ filter: "none",y: 0, opacity:1 }}
+                                            exit={{ filter: "blur(10px)",y:-20, opacity:[1,0.7,0] }}
+                                            className="dropdown-content menu p-2 shadow-2xl bg-base-100 border border-base-300 rounded-2xl w-60 mt-4">
+                                            <li className="px-4 py-3 border-b border-base-200 mb-2">
+                                                <p className="text-sm font-black uppercase text-base-content/40 hover:bg-transparent tracking-widest cursor-default">Signed in as</p>
+                                                <p className="text-xs hover:bg-transparent font-bold truncate cursor-default">{user.email}</p>
+                                            </li>
+                                            {role !== "member" && (
+                                                <li>
+                                                    <NavLink to="/admin-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
+                                                        <Settings size={18} /> Manager Dashboard
+                                                    </NavLink>
+                                                </li>
+                                            )}
+                                            <li>
+                                                <NavLink to="/user-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
+                                                    <LayoutDashboard size={18} /> User Dashboard
+                                                </NavLink>
+                                            </li>
+                                            {/* <li>
                                         <NavLink to="/user-profile" onClick={closeDropdown} className="py-3 rounded-xl">
                                             <UserCog size={18} /> Profile
                                         </NavLink>
                                     </li> */}
-                                    <div className="divider my-1"></div>
-                                    <li>
-                                        <button onClick={logOut} className="text-error py-3 rounded-xl hover:bg-error/10">
-                                            <LogOut size={18} /> Sign Out
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            {/* Mobile Hamburger */}
-                            {/* <button 
-                                onClick={() => setMobileMenu(!mobileMenu)} 
-                                className="md:hidden btn btn-ghost btn-circle"
-                            >
-                                {mobileMenu ? <X size={24} /> : <Menu size={24} />}
-                            </button> */}
+                                            <div className="divider px-2 my-1"></div>
+                                            <li>
+                                                <button onClick={logOut} className="text-error py-3 rounded-xl hover:bg-error/10">
+                                                    <LogOut size={18} /> Sign Out
+                                                </button>
+                                            </li>
+                                        </motion.ul>
+                                    ) : null}
+                                </AnimatePresence>
+                            </button>
                         </>
                     ) : (
                         <Link to="/login" className="btn btn-primary btn-md rounded-xl px-8 font-bold shadow-lg shadow-primary/20">
@@ -125,36 +132,6 @@ const Navbar = () => {
                         </Link>
                     )}
                 </div>
-
-                {/* Mobile Menu Overlay */}
-                {mobileMenu && (
-                    <div className="absolute top-full left-0 w-full mt-2 px-2 md:hidden z-100 animate-in fade-in zoom-in-95 duration-200">
-                        <div className="bg-base-100 border border-base-300 rounded-3xl shadow-2xl p-4 flex flex-col gap-2">
-                            {role !== "member" && (
-                                <NavLink 
-                                    to="/admin-dashboard" 
-                                    onClick={closeDropdown}
-                                    className="flex items-center gap-3 p-4 rounded-2xl hover:bg-base-200 font-semibold"
-                                >
-                                    <Settings size={20} /> Manager Dashboard
-                                </NavLink>
-                            )}
-                            <NavLink 
-                                to="/user-dashboard" 
-                                onClick={closeDropdown}
-                                className="flex items-center gap-3 p-4 rounded-2xl hover:bg-base-200 font-semibold"
-                            >
-                                <LayoutDashboard size={20} /> User Dashboard
-                            </NavLink>
-                            <button 
-                                onClick={logOut}
-                                className="btn btn-error btn-outline rounded-2xl mt-4 w-full"
-                            >
-                                <LogOut size={20} /> Sign Out
-                            </button>
-                        </div>
-                    </div>
-                )}
             </nav>
         </div>
     );
