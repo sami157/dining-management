@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 import { IoIosAddCircle } from "react-icons/io";
 import { format } from 'date-fns';
+import { motion, AnimatePresence } from "motion/react"
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 
@@ -147,15 +148,15 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                         </div>
                         <div className='flex justify-between'>
                             <h2 className='card-title'>Expense Log</h2>
-                            <button
+                            <motion.button
                                 onClick={() => openExpenseModal()} disabled={monthFinalized}
-                                className='rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
+                                className='active:scale-90 transition-transform rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
                             >
                                 <div className='flex items-center gap-1'>
                                     <IoIosAddCircle className='text-2xl' />
                                     <p>Expense</p>
                                 </div>
-                            </button>
+                            </motion.button>
                         </div>
                     </div>
                     <div className='overflow-x-auto'>
@@ -203,89 +204,98 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
             </div>
 
             {/* Expense Modal */}
-            {showExpenseModal && (
-                <div className="modal modal-open">
-                    <div className="modal-box w-[94vw] mx-auto">
-                        <h3 className="font-bold text-lg mb-4">
-                            {editingExpense ? 'Edit Expense' : 'Add Expense'}
-                        </h3>
+            <AnimatePresence>
+                {showExpenseModal && (
+                    <motion.div
+                        className="modal modal-open">
+                        <motion.div layout
+                        initial={{ filter: "blur(20px)", y: 100, opacity: 0 }}
+                        animate={{ filter: "none", y: 0, opacity: 1 }}
+                        exit={{ filter: "blur(10px)", y: 50, opacity: [null,0.1,0] }} 
+                        className="modal-box w-[94vw] mx-auto">
+                            <h3 className="font-bold text-lg mb-4">
+                                {editingExpense ? 'Edit Expense' : 'Add Expense'}
+                            </h3>
 
-                        <div className='flex flex-col gap-3'>
-                            <div>
-                                <label className='label'>Date</label>
-                                <input
-                                    type="date"
-                                    value={expenseData.date}
-                                    onChange={(e) => setExpenseData({ ...expenseData, date: e.target.value })}
-                                    className='input input-bordered w-full'
-                                />
+                            <div className='flex flex-col gap-3'>
+                                <div>
+                                    <label className='label'>Date</label>
+                                    <input
+                                        type="date"
+                                        value={expenseData.date}
+                                        onChange={(e) => setExpenseData({ ...expenseData, date: e.target.value })}
+                                        className='input input-bordered w-full'
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className='label'>Category</label>
+                                    <select
+                                        value={expenseData.category}
+                                        onChange={(e) => setExpenseData({ ...expenseData, category: e.target.value })}
+                                        className='select select-bordered w-full'
+                                    >
+                                        <option value="bazar">Bazar</option>
+                                        <option value="gas">Gas</option>
+                                        <option value="transport">Transport</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className='label'>Amount (৳)</label>
+                                    <input
+                                        type="number"
+                                        value={expenseData.amount}
+                                        onChange={(e) => setExpenseData({ ...expenseData, amount: parseFloat(e.target.value) })}
+                                        className='input input-bordered w-full'
+                                        placeholder='Enter amount'
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className='label'>Associated Person</label>
+                                    <select
+                                        value={expenseData.person}
+                                        onChange={(e) => setExpenseData({ ...expenseData, person: e.target.value })}
+                                        className='select select-bordered w-full'
+                                    >
+                                        <option value="">Select Person</option>
+                                        <option value="jakir">Jakir</option>
+                                        <option value="sohan">Sohan</option>
+                                        <option value="kawsar">Kawsar</option>
+                                        <option value="sifat">Sifat</option>
+                                        <option value="rashed">Rashed</option>
+                                        <option value="hamid">Hamid</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className='label'>Description (Optional)</label>
+                                    <textarea
+                                        value={expenseData.description}
+                                        onChange={(e) => setExpenseData({ ...expenseData, description: e.target.value })}
+                                        className='textarea textarea-bordered w-full'
+                                        placeholder='Add description'
+                                    />
+                                </div>
                             </div>
 
-                            <div>
-                                <label className='label'>Category</label>
-                                <select
-                                    value={expenseData.category}
-                                    onChange={(e) => setExpenseData({ ...expenseData, category: e.target.value })}
-                                    className='select select-bordered w-full'
-                                >
-                                    <option value="bazar">Bazar</option>
-                                    <option value="gas">Gas</option>
-                                    <option value="transport">Transport</option>
-                                    <option value="other">Other</option>
-                                </select>
+                            <div className="modal-action">
+                                <button onClick={handleExpenseSubmit} className='btn btn-primary'>
+                                    {editingExpense ? 'Update' : 'Add'} Expense
+                                </button>
+                                <button onClick={() => setShowExpenseModal(false)} className='btn'>
+                                    Cancel
+                                </button>
                             </div>
+                        </motion.div>
 
-                            <div>
-                                <label className='label'>Amount (৳)</label>
-                                <input
-                                    type="number"
-                                    value={expenseData.amount}
-                                    onChange={(e) => setExpenseData({ ...expenseData, amount: parseFloat(e.target.value) })}
-                                    className='input input-bordered w-full'
-                                    placeholder='Enter amount'
-                                />
-                            </div>
-
-                            <div>
-                                <label className='label'>Associated Person</label>
-                                <select
-                                    value={expenseData.person}
-                                    onChange={(e) => setExpenseData({ ...expenseData, person: e.target.value })}
-                                    className='select select-bordered w-full'
-                                >
-                                    <option value="">Select Person</option>
-                                    <option value="jakir">Jakir</option>
-                                    <option value="sohan">Sohan</option>
-                                    <option value="kawsar">Kawsar</option>
-                                    <option value="sifat">Sifat</option>
-                                    <option value="rashed">Rashed</option>
-                                    <option value="hamid">Hamid</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className='label'>Description (Optional)</label>
-                                <textarea
-                                    value={expenseData.description}
-                                    onChange={(e) => setExpenseData({ ...expenseData, description: e.target.value })}
-                                    className='textarea textarea-bordered w-full'
-                                    placeholder='Add description'
-                                />
-                            </div>
-                        </div>
-
-                        <div className="modal-action">
-                            <button onClick={handleExpenseSubmit} className='btn btn-primary'>
-                                {editingExpense ? 'Update' : 'Add'} Expense
-                            </button>
-                            <button onClick={() => setShowExpenseModal(false)} className='btn'>
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                    <div className="modal-backdrop" onClick={() => setShowExpenseModal(false)}></div>
-                </div>
-            )}
+                        <div className="modal-backdrop" onClick={() => setShowExpenseModal(false)}></div>
+                    </motion.div>
+                )
+                }
+            </AnimatePresence>
         </div>
     )
 }

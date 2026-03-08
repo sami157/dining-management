@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { format } from 'date-fns';
-import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiTrash2 } from 'react-icons/fi';
+import { motion, AnimatePresence } from "motion/react"
 import { IoIosAddCircle } from "react-icons/io";
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
@@ -142,7 +143,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                         <td className='flex justify-center'>
                                             <button
                                                 onClick={() => openDepositModal(user)} disabled={monthFinalized}
-                                                className='rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
+                                                className='active:scale-90 transition-transform rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
                                             >
                                                 <div className='flex gap-2 items-center'>
                                                     <IoIosAddCircle className='text-2xl' />
@@ -194,48 +195,55 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                 </div>
             </div>
             {/* Deposit Modal */}
-            {showDepositModal && (
-                <div className="modal modal-open">
-                    <div className="modal-box w-[94vw] mx-auto">
-                        <h3 className="font-bold text-lg mb-4">
-                            {editingDeposit ? 'Edit Deposit' : 'Add Deposit'} - {selectedUser?.name}
-                        </h3>
+            <AnimatePresence>
+                {showDepositModal && (
+                    <div className="modal modal-open">
+                        <motion.div layout
+                        initial={{ filter: "blur(20px)", y: 100, opacity: 0 }}
+                        animate={{ filter: "none", y: 0, opacity: 1 }}
+                        exit={{ filter: "blur(10px)", y: 50, opacity: [null,0.1,0] }} 
+                         className="modal-box w-[94vw] mx-auto">
+                            <h3 className="font-bold text-lg mb-4">
+                                {editingDeposit ? 'Edit Deposit' : 'Add Deposit'} - {selectedUser?.name}
+                            </h3>
 
-                        <div className='flex flex-col gap-3'>
-                            <div>
-                                <label className='label'>Amount (৳)</label>
-                                <input
-                                    type="number"
-                                    value={depositAmount}
-                                    onChange={(e) => setDepositAmount(e.target.value)}
-                                    className='input input-bordered w-full'
-                                    placeholder='Enter amount'
-                                />
+                            <div className='flex flex-col gap-3'>
+                                <div>
+                                    <label className='label'>Amount (৳)</label>
+                                    <input
+                                        type="number"
+                                        value={depositAmount}
+                                        onChange={(e) => setDepositAmount(e.target.value)}
+                                        className='input input-bordered w-full'
+                                        placeholder='Enter amount'
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className='label'>Notes (Optional)</label>
+                                    <textarea
+                                        value={depositNotes}
+                                        onChange={(e) => setDepositNotes(e.target.value)}
+                                        className='textarea textarea-bordered w-full'
+                                        placeholder='Add notes'
+                                    />
+                                </div>
                             </div>
 
-                            <div>
-                                <label className='label'>Notes (Optional)</label>
-                                <textarea
-                                    value={depositNotes}
-                                    onChange={(e) => setDepositNotes(e.target.value)}
-                                    className='textarea textarea-bordered w-full'
-                                    placeholder='Add notes'
-                                />
+                            <div className="modal-action">
+                                <button onClick={handleDepositSubmit} className='btn btn-primary'>
+                                    {editingDeposit ? 'Update' : 'Add'} Deposit
+                                </button>
+                                <button onClick={() => setShowDepositModal(false)} className='btn'>
+                                    Cancel
+                                </button>
                             </div>
-                        </div>
-
-                        <div className="modal-action">
-                            <button onClick={handleDepositSubmit} className='btn btn-primary'>
-                                {editingDeposit ? 'Update' : 'Add'} Deposit
-                            </button>
-                            <button onClick={() => setShowDepositModal(false)} className='btn'>
-                                Cancel
-                            </button>
-                        </div>
+                        </motion.div>
+                        <div className="modal-backdrop" onClick={() => setShowDepositModal(false)}></div>
                     </div>
-                    <div className="modal-backdrop" onClick={() => setShowDepositModal(false)}></div>
-                </div>
-            )}
+                )
+                }
+            </AnimatePresence>
         </div>
     )
 }

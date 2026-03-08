@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from "motion/react"
 import { MdAdminPanelSettings } from "react-icons/md";
 import { Plus, Minus, ChevronLeft, ChevronRight, Cog } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
@@ -33,83 +34,89 @@ const UserEditModal = ({ user, onClose, onSave }) => {
 
   return (
     <dialog open className="modal modal-open">
-      <div className="modal-box relative w-[94vw] md:w-full max-w-md mx-auto border-t sm:border border-base-300 rounded-xl p-6">
-        {/* Close button - larger touch target for mobile */}
-        <button
-          className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-          onClick={onClose}
-        >✕</button>
-
-        <h3 className="font-black text-xl mb-1 text-primary italic uppercase tracking-tight">
-          Edit Member
-        </h3>
-        <p className="text-[10px] font-bold opacity-50 mb-6 uppercase tracking-widest">
-          {user.name} — Room {user.room}
-        </p>
-
-        <div className="flex flex-col gap-5">
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-black uppercase text-[10px] opacity-70">Role</span>
-            </label>
-            <select
-              className="select select-bordered w-full font-bold focus:outline-primary transition-all"
-              value={role}
-              onChange={e => setRole(e.target.value)}
-            >
-              <option value="member">Member</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-black uppercase text-[10px] opacity-70">Fixed Deposit (৳)</span>
-            </label>
-            <input
-              type="number"
-              className="input input-bordered w-full font-bold focus:outline-primary"
-              value={fixedDeposit}
-              min={0}
-              onChange={e => setFixedDeposit(e.target.value)}
-            />
-          </div>
-
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-black uppercase text-[10px] opacity-70">Mosque Fee (৳)</span>
-            </label>
-            <input
-              type="number"
-              className="input input-bordered w-full font-bold focus:outline-primary"
-              value={mosqueFee}
-              min={0}
-              onChange={e => setMosqueFee(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="modal-action mt-8 flex flex-col-reverse sm:flex-row gap-2">
+      <AnimatePresence>
+        <motion.div layout
+                        initial={{ filter: "blur(20px)", y: 100, opacity: 0 }}
+                        animate={{ filter: "none", y: 0, opacity: 1 }}
+                        exit={{ filter: "blur(10px)", y: 50, opacity: [null,0.1,0] }}  
+        className="modal-box relative w-[94vw] md:w-full max-w-md mx-auto border-t sm:border border-base-300 rounded-xl p-6">
+          {/* Close button - larger touch target for mobile */}
           <button
-            className="btn btn-ghost w-full sm:w-auto font-bold uppercase"
+            className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
             onClick={onClose}
-            disabled={saving}
-          >
-            Cancel
-          </button>
-          <button
-            className="btn btn-primary w-full sm:flex-1 font-black shadow-lg shadow-primary/20"
-            onClick={handleSave}
-            disabled={saving}
-          >
-            {saving ? <span className="loading loading-spinner loading-sm" /> : 'SAVE UPDATES'}
-          </button>
-        </div>
-      </div>
-      {/* Backdrop for mobile tapping to close */}
-      <form method="dialog" className="modal-backdrop" onClick={onClose}>
-        <button>close</button>
-      </form>
+          >✕</button>
+
+          <h3 className="font-black text-xl mb-1 text-primary italic uppercase tracking-tight">
+            Edit Member
+          </h3>
+          <p className="text-[10px] font-bold opacity-50 mb-6 uppercase tracking-widest">
+            {user.name} — Room {user.room}
+          </p>
+
+          <div className="flex flex-col gap-5">
+            <div className="form-control w-full">
+              <label className="label py-1">
+                <span className="label-text font-black uppercase text-[10px] opacity-70">Role</span>
+              </label>
+              <select
+                className="select select-bordered w-full font-bold focus:outline-primary transition-all"
+                value={role}
+                onChange={e => setRole(e.target.value)}
+              >
+                <option value="member">Member</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            <div className="form-control w-full">
+              <label className="label py-1">
+                <span className="label-text font-black uppercase text-[10px] opacity-70">Fixed Deposit (৳)</span>
+              </label>
+              <input
+                type="number"
+                className="input input-bordered w-full font-bold focus:outline-primary"
+                value={fixedDeposit}
+                min={0}
+                onChange={e => setFixedDeposit(e.target.value)}
+              />
+            </div>
+
+            <div className="form-control w-full">
+              <label className="label py-1">
+                <span className="label-text font-black uppercase text-[10px] opacity-70">Mosque Fee (৳)</span>
+              </label>
+              <input
+                type="number"
+                className="input input-bordered w-full font-bold focus:outline-primary"
+                value={mosqueFee}
+                min={0}
+                onChange={e => setMosqueFee(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="modal-action mt-8 flex flex-col-reverse sm:flex-row gap-2">
+            <button
+              className="btn btn-ghost w-full sm:w-auto font-bold uppercase"
+              onClick={onClose}
+              disabled={saving}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary w-full sm:flex-1 font-black shadow-lg shadow-primary/20"
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? <span className="loading loading-spinner loading-sm" /> : 'SAVE UPDATES'}
+            </button>
+          </div>
+        </motion.div>
+        {/* Backdrop for mobile tapping to close */}
+        <form method="dialog" className="modal-backdrop" onClick={onClose}>
+          <button>close</button>
+        </form>
+      </AnimatePresence>
     </dialog>
   );
 };
