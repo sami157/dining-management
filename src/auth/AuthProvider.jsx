@@ -1,5 +1,5 @@
-import {  useEffect, useState } from 'react';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider } from "firebase/auth";
+import { useEffect, useState } from 'react';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail } from "firebase/auth";
 import { AuthContext } from './AuthContext.jsx';
 import { auth } from '../../firebase/firebase.init.js';
 
@@ -14,7 +14,7 @@ const AuthProvider = ({ children }) => {
             setErrorMessage('');
         });
         return () => unsubscribe();
-    },[]);
+    }, []);
 
 
     const createUser = async (email, password) => {
@@ -22,7 +22,7 @@ const AuthProvider = ({ children }) => {
     }
 
     const signInUser = (email, password) => {
-            return signInWithEmailAndPassword(auth, email, password)
+        return signInWithEmailAndPassword(auth, email, password)
     }
 
     const signOutUser = () => {
@@ -39,6 +39,10 @@ const AuthProvider = ({ children }) => {
         else return Promise.reject()
     }
 
+    const sendEmailToResetPassword = (email) => {
+        return sendPasswordResetEmail(auth, email)
+    }
+
     const authData = {
         auth,
         user,
@@ -49,7 +53,8 @@ const AuthProvider = ({ children }) => {
         signOutUser,
         setErrorMessage,
         errorMessage,
-        updateUserProfile
+        updateUserProfile,
+        sendEmailToResetPassword
     }
     return (
         <AuthContext value={authData}>

@@ -37,7 +37,7 @@ const Registration = () => {
         <div className='flex flex-col gap-4 min-h-screen mt-8 items-center'>
             <p className='text-4xl font-bold'>Registration</p>
             <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="card bg-base-100 w-full max-w-sm shadow-2xl">
+                <div className="card bg-base-100 w-[85vw] md:w-full max-w-sm">
                     <div className="card-body">
                         <fieldset className="fieldset">
                             {/* Name */}
