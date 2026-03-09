@@ -90,9 +90,9 @@ const Navbar = () => {
                                 <AnimatePresence>
                                     {visible ? (
                                         <motion.ul
-                                            initial={{ filter: "blur(10px)",y: -30, opacity: 1 }}
-                                            animate={{ filter: "none",y: 0, opacity:1 }}
-                                            exit={{ filter: "blur(10px)",y:-20, opacity:[1,0.7,0] }}
+                                            initial={{ y: -30, opacity: 1 }}
+                                            animate={{ y: 0, opacity:1 }}
+                                            exit={{ y:-10, opacity:0 }}
                                             className="dropdown-content menu p-2 shadow-2xl bg-base-100 border border-base-300 rounded-2xl w-60 mt-4">
                                             <li className="px-4 py-3 border-b border-base-200 mb-2">
                                                 <p className="text-sm font-black uppercase text-base-content/40 hover:bg-transparent tracking-widest cursor-default">Signed in as</p>
