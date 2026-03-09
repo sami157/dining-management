@@ -199,9 +199,9 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                 {showDepositModal && (
                     <div className="modal modal-open">
                         <motion.div layout
-                        initial={{ filter: "blur(20px)", y: 100, opacity: 0 }}
-                        animate={{ filter: "none", y: 0, opacity: 1 }}
-                        exit={{ filter: "blur(10px)", y: 50, opacity: [null,0.1,0] }} 
+                            initial={{ filter: "blur(20px)", y: 100 }}
+                            animate={{ filter: "none", y: 0, opacity: 1 }}
+                            exit={{ filter: "blur(20px)", y: 20, opacity: 0 }} 
                          className="modal-box w-[94vw] mx-auto">
                             <h3 className="font-bold text-lg mb-4">
                                 {editingDeposit ? 'Edit Deposit' : 'Add Deposit'} - {selectedUser?.name}

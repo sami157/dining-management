@@ -33,13 +33,13 @@ const UserEditModal = ({ user, onClose, onSave }) => {
   };
 
   return (
-    <dialog open className="modal modal-open">
-      <AnimatePresence>
+    <AnimatePresence>
+      <div className="modal modal-open">
         <motion.div layout
-                        initial={{ filter: "blur(20px)", y: 100, opacity: 0 }}
-                        animate={{ filter: "none", y: 0, opacity: 1 }}
-                        exit={{ filter: "blur(10px)", y: 50, opacity: [null,0.1,0] }}  
-        className="modal-box relative w-[94vw] md:w-full max-w-md mx-auto border-t sm:border border-base-300 rounded-xl p-6">
+          initial={{ filter: "blur(5px)", y: 30 }}
+          animate={{ filter: "none", y: 0, opacity: 1 }}
+          exit={{ filter: "blur(10px)", y: 20, opacity: 0 }}
+          className="modal-box relative w-[94vw] md:w-full max-w-md mx-auto border-t sm:border border-base-300 rounded-xl p-6">
           {/* Close button - larger touch target for mobile */}
           <button
             className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
@@ -116,8 +116,8 @@ const UserEditModal = ({ user, onClose, onSave }) => {
         <form method="dialog" className="modal-backdrop" onClick={onClose}>
           <button>close</button>
         </form>
-      </AnimatePresence>
-    </dialog>
+      </div>
+    </AnimatePresence>
   );
 };
 

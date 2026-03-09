@@ -14,21 +14,21 @@ const Navbar = () => {
     const dropdownRef = useRef(null)
 
     useEffect(() => {
-    const handleClickOutside = (e) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-            setVisible(false)
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setVisible(false)
+            }
         }
-    }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-}, [])
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [])
 
-    // const closeDropdown = () => {
-    //     if (document.activeElement instanceof HTMLElement) {
-    //         document.activeElement.blur();
-    //     }
-    // };
+    const closeDropdown = () => {
+        if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+    };
 
     const logOut = async () => {
         await signOutUser();
@@ -49,7 +49,7 @@ const Navbar = () => {
             <nav className="w-[98vw] bg-base-100 border border-base-300 rounded-xl px-2 py-2 flex items-center justify-between relative">
 
                 {/* Logo Section */}
-                <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
+                <Link viewTransition to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
                     <div className="bg-primary text-primary-content p-2 rounded-md">
                         <GiCampCookingPot size={28} />
                     </div>
@@ -68,8 +68,9 @@ const Navbar = () => {
                     ) : user ? (
                         <>
                             {/* Polished User Avatar & Dropdown */}
-                            <button ref={dropdownRef} onClick={() => setVisible(!visible)} className="dropdown cursor-pointer dropdown-end" >
-                                <div
+                            <div
+                                className="dropdown dropdown-end">
+                                <div tabIndex={0} ref={dropdownRef}
                                     className="flex items-center gap-2 p-2 rounded-full bg-base-300/80 hover:bg-base-200 transition-colors"
                                 >
                                     <span className="hidden cursor-pointer md:block text-sm font-semibold p-0 md:px-2">
@@ -87,47 +88,46 @@ const Navbar = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <AnimatePresence>
-                                    {visible ? (
-                                        <motion.ul
-                                            initial={{ y: -30, opacity: 1 }}
-                                            animate={{ y: 0, opacity:1 }}
-                                            exit={{ y:-10, opacity:0 }}
-                                            className="dropdown-content menu p-2 shadow-2xl bg-base-100 border border-base-300 rounded-2xl w-60 mt-4">
-                                            <li className="px-4 py-3 border-b border-base-200 mb-2">
-                                                <p className="text-sm font-black uppercase text-base-content/40 hover:bg-transparent tracking-widest cursor-default">Signed in as</p>
-                                                <p className="text-xs hover:bg-transparent font-bold truncate cursor-default">{user.email}</p>
-                                            </li>
-                                            {role !== "member" && (
-                                                <li>
-                                                    <NavLink to="/admin-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
-                                                        <Settings size={18} /> Manager Dashboard
-                                                    </NavLink>
-                                                </li>
-                                            )}
-                                            <li>
-                                                <NavLink to="/user-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
-                                                    <LayoutDashboard size={18} /> User Dashboard
+                                <ul tabIndex="-1"
+                                    className="menu dropdown-content z-100 shadow-2xl p-2 bg-base-100 border border-base-300 rounded-2xl w-60 mt-4">
+                                    <li className="px-4 py-3 border-b border-base-200 mb-2">
+                                        <p className="text-sm font-black uppercase text-base-content/40 hover:bg-transparent tracking-widest cursor-default">Signed in as</p>
+                                        <p className="text-xs hover:bg-transparent font-bold truncate cursor-default">{user.email}</p>
+                                    </li>
+                                    {role !== "member" && (
+                                        <AnimatePresence>
+                                            <motion.li onClick={closeDropdown}
+                                                initial={{ x: -20 }}
+                                                animate={{ x: 0 }}
+                                                exit={{ x: 10 }}
+                                            >
+                                                <NavLink viewTransition to="/admin-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
+                                                    <Settings size={18} /> Manager Dashboard
                                                 </NavLink>
-                                            </li>
-                                            {/* <li>
+                                            </motion.li>
+                                        </AnimatePresence>
+                                    )}
+                                        <li onClick={closeDropdown}>
+                                        <NavLink viewTransition to="/user-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
+                                            <LayoutDashboard size={18} /> User Dashboard
+                                        </NavLink>
+                                    </li>
+                                    {/* <li>
                                         <NavLink to="/user-profile" onClick={closeDropdown} className="py-3 rounded-xl">
                                             <UserCog size={18} /> Profile
                                         </NavLink>
                                     </li> */}
-                                            <div className="divider px-2 my-1"></div>
-                                            <li>
-                                                <button onClick={logOut} className="text-error py-3 rounded-xl hover:bg-error/10">
-                                                    <LogOut size={18} /> Sign Out
-                                                </button>
-                                            </li>
-                                        </motion.ul>
-                                    ) : null}
-                                </AnimatePresence>
-                            </button>
+                                    <div className="divider px-2 my-1"></div>
+                                    <li>
+                                        <button onClick={logOut} className="text-error py-3 rounded-xl hover:bg-error/10">
+                                            <LogOut size={18} /> Sign Out
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                         </>
                     ) : (
-                        <Link to="/login" className="btn btn-primary btn-md rounded-xl px-8 font-bold shadow-lg shadow-primary/20">
+                        <Link viewTransition to="/login" className="btn btn-primary btn-md rounded-xl px-8 font-bold shadow-lg shadow-primary/20">
                             Login
                         </Link>
                     )}
