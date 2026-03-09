@@ -1,15 +1,22 @@
+Feature draft:
+1. Alternative meal preference. User can choose meals for which he wants an alternative. It can be changed at will, but cannot be done on per meal basis. In other words it will be an automated system and not 'opt-in' per meal basis. Now for this to work, menu(s) must be fixed first. The managers should be able to add a new menu anytime.
+2. Review System. Users can rate any meal(s) from 0 to 5 stars. The managers can see the reviews and insights.
+3. Manager can mark an upcoming meal as featured meal, which will be highlighted on top of Homepage and user dashboard.
+
 Common:
 1. Implement proper refetching on all pages
-2. Implement 'Forgot Password' feature
 
 Server:
-1. Chech auth middleware role protection for all routes
+1. Create API for bulk toggle off meals for a month.
 
 Homepage:
+1. Make the upcoming meals a card slideshow with tappable previous and next buttons, instead of a boring grid
 
 
 User Dashboard:
+1. Create a functional bulk toggle off button
+2. Make the stats section collapsable with motion animations
 
 Profile:
-1. Viewing and Editing Info
+1. Viewing and Editing Basic Info, alternative meal preference
 

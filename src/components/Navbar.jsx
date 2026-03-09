@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, Link } from 'react-router';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
+// eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from "motion/react"
 import { LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { GiCampCookingPot } from "react-icons/gi";
@@ -10,6 +11,7 @@ import useRole from '../hooks/useRole';
 const Navbar = () => {
     const { user, loading, signOutUser } = useAuth();
     const { role } = useRole();
+    // eslint-disable-next-line no-unused-vars
     const [visible, setVisible] = useState(false)
     const dropdownRef = useRef(null)
 
