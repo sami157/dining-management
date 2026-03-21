@@ -1,21 +1,27 @@
 import { format } from 'date-fns';
-import { Utensils, CheckCircle2, Circle, Plus, Minus } from 'lucide-react'; // Added Plus, Minus
+import { Utensils, CircleCheckBig, Circle, CircleX, Plus, Minus } from 'lucide-react'; // Added Plus, Minus
 import toast from 'react-hot-toast';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import useAuth from '../hooks/useAuth';
+import { useState } from 'react';
 
 const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
     const axiosSecure = useAxiosSecure();
     const { loading } = useAuth();
+    const [requested, setRequested] = useState(false)
 
     const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
     const meals = schedule?.meals || [];
     const dateStr = format(date, 'yyyy-MM-dd');
 
     const handleMealAction = async (meal) => {
+        setRequested(true)
         if (meal.isRegistered && meal.registrationId) {
             toast.promise(
-                axiosSecure.delete(`/users/meals/register/cancel/${meal.registrationId}`).then(() => refetch()),
+                axiosSecure.delete(`/users/meals/register/cancel/${meal.registrationId}`).then(() => {
+                    refetch()
+                    setRequested(false)
+                }),
                 {
                     loading: 'Cancelling...',
                     success: 'Registration removed',
@@ -27,6 +33,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
 
         if (!meal.canRegister) {
             toast.error('Registration deadline passed', { icon: '🚫' });
+            setRequested(false)
             return;
         }
 
@@ -35,7 +42,10 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                 date: dateStr,
                 mealType: meal.mealType,
                 numberOfMeals: 1 // Default to 1
-            }).then(() => refetch()),
+            }).then(() => {
+                refetch()
+                setRequested(false)
+            }),
             {
                 loading: 'Registering...',
                 success: 'Meal booked!',
@@ -60,7 +70,6 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
             }
         );
     };
-
     if (loading) return null;
 
     return (
@@ -95,96 +104,117 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                 <div className='skeleton bg-base-200 w-70 mx-auto md:w-88 h-32'></div>
                                 <div className='skeleton bg-base-200 w-70 mx-auto md:w-88 h-32'></div>
                             </div>
-                            : meals.length > 0 
-                            ? 
-                            (
-                                meals.map((meal) => {
-                                    const isReg = meal.isRegistered;
+                            : meals.length > 0
+                                ?
+                                (
+                                    meals.map((meal) => {
+                                        const isReg = meal.isRegistered;
 
-                                    return (
-                                        <div
-                                            key={meal.mealType}
-                                            className={`relative min-h-32 group rounded-xl border transition-all duration-300 overflow-hidden ${isReg ? 'bg-primary/5 border-primary/30' : 'bg-base-200/50 border-base-300'
-                                                }`}
-                                        >
-                                            <div className="p-4">
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`p-2 rounded-xl ${isReg ? 'bg-primary text-white' : 'bg-base-100 border border-base-300'}`}>
-                                                            <Utensils size={16} />
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                                                                {meal.mealType}
-                                                                {meal.weight && <span className="opacity-40 text-[9px] font-bold">({meal.weight})</span>}
-                                                            </h3>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Action Area: Qty Controls + Toggle */}
-                                                    {/* Action Area: Qty Controls + Toggle */}
-                                                    <div className="flex items-center gap-3">
-                                                        {isReg && (
-                                                            <div className="flex items-center gap-1 bg-base-100 p-1 rounded-lg border border-base-300 shadow-sm">
-                                                                <button
-                                                                    type="button" // Explicitly set type to prevent form issues
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation(); // Prevent triggering parent clicks
-                                                                        handleUpdateQty(meal.registrationId, meal.numberOfMeals, -1);
-                                                                    }}
-                                                                    // CHANGE: Allow clicking even if canRegister is false, 
-                                                                    // handle the "deadline" logic inside the function or 
-                                                                    // ensure your state allows editing registered meals
-                                                                    disabled={meal.numberOfMeals <= 1}
-                                                                    className="p-0.5 hover:text-primary disabled:opacity-20 transition-colors cursor-pointer"
-                                                                >
-                                                                    <Minus size={12} strokeWidth={3} />
-                                                                </button>
-
-                                                                <span className="text-[10px] font-black min-w-3 text-center text-primary">
-                                                                    {meal.numberOfMeals || 1}
-                                                                </span>
-
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleUpdateQty(meal.registrationId, meal.numberOfMeals, 1);
-                                                                    }}
-                                                                    // CHANGE: Removed the !meal.canRegister restriction
-                                                                    className="p-0.5 hover:text-primary disabled:opacity-20 transition-colors cursor-pointer"
-                                                                >
-                                                                    <Plus size={12} strokeWidth={3} />
-                                                                </button>
+                                        return (
+                                            <div
+                                                key={meal.mealType}
+                                                className={`relative min-h-32 group rounded-xl transition-all duration-300 overflow-hidden ${!meal.isAvailable ? 'bg-none border-dashed border-base-300 border' : isReg ? 'bg-primary/10 border-primary/30' : 'bg-base-200 border-base-300'
+                                                    }`}
+                                            >
+                                                <div className="p-4">
+                                                    <div className="flex justify-between items-center mb-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`p-3 rounded-full ${isReg ? 'bg-primary text-white' : 'bg-base-100 border border-base-300'}`}>
+                                                                {
+                                                                    meal.isAvailable ?
+                                                                        <Utensils size={18} /> :
+                                                                        <CircleX size={18} />
+                                                                }
                                                             </div>
-                                                        )}
+                                                            <div className='flex flex-col items-start'>
+                                                                <h3 className="font-bold uppercase tracking-wide text-sm flex items-center gap-2">
+                                                                    {
+                                                                        meal.mealType === 'morning' ? 'Morning' :
+                                                                            meal.mealType === 'evening' ? 'Evening' : 'Night'
+                                                                    }
+                                                                </h3>
+                                                                <div>
+                                                                    {meal.weight && <span className="opacity-40 text-xs font-bold">{
+                                                                        meal.isAvailable ? meal.weight : 'Not available'
+                                                                    }</span>}
+                                                                </div>
+                                                            </div>
+                                                        </div>
 
-                                                        <button
-                                                            onClick={() => handleMealAction(meal)}
-                                                            disabled={!meal.canRegister && !isReg}
-                                                            className={`transition-all active:scale-90 ${!meal.canRegister && !isReg ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'
-                                                                }`}
-                                                        >
-                                                            {isReg ? (
-                                                                <CheckCircle2 size={28} className="text-primary fill-primary/10" />
-                                                            ) : (
-                                                                <Circle size={28} className="text-base-content/20 hover:text-primary/40 transition-colors" />
+                                                        {/* Action Area: Qty Controls + Toggle */}
+                                                        <div className="flex items-center gap-3">
+                                                            {isReg && (
+                                                                <div className="flex items-center gap-1 bg-base-100 px-2 py-1 rounded-lg border border-base-300 shadow-sm">
+                                                                    <button
+                                                                        type="button" // Explicitly set type to prevent form issues
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation(); // Prevent triggering parent clicks
+                                                                            handleUpdateQty(meal.registrationId, meal.numberOfMeals, -1);
+                                                                        }}
+
+                                                                        disabled={meal.numberOfMeals <= 1}
+                                                                        className="p-0.5 hover:text-primary disabled:opacity-20 transition-colors cursor-pointer"
+                                                                    >
+                                                                        <Minus size={12} strokeWidth={3} />
+                                                                    </button>
+
+                                                                    <span className="font-black min-w-3 text-center text-primary">
+                                                                        {meal.numberOfMeals || 1}
+                                                                    </span>
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            handleUpdateQty(meal.registrationId, meal.numberOfMeals, 1);
+                                                                        }}
+                                                                        // CHANGE: Removed the !meal.canRegister restriction
+                                                                        className="p-0.5 hover:text-primary disabled:opacity-20 transition-colors cursor-pointer"
+                                                                    >
+                                                                        <Plus size={12} strokeWidth={3} />
+                                                                    </button>
+                                                                </div>
                                                             )}
-                                                        </button>
-                                                    </div>
-                                                </div>
 
-                                                {/* Menu Description */}
-                                                <div className={`p-3 rounded-xl text-[11px] font-medium leading-relaxed ${isReg ? 'bg-white/50 border border-primary/10 text-primary text-center' : 'bg-base-100 border border-base-300 opacity-70 text-center'
-                                                    }`}>
-                                                    {meal.menu || "Menu Pending"}
+                                                            <button
+                                                                onClick={() => handleMealAction(meal)}
+                                                                disabled={!meal.canRegister && !isReg || requested}
+                                                                className={`transition-all active:scale-90 ${!meal.canRegister && !isReg ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'
+                                                                    }`}
+                                                            >
+                                                                {isReg ? (
+                                                                    <CircleCheckBig size={28} className="text-primary fill-primary/10" />
+                                                                ) :
+                                                                    meal.isAvailable ?
+                                                                        (
+                                                                            <Circle size={28} className="text-base-content/20 hover:text-primary/40 transition-colors" />
+                                                                        ) : (
+                                                                            <CircleX size={28} className="text-base-content/20 hover:text-primary/40 transition-colors" />
+                                                                        )
+                                                                }
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Menu Description */}
+                                                    <div className={`p-3 bangla-text text-sm rounded-lg font-medium text-center leading-relaxed ${isReg ? 'bg-base-100/60 text-base-content border border-primary/30' : 'bg-base-100 border text-base-content border-base-300 opacity-70'
+                                                        }`}>
+                                                        {
+                                                            meal.menu || <span className="text-base-content/25 italic">
+                                                                {
+                                                                    meal.isAvailable ?
+                                                                        <p>মেন্যু পেন্ডিং</p> :
+                                                                        <p>X</p>
+                                                                }
+                                                            </span>
+                                                        }
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    );
-                                })
-                            )
-                            : (
+                                        );
+                                    })
+                                )
+                                : (
                                     <div className="flex flex-col items-center justify-center py-10 opacity-20 italic space-y-2">
                                         <Utensils size={32} strokeWidth={1} />
                                         <p className="text-xs font-bold uppercase tracking-widest">Kitchen Closed</p>

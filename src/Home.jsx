@@ -16,8 +16,8 @@ const Home = () => {
           user
             ?
             <div className={`flex flex-col md:flex-row justify-center ${loading && 'opacity-0'}`}>
-              {/* <MealSheet /> */}
-              <MealSheetRamadan/>
+              <MealSheet />
+              {/* <MealSheetRamadan/> */}
               <UpcomingMeals />
             </div>
             :

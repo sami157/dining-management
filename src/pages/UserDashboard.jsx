@@ -392,8 +392,8 @@ const UserDashboard = () => {
                                                                     <span className={`text-[9px] font-bold opacity-40 uppercase transition-all ${canEditQty ? 'mt-3' : ''}`}>
                                                                         {/* Ramadan */}
                                                                         {
-                                                                            type[0] === 'm' ? 'S' :
-                                                                                type[0] === 'e' ? 'I' :
+                                                                            type[0] === 'm' ? 'M' :
+                                                                                type[0] === 'e' ? 'E' :
                                                                                     'N'
                                                                         }
                                                                     </span>

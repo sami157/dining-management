@@ -46,8 +46,8 @@ const GeneralInfo = ({ managerList, isLoading }) => {
             <h2 className="text-2xl py-4 font-black tracking-tighter uppercase italic text-gray-800">Meal Deadlines</h2>
 
             <div className="text-base-content/60 text-sm tracking-wide">
-                <p><span className='font-bold uppercase'>Sehri:</span> Previous Day 10 PM</p>
-                <p><span className='font-bold uppercase'>Iftaar:</span> Same Day 2 PM</p>
+                <p><span className='font-bold uppercase'>Morning:</span> Previous Day 10 PM</p>
+                <p><span className='font-bold uppercase'>Evening:</span> Same Day 10 AM</p>
                 <p><span className='font-bold uppercase'>Night:</span> Same Day 2 PM</p>
             </div>
         </div>

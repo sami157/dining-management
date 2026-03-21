@@ -2,17 +2,29 @@ import React, { useState, useMemo } from 'react'
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
 import useAuth from '../hooks/useAuth';
-import { addDays, format } from 'date-fns';
-import Loading from './Loading';
+import { addDays, format, set, isSameDay } from 'date-fns';
 import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
+import GeneralInfo from './GeneralInfo';
 
 export const MealSheet = () => {
     const axiosSecure = useAxiosSecure()
     const { loading } = useAuth()
     const [searchTerm, setSearchTerm] = useState('');
-    const [tomorrow, setTomorrow] = useState(false)
-    const [day, setDay] = useState(new Date());
+    const getInitialDay = () => {
+        const now = new Date();
+        const threshold = set(now, {
+            hours: 22,
+            minutes: 30,
+            seconds: 0,
+            milliseconds: 0,
+        });
+
+        return now >= threshold ? addDays(now, 1) : now;
+    };
+    const [day, setDay] = useState(getInitialDay);
     const todayStr = format(day, 'yyyy-MM-dd');
+    const isTomorrow = isSameDay(day, addDays(new Date(), 1));
+
 
     // 1. Fetch all users
     const { data: usersData, isLoading: usersLoading } = useQuery({
@@ -24,8 +36,10 @@ export const MealSheet = () => {
         },
     });
 
+    const managers = usersData?.filter(user => user.role === 'admin' && user.name !== 'Kawsar Molla') || [];
+
     // 2. Fetch today's registrations
-    const { data: registrationsData, isLoading: registrationsLoading, refetch: refetchRegistrations } = useQuery({
+    const { data: registrationsData, isLoading: registrationsLoading } = useQuery({
         queryKey: ['todayRegistrations', todayStr],
         enabled: !loading,
         queryFn: async () => {
@@ -35,15 +49,13 @@ export const MealSheet = () => {
     });
 
     const handleTomorrowToggle = () => {
-        if (tomorrow) {
+        if (isTomorrow) {
             setDay(new Date());
-            setTomorrow(false);
         } else {
             setDay(addDays(new Date(), 1));
-            setTomorrow(true);
         }
-        refetchRegistrations();
-    }
+    };
+
 
     // 3. Calculate Totals for the Brackets
     const mealTotals = useMemo(() => {
@@ -72,13 +84,13 @@ export const MealSheet = () => {
 
     const SkeletonRow = () => {
         return (
-            <tbody className='text-sm skeleton text-base-200/40'>
+            <tbody className='text-sm animate-pulse text-base-200/40'>
                 <tr className='h-15 group'>
                     <td>
-                        <span className='h-12 py-2 px-6 bg-base-200/40 rounded-lg skeleton'></span>
+                        <span className='h-12 py-2 px-6 bg-base-200/40 rounded-lg animate-pulse'></span>
                     </td>
                     <td>
-                        <span className='h-12 py-2 px-12 lg:px-20 text-left bg-base-200/40 rounded-lg skeleton'></span>
+                        <span className='h-12 py-2 px-12 lg:px-20 text-left bg-base-200/40 rounded-lg animate-pulse'></span>
                     </td>
                     <td className='w-full h-15 flex gap-5 justify-center py-1 items-center'>
                         <MealBox />
@@ -138,7 +150,7 @@ export const MealSheet = () => {
                 </div>
                 {/* Table and Footer */}
                 <div className='space-y-2'>
-                    <div className='overflow-x-auto h-95 md:h-screen grow border border-base-300 mask-b-from-95% mask-b-to-100%'>
+                    <div className='overflow-x-auto h-95 md:h-screen grow border border-base-300 mask-b-from-98% mask-b-to-100%'>
                         <table className='table table-sm'>
                             <thead className='rounded top-0'>
                                 <tr className='text-base-content/70'>
@@ -253,6 +265,7 @@ export const MealSheet = () => {
                             <span className='font-black text-lg'>{filteredUsers?.length || 0}</span> Members
                         </span>
                     </div>
+                    <GeneralInfo managerList={managers} isLoading={usersLoading} />
                 </div>
             </div>
         </div>

@@ -76,13 +76,7 @@ const UpcomingMeals = () => {
 
                             return (
                                 <div key={key} className="h-full">
-                                    {/* <UpcomingMealCard
-                                        date={date}
-                                        schedule={schedule}
-                                        dataLoading={dataLoading}
-                                        refetch={refetch}
-                                    /> */}
-                                    <UpcomingMealCardRamadan
+                                    <UpcomingMealCard
                                         date={date}
                                         schedule={schedule}
                                         dataLoading={dataLoading}
