@@ -36,7 +36,7 @@ export const MealSheet = () => {
         },
     });
 
-    const managers = usersData?.filter(user => user.role === 'admin' && user.name !== 'Kawsar Molla') || [];
+    const managers = usersData?.filter(user => user.role === 'admin' && user.name !== 'Kawsar Molla' && user.name !== 'Tanzir Ahmed Sami') || [];
 
     // 2. Fetch today's registrations
     const { data: registrationsData, isLoading: registrationsLoading } = useQuery({

@@ -26,6 +26,7 @@ export const UserMonthlyStats = ({ finalizationData, finalizationLoading }) => {
 
     // 3. Data Ready State
     const { mealRate, mealCost, mosqueFee, previousBalance, newBalance } = finalizationData;
+    console.log(finalizationData)
 
     return (
         <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">

@@ -225,6 +225,23 @@ const UserDashboard = () => {
     const showMenu = (date) => { setSelectedDate(date); setShowModal(true); }
     const closeModal = () => { setShowModal(false); setSelectedDate(null); }
 
+    const StatItem = ({ label, value, colorClass, isLoading, symbol = "৳" }) => (
+        <div className={`flex items-center justify-between p-3 rounded-xl transition-all ${colorClass} ${isLoading ? 'animate-pulse opacity-70' : ''}`}>
+            <span className="text-[10px] uppercase tracking-widest font-bold opacity-80">
+                {label}
+            </span>
+            <div className="text-right">
+                {isLoading ? (
+                    <div className="h-6 w-16 bg-current/20 rounded-md" />
+                ) : (
+                    <p className="text-lg font-black leading-none">
+                        {typeof value === 'number' && label !== 'Total Meals' ? `${symbol}${value.toLocaleString(undefined, { minimumFractionDigits: value % 1 !== 0 ? 2 : 0 })}` : value}
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+
     return (
         <div>
             <div className='p-4 flex flex-col items-center'>
@@ -240,76 +257,70 @@ const UserDashboard = () => {
                         </button>
                     </div>
 
-                    <div className={`grid grid-cols-1 self-center gap-2 p-2 bg-base-200/80 rounded-xl`}>
+                    <div className="grid grid-cols-1 md:w-70 mx-auto gap-3 p-3 bg-base-200/80 border border-base-300 rounded-2xl shadow-inner">
 
-                        {/* Total Meals */}
-                        <div className={`flex gap-6 items-center justify-between p-2 bg-primary/15 rounded-lg ${dataLoading && 'animate-pulse'}`}>
-                            <span className={`text-xs uppercase tracking-wider font-semibold text-primary`}>Total Meals</span>
-                            {
-                                dataLoading ? (
-                                    <p className={`${dataLoading && 'animate-pulse text-transparent'}`}>1000</p>
-                                ) : (
-                                    <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-primary font-black'}`}>{
-                                        mealCountData?.totalMeals || 0
-                                    }</p>
-                                )
-                            }
-                        </div>
+                        {/* Primary Stats */}
+                        <StatItem
+                            label="Total Meals"
+                            value={mealCountData?.totalMeals || 0}
+                            colorClass="bg-primary/10 text-primary"
+                            isLoading={dataLoading}
+                        />
 
-                        {/* Monthly Deposit */}
-                        <div className={`flex gap-8 justify-between items-center p-2 bg-success/15 rounded-lg ${dataLoading && 'animate-pulse'}`}>
-                            <span className={`text-xs uppercase tracking-wider font-semibold text-success`}>Deposit</span>
-                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-success font-black'}`}>
-                                {
-                                    dataLoading ? (
-                                        <p className={`${dataLoading && 'animate-pulse text-transparent'}`}>1000</p>
-                                    ) : (
-                                        <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-success'}`}>
-                                            ৳{depositData?.deposit || 0
-                                            }</p>
-                                    )
-                                }
-                            </p>
-                        </div>
+                        <StatItem
+                            label="Monthly Deposit"
+                            value={depositData?.deposit || 0}
+                            colorClass="bg-success/10 text-success"
+                            isLoading={dataLoading}
+                        />
 
-                        {/* Fixed Deposit */}
-                        <div className={`flex gap-8 justify-between items-center p-2 bg-info/15 rounded-lg ${dataLoading && 'animate-pulse'}`}>
-                            <span className={`text-xs uppercase tracking-wider font-semibold text-info`}>Fixed Deposit</span>
-                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-info font-black'}`}>
-                                {
-                                    dataLoading ? (
-                                        <p className={`${dataLoading && 'animate-pulse text-transparent'}`}>1000</p>
-                                    ) : (
-                                        <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-info'}`}>
-                                            ৳{userData?.fixedDeposit || 0}</p>
-                                    )
-                                }
-                            </p>
-                        </div>
+                        <StatItem
+                            label="Fixed Deposit"
+                            value={userData?.fixedDeposit || 0}
+                            colorClass="bg-info/10 text-info"
+                            isLoading={dataLoading}
+                        />
 
-                        {/* Mosque Contribution */}
-                        <div className={`flex gap-8 justify-between items-center p-2 bg-base-300 rounded-lg ${dataLoading && 'animate-pulse'}`}>
-                            <span className={`text-xs uppercase tracking-wider font-semibold text-base-content/70`}>Mosque</span>
-                            <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-base-content font-black'}`}>
-                                {
-                                    dataLoading ? (
-                                        <p className={`${dataLoading && 'animate-pulse text-transparent'}`}>1000</p>
-                                    ) : (
-                                        <p className={`text-xl font-black ${dataLoading ? 'text-transparent' : 'text-base-content'}`}>
-                                            ৳{userData?.mosqueFee || 0}</p>
-                                    )
-                                }
-                            </p>
-                        </div>
+                        <StatItem
+                            label="Mosque"
+                            value={userData?.mosqueFee || 0}
+                            colorClass="bg-base-300 text-base-content"
+                            isLoading={dataLoading}
+                        />
 
+                        {/* Finalization Section */}
+                        {finalizationData && (
+                            <div className="mt-2 pt-4 border-t border-base-300 space-y-3">
+                                <StatItem
+                                    label="Meal Rate"
+                                    value={finalizationData?.mealRate || 0}
+                                    colorClass="bg-primary/5 text-primary border border-primary/30"
+                                    isLoading={dataLoading}
+                                />
+
+                                <StatItem
+                                    label="Meal Cost"
+                                    value={finalizationData?.mealCost || 0}
+                                    colorClass="bg-error/10 text-error border border-error/30"
+                                    isLoading={dataLoading}
+                                />
+
+                                <StatItem
+                                    label="Closing Balance"
+                                    value={finalizationData?.newBalance || 0}
+                                    colorClass={
+                                        finalizationData?.newBalance < 0
+                                            ? "bg-error/10 text-error border border-error/30"
+                                            : "bg-success/10 text-success border border-success/30"
+                                    }
+                                    isLoading={dataLoading}
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <div className={`${finalizationData ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'grid-cols-1 w-[94vw] md:w-2/5'}`}>
-                    <div className={`${!finalizationData && 'hidden'}`}>
-                        <UserMonthlyStats finalizationData={finalizationData} finalizationLoading={finalizationLoading} />
-                    </div>
-
+                <div className='grid-cols-1 w-[94vw] md:w-2/5'>
                     <div className='flex flex-col gap-4 justify-center items-center'>
                         <div className='p-2 flex flex-col items-center gap-2'>
                             <button
@@ -342,7 +353,7 @@ const UserDashboard = () => {
                                                             className={`text-2xl transition-transform active:scale-90 ${scheduleMap[dateStr] ? 'text-base-content hover:scale-110 cursor-pointer' : 'opacity-20 cursor-not-allowed'}`}
                                                             disabled={!scheduleMap[dateStr]}
                                                         >
-                                                            <Info size={20}/>
+                                                            <Info size={20} />
                                                         </button>
                                                         <div className='flex tracking-tighter uppercase flex-col'>
                                                             <span className={`text-sm ${dateStr === format(today, 'yyyy-MM-dd') ? 'font-bold' : 'font-medium'}`}>
