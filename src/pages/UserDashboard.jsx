@@ -58,6 +58,17 @@ const UserDashboard = () => {
         }
     });
 
+    const { data: userBalanceData, isLoading: userBalanceLoading } = useQuery({
+        queryKey: ['userBalance', monthString],
+        retry: false,
+        throwOnError: false,
+        enabled: !loading,
+        queryFn: async () => {
+            const response = await axiosSecure.get(`/finance/my-balance`);
+            return response.data;
+        }
+    });
+
     const { data, isLoading: mealLoading, refetch } = useQuery({
         queryKey: ['userMeals', monthString],
         queryFn: async () => {
@@ -235,7 +246,7 @@ const UserDashboard = () => {
                     <div className="h-6 w-16 bg-current/20 rounded-md" />
                 ) : (
                     <p className="text-lg font-black leading-none">
-                        {typeof value === 'number' && label !== 'Total Meals' ? `${symbol}${value.toLocaleString(undefined, { minimumFractionDigits: value % 1 !== 0 ? 2 : 0 })}` : value}
+                        {label !== 'Total Meals' ? `${symbol}${value.toLocaleString(undefined, { minimumFractionDigits: value % 1 !== 0 ? 2 : 0 })}` : value}
                     </p>
                 )}
             </div>
@@ -257,23 +268,9 @@ const UserDashboard = () => {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:w-70 mx-auto gap-3 p-3 bg-base-200/80 border border-base-300 rounded-2xl shadow-inner">
+                    <div className="grid grid-cols-1 w-full mx-4 md:w-70 md:mx-auto gap-3 p-3 bg-base-200/80 border border-base-300 rounded-2xl shadow-inner">
 
                         {/* Primary Stats */}
-                        <StatItem
-                            label="Total Meals"
-                            value={mealCountData?.totalMeals || 0}
-                            colorClass="bg-primary/10 text-primary"
-                            isLoading={dataLoading}
-                        />
-
-                        <StatItem
-                            label="Monthly Deposit"
-                            value={depositData?.deposit || 0}
-                            colorClass="bg-success/10 text-success"
-                            isLoading={dataLoading}
-                        />
-
                         <StatItem
                             label="Fixed Deposit"
                             value={userData?.fixedDeposit || 0}
@@ -287,6 +284,39 @@ const UserDashboard = () => {
                             colorClass="bg-base-300 text-base-content"
                             isLoading={dataLoading}
                         />
+                        <StatItem
+                            label="Monthly Deposit"
+                            value={depositData?.deposit || 0}
+                            colorClass={
+                                depositData?.deposit <= 0 ? "bg-error/10 text-error border border-dashed border-error" :
+                                    "bg-success/10 text-success"
+                            }
+                            isLoading={dataLoading}
+                        />
+
+                        <StatItem
+                            label="Total Meals"
+                            value={mealCountData?.totalMeals || 0}
+                            colorClass="bg-primary/10 text-primary"
+                            isLoading={dataLoading}
+                        />
+
+
+                        {
+                            !finalizationData && (
+                                <StatItem
+                                    label="Current Balance"
+                                    value={userBalanceData?.balance || 0}
+                                    colorClass={
+                                        userBalanceData?.balance < 0
+                                            ? "bg-error/10 text-error border border-error border-dashed"
+                                            : "bg-success/10 text-success border border-success border-dashed"
+                                    }
+                                    isLoading={dataLoading}
+                                />
+                            )
+                        }
+
 
                         {/* Finalization Section */}
                         {finalizationData && (
@@ -294,14 +324,14 @@ const UserDashboard = () => {
                                 <StatItem
                                     label="Meal Rate"
                                     value={finalizationData?.mealRate || 0}
-                                    colorClass="bg-primary/5 text-primary border border-primary/30"
+                                    colorClass="bg-primary/5 text-primary border border-primary border-dashed"
                                     isLoading={dataLoading}
                                 />
 
                                 <StatItem
                                     label="Meal Cost"
                                     value={finalizationData?.mealCost || 0}
-                                    colorClass="bg-error/10 text-error border border-error/30"
+                                    colorClass="bg-error/10 text-error border border-error border-dashed"
                                     isLoading={dataLoading}
                                 />
 
@@ -310,8 +340,8 @@ const UserDashboard = () => {
                                     value={finalizationData?.newBalance || 0}
                                     colorClass={
                                         finalizationData?.newBalance < 0
-                                            ? "bg-error/10 text-error border border-error/30"
-                                            : "bg-success/10 text-success border border-success/30"
+                                            ? "bg-error/10 text-error border border-error border-dashed"
+                                            : "bg-success/10 text-success border border-success border-dashed"
                                     }
                                     isLoading={dataLoading}
                                 />
