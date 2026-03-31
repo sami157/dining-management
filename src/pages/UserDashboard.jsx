@@ -237,7 +237,7 @@ const UserDashboard = () => {
     const closeModal = () => { setShowModal(false); setSelectedDate(null); }
 
     const StatItem = ({ label, value, colorClass, isLoading, symbol = "৳" }) => (
-        <div className={`flex items-center justify-between p-3 rounded-xl transition-all ${colorClass} ${isLoading ? 'animate-pulse opacity-70' : ''}`}>
+        <div className={`flex items-center justify-between gap-4 p-3 rounded-xl transition-all ${colorClass} ${isLoading ? 'animate-pulse opacity-70' : ''}`}>
             <span className="text-[10px] uppercase tracking-widest font-bold opacity-80">
                 {label}
             </span>
@@ -268,7 +268,7 @@ const UserDashboard = () => {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 w-full mx-4 md:w-70 md:mx-auto gap-3 p-3 bg-base-200/80 border border-base-300 rounded-2xl shadow-inner">
+                    <div className="grid grid-cols-1 md:w-70 mx-auto gap-3 p-3 bg-base-200/80 border border-base-300 rounded-2xl shadow-inner">
 
                         {/* Primary Stats */}
                         <StatItem
