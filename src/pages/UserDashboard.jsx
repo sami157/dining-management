@@ -3,10 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { format, addMonths, subMonths, lastDayOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
-import { GiMeal } from 'react-icons/gi';
 import useAuth from '../hooks/useAuth';
-import { UserMonthlyStats } from '../components/UserDashboard/UserMonthlyStats';
 import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, BadgeInfo, Info } from 'lucide-react';
+import { getMealLabel, getMealShortLabel } from '../utils/mealTypes';
 
 
 const getToday = () => {
@@ -14,6 +13,23 @@ const getToday = () => {
     today.setHours(0, 0, 0, 0);
     return today;
 };
+
+const StatItem = ({ label, value, colorClass, isLoading, symbol = "৳" }) => (
+    <div className={`flex items-center justify-between gap-4 p-3 rounded-xl transition-all ${colorClass} ${isLoading ? 'animate-pulse opacity-70' : ''}`}>
+        <span className="text-[10px] uppercase tracking-widest font-bold opacity-80">
+            {label}
+        </span>
+        <div className="text-right">
+            {isLoading ? (
+                <div className="h-6 w-16 bg-current/20 rounded-md" />
+            ) : (
+                <p className="text-lg font-black leading-none">
+                    {label !== 'Total Meals' ? `${symbol}${value.toLocaleString(undefined, { minimumFractionDigits: value % 1 !== 0 ? 2 : 0 })}` : value}
+                </p>
+            )}
+        </div>
+    </div>
+);
 
 const UserDashboard = () => {
     const axiosSecure = useAxiosSecure();
@@ -208,7 +224,7 @@ const UserDashboard = () => {
         );
     };
 
-    const dataLoading = depositLoading || countLoading || userDataLoading || mealLoading
+    const dataLoading = depositLoading || countLoading || userDataLoading || mealLoading || finalizationLoading || userBalanceLoading;
 
     const MealBox = ({ status, date, mealType }) => {
         let bgColor = 'bg-base-300';
@@ -235,23 +251,6 @@ const UserDashboard = () => {
 
     const showMenu = (date) => { setSelectedDate(date); setShowModal(true); }
     const closeModal = () => { setShowModal(false); setSelectedDate(null); }
-
-    const StatItem = ({ label, value, colorClass, isLoading, symbol = "৳" }) => (
-        <div className={`flex items-center justify-between gap-4 p-3 rounded-xl transition-all ${colorClass} ${isLoading ? 'animate-pulse opacity-70' : ''}`}>
-            <span className="text-[10px] uppercase tracking-widest font-bold opacity-80">
-                {label}
-            </span>
-            <div className="text-right">
-                {isLoading ? (
-                    <div className="h-6 w-16 bg-current/20 rounded-md" />
-                ) : (
-                    <p className="text-lg font-black leading-none">
-                        {label !== 'Total Meals' ? `${symbol}${value.toLocaleString(undefined, { minimumFractionDigits: value % 1 !== 0 ? 2 : 0 })}` : value}
-                    </p>
-                )}
-            </div>
-        </div>
-    );
 
     return (
         <div>
@@ -431,12 +430,7 @@ const UserDashboard = () => {
                                                                     </div>
 
                                                                     <span className={`text-[9px] font-bold opacity-40 uppercase transition-all ${canEditQty ? 'mt-3' : ''}`}>
-                                                                        {/* Ramadan */}
-                                                                        {
-                                                                            type[0] === 'm' ? 'M' :
-                                                                                type[0] === 'e' ? 'E' :
-                                                                                    'N'
-                                                                        }
+                                                                        {getMealShortLabel(type)}
                                                                     </span>
                                                                 </div>
                                                             );
@@ -498,7 +492,7 @@ const UserDashboard = () => {
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex flex-col">
                                                         <h4 className="font-black text-lg capitalize tracking-tight flex items-center gap-2">
-                                                            {mealType}
+                                                            {getMealLabel(mealType)}
                                                             <div className="bg-base-300 px-4 py-1 rounded-full text-xs font-bold opacity-70">
                                                                 {status.weight}
                                                             </div>

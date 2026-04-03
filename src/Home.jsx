@@ -3,7 +3,6 @@ import useAuth from './hooks/useAuth'
 import Loading from './components/Loading'
 import { Link } from 'react-router';
 import { MealSheet } from './components/MealSheet';
-import { MealSheetRamadan } from './components/MealSheetRamadan';
 
 const Home = () => {
   const { user, loading } = useAuth()
@@ -11,13 +10,12 @@ const Home = () => {
     <div>
       {
         loading ?
-            <Loading />
+          <Loading />
           :
           user
             ?
             <div className={`flex flex-col md:flex-row justify-center ${loading && 'opacity-0'}`}>
               <MealSheet />
-              {/* <MealSheetRamadan/> */}
               <UpcomingMeals />
             </div>
             :

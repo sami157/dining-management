@@ -5,6 +5,7 @@ import useAuth from '../hooks/useAuth';
 import { addDays, format, set, isSameDay } from 'date-fns';
 import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
 import GeneralInfo from './GeneralInfo';
+import { getMealShortLabel } from '../utils/mealTypes';
 
 export const MealSheet = () => {
     const axiosSecure = useAxiosSecure()
@@ -158,9 +159,9 @@ export const MealSheet = () => {
                                     <th className='font-black uppercase'>Member</th>
                                     <th className='py-2'>
                                         <div className='flex  gap-7 items-center justify-center'>
-                                            {/* M Column Header */}
+                                            {/* Breakfast Column Header */}
                                             <div className="flex flex-col font-black justify-center items-center">
-                                                <span>M</span>
+                                                <span>{getMealShortLabel('morning')}</span>
                                                 {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>
@@ -169,9 +170,9 @@ export const MealSheet = () => {
                                                     )
                                                 }
                                             </div>
-                                            {/* E Column Header */}
+                                            {/* Lunch Column Header */}
                                             <div className="flex flex-col font-black justify-center items-center">
-                                                <span>E</span>
+                                                <span>{getMealShortLabel('evening')}</span>
                                                 {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>
@@ -180,9 +181,9 @@ export const MealSheet = () => {
                                                     )
                                                 }
                                             </div>
-                                            {/* N Column Header */}
+                                            {/* Dinner Column Header */}
                                             <div className="flex flex-col font-black justify-center items-center">
-                                                <span>N</span>
+                                                <span>{getMealShortLabel('night')}</span>
                                                 {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>

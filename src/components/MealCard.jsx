@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { Check, X, Edit2, Trash2, XCircle, Info } from 'lucide-react'; // Modern icons
+import { getMealLabel } from '../utils/mealTypes';
 
 const MealCard = ({ schedule, onUpdate, onDelete }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -114,8 +115,7 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
                             <div className='flex justify-between items-center mb-1'>
                                 <span className={`text-xs font-bold uppercase tracking-widest ${meal?.isAvailable ? 'text-primary' : 'text-base-content/40'}`}>
                                     {
-                                        meal.mealType === 'morning' ? 'Morning' :
-                                            meal.mealType === 'evening' ? 'Evening' : 'Night'
+                                        getMealLabel(meal.mealType)
                                     }
                                 </span>
                                 {meal?.isAvailable && (

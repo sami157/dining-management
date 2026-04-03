@@ -8,6 +8,7 @@ import { MdAdminPanelSettings } from "react-icons/md";
 import { Plus, Minus, ChevronLeft, ChevronRight, Cog } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
+import { getMealShortLabel } from '../utils/mealTypes';
 
 // ─── User Edit Modal 
 const UserEditModal = ({ user, onClose, onSave }) => {
@@ -314,7 +315,7 @@ const MemberManagement = () => {
                                       {reg && (reg.numberOfMeals > 1 ? `x${reg.numberOfMeals}` : null)}
                                     </button>
                                   </div>
-                                  <span className={`text-[7px] font-black opacity-30 ${canEditQty ? 'mt-3' : ''}`}>{type[0].toUpperCase()}</span>
+                                  <span className={`text-[7px] font-black opacity-30 ${canEditQty ? 'mt-3' : ''}`}>{getMealShortLabel(type)}</span>
                                 </div>
                               );
                             })}

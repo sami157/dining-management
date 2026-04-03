@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import useAuth from '../hooks/useAuth';
 import { useState } from 'react';
+import { getMealLabel } from '../utils/mealTypes';
 
 const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
     const axiosSecure = useAxiosSecure();
@@ -128,10 +129,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                                             </div>
                                                             <div className='flex flex-col items-start'>
                                                                 <h3 className="font-bold uppercase tracking-wide text-sm flex items-center gap-2">
-                                                                    {
-                                                                        meal.mealType === 'morning' ? 'Morning' :
-                                                                            meal.mealType === 'evening' ? 'Evening' : 'Night'
-                                                                    }
+                                                                    {getMealLabel(meal.mealType)}
                                                                 </h3>
                                                                 <div>
                                                                     {meal.weight && <span className="opacity-40 text-xs font-bold">{

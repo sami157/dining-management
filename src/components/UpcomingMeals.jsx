@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight, CalendarDays, LayoutGrid } from 'lucide-reac
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import UpcomingMealCard from '../components/UpcomingMealCard';
 import useAuth from '../hooks/useAuth';
-import UpcomingMealCardRamadan from './UpcomingMealCardRamadan';
 
 const UpcomingMeals = () => {
     const axiosSecure = useAxiosSecure();

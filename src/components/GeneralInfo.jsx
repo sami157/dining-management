@@ -1,5 +1,6 @@
 import { Mail, Phone } from 'lucide-react';
 import React from 'react';
+import { getMealLabel } from '../utils/mealTypes';
 
 const GeneralInfo = ({ managerList, isLoading }) => {
     if (isLoading) {
@@ -46,13 +47,13 @@ const GeneralInfo = ({ managerList, isLoading }) => {
             <h2 className="text-2xl py-4 font-black tracking-tighter uppercase italic text-base-content">Meal Deadlines</h2>
             {/* name of each tab group should be unique */}
             <div className="tabs tabs-box p-2">
-                <input type="radio" name="my_tabs_6" className="tab font-bold drop-shadow-xs shadow-none" aria-label="Morning" defaultChecked/>
+                <input type="radio" name="my_tabs_6" className="tab font-bold drop-shadow-xs shadow-none" aria-label={getMealLabel('morning')} defaultChecked/>
                 <div className="tab-content bg-base-100 drop-shadow-xs border-base-200 p-4 mt-2">Previous Day 10 PM</div>
 
-                <input type="radio" name="my_tabs_6" className="tab font-bold drop-shadow-xs shadow-none" aria-label="Evening" />
+                <input type="radio" name="my_tabs_6" className="tab font-bold drop-shadow-xs shadow-none" aria-label={getMealLabel('evening')} />
                 <div className="tab-content bg-base-100 drop-shadow-xs border-base-200 p-4 mt-2">Same Day 8 AM</div>
 
-                <input type="radio" name="my_tabs_6" className="tab font-bold drop-shadow-xs shadow-none" aria-label="Night" />
+                <input type="radio" name="my_tabs_6" className="tab font-bold drop-shadow-xs shadow-none" aria-label={getMealLabel('night')} />
                 <div className="tab-content bg-base-100 drop-shadow-xs border-base-200 p-4 mt-2">Same Day 2 PM</div>
             </div>
         </div>
