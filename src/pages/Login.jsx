@@ -2,10 +2,14 @@ import React, { useState } from 'react'
 import { useForm } from "react-hook-form"
 import useAuth from '../hooks/useAuth'
 import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router'
-import { SearchX , Key } from 'lucide-react'
+import { Link, useNavigate } from 'react-router'
+import { SearchX, Key } from 'lucide-react'
 import useAxiosSecure from '../hooks/useAxiosSecure'
 import { useQuery } from '@tanstack/react-query'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 const Login = () => {
     const navigate = useNavigate()
@@ -13,6 +17,8 @@ const Login = () => {
     const { register, formState: { errors }, handleSubmit } = useForm()
     const [email, setEmail] = useState('')
     const axiosSecure = useAxiosSecure()
+    const emailField = register("email", { required: "Email Address is required" })
+    const passwordField = register("password", { required: "Password is required" })
 
     const { refetch, isFetching } = useQuery({
         queryKey: ['userExists', email],
@@ -71,40 +77,69 @@ const Login = () => {
     }
 
     return (
-        <div className='flex flex-col gap-4 min-h-screen items-center mt-[calc(100vh/5)]'>
-            <p className='text-4xl font-bold'>Login</p>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="card bg-base-100 w-[85vw] md:w-full">
-                    <div className="card-body">
-                        <fieldset className="fieldset">
-                            {/* Email */}
-                            <label className="label">Email</label>
-                            <input {...register("email", { required: "Email Address is required" })} type="email" className="input" placeholder="Email " onChange={(e) => {
-                                setEmail(e.target.value)
-                            }} />
-                            {errors.email && <p className='text-error font-semibold' role="alert">{errors.email.message}</p>}
-
-                            {/* Password */}
-                            <div className='flex items-center justify-between'>
-                                <label className="label">Password</label>
+        <div className='min-h-screen'>
+            <div className='flex min-h-screen items-center justify-center'>
+                <Card className='w-full max-w-md'>
+                    <CardHeader className='space-y-2 pb-4'>
+                        <CardTitle className='text-3xl font-bold tracking-tight'>Login</CardTitle>
+                        <CardDescription>Enter your account credentials to continue.</CardDescription>
+                    </CardHeader>
+                    <CardContent className='space-y-6'>
+                        <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
+                            <div className='space-y-2'>
+                                <Label htmlFor='email'>Email</Label>
+                                <Input
+                                    id='email'
+                                    {...emailField}
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    onChange={(e) => {
+                                        emailField.onChange(e)
+                                        setEmail(e.target.value)
+                                    }}
+                                />
+                                {errors.email && <p className='text-sm font-semibold text-destructive' role="alert">{errors.email.message}</p>}
                             </div>
-                            <input {...register("password", { required: "Password is required" })} type="password" className="input" placeholder="Password" />
-                            {errors.password && <p className='text-error font-semibold' role="alert">{errors.password.message}</p>}
 
-                            <div><a onClick={() => navigate('/register')} className="link link-info">Not registered yet? Click here</a></div>
-                            <button type='submit' className="btn btn-primary mt-2">Login</button>
-                        </fieldset>
-                    </div>
-                </div>
-            </form>
-            <div className='gap-1 flex flex-col items-center'>
-                <button
-                    disabled={isFetching}
-                    onClick={forgotPasswordAction}
-                    className='btn font-bold bg-base-100'>
-                    <span><Key size={18} /></span>Forgot Password?
-                </button>
-                <p className='px-4 py-1 text-xs text-center text-base-content/50'>In such case, write your email address above and click this button</p>
+                            <div className='space-y-2'>
+                                <Label htmlFor='password'>Password</Label>
+                                <Input
+                                    id='password'
+                                    {...passwordField}
+                                    type="password"
+                                    placeholder="Enter your password"
+                                />
+                                {errors.password && <p className='text-sm font-semibold text-destructive' role="alert">{errors.password.message}</p>}
+                            </div>
+
+                            <div className='flex items-center justify-between gap-3 text-sm'>
+                                <Link to='/register' className='font-semibold text-primary underline-offset-4 hover:underline'>
+                                    Not registered yet? Click here
+                                </Link>
+                            </div>
+
+                            <Button type='submit' className='w-full'>
+                                Login
+                            </Button>
+                        </form>
+
+                        <div className='rounded-md bg-muted p-4'>
+                            <Button
+                                type='button'
+                                variant='outline'
+                                disabled={isFetching}
+                                onClick={forgotPasswordAction}
+                                className='w-full bg-background'
+                            >
+                                <Key size={18} />
+                                Forgot Password?
+                            </Button>
+                            <p className='mt-2 text-xs text-center leading-5 text-muted-foreground'>
+                                Write your email address above, then use this button to send a password reset email.
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

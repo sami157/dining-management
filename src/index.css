@@ -1,7 +1,79 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Tiro+Bangla:ital@0;1&family=Zalando+Sans+Expanded:ital,wght@0,200..900;1,200..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Tiro+Bangla:ital@0;1&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@100..900&display=swap');
 @import "tailwindcss";
 @plugin "daisyui";
+
+:root {
+  --background: oklch(100% 0 0);
+  --foreground: oklch(20% 0 0);
+  --card: oklch(100% 0 0);
+  --card-foreground: oklch(20% 0 0);
+  --popover: oklch(100% 0 0);
+  --popover-foreground: oklch(20% 0 0);
+  --primary: oklch(90% 0.2 55.934);
+  --primary-foreground: oklch(42% 0.095 57.708);
+  --secondary: oklch(94.9% 0.199 91.936);
+  --secondary-foreground: oklch(40% 0.123 38.172);
+  --muted: oklch(97% 0 0);
+  --muted-foreground: oklch(48% 0 0);
+  --accent: oklch(97% 0 0);
+  --accent-foreground: oklch(20% 0 0);
+  --destructive: oklch(72.3% 0.191 22.216);
+  --destructive-foreground: oklch(39% 0.141 25.723);
+  --border: oklch(92% 0 0);
+  --input: oklch(92% 0 0);
+  --ring: oklch(90% 0.2 55.934);
+  --radius: 1rem;
+}
+
+.dark,
+[data-theme="dark"] {
+  --background: oklch(24% 0.023 329.708);
+  --foreground: oklch(72.354% 0.092 79.129);
+  --card: oklch(21% 0.021 329.708);
+  --card-foreground: oklch(72.354% 0.092 79.129);
+  --popover: oklch(21% 0.021 329.708);
+  --popover-foreground: oklch(72.354% 0.092 79.129);
+  --primary: oklch(71.996% 0.123 62.756);
+  --primary-foreground: oklch(14.399% 0.024 62.756);
+  --secondary: oklch(34.465% 0.029 199.194);
+  --secondary-foreground: oklch(86.893% 0.005 199.194);
+  --muted: oklch(21% 0.021 329.708);
+  --muted-foreground: oklch(63% 0.03 79.129);
+  --accent: oklch(34.465% 0.029 199.194);
+  --accent-foreground: oklch(86.893% 0.005 199.194);
+  --destructive: oklch(77.318% 0.128 31.871);
+  --destructive-foreground: oklch(15.463% 0.025 31.871);
+  --border: oklch(16% 0.019 329.708);
+  --input: oklch(16% 0.019 329.708);
+  --ring: oklch(71.996% 0.123 62.756);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.5rem);
+}
 
 /* light theme */
 @plugin "daisyui/theme" {
@@ -78,9 +150,9 @@
 
 /* fonts */
 .title-font {
-  font-family: "Zalando Sans Expanded", sans-serif;
+  font-family: "Outfit", sans-serif;
   font-optical-sizing: auto;
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .bangla-text {
@@ -93,10 +165,26 @@
 }
 
 * {
-  font-family: "Google Sans Flex", sans-serif;
-  font-variation-settings:
-    "wdth" 100,
-    "ROND" 25;
+  font-family: "Outfit", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+body {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(
+      circle at top,
+      color-mix(in oklch, var(--primary) 20%, transparent),
+      transparent 38%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--background) 92%, white),
+      var(--background)
+    );
+  background-attachment: fixed;
+  color: var(--foreground);
 }
 
 /* Navlink styling */
