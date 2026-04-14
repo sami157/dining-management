@@ -8,7 +8,7 @@ function Input({ className, type = "text", ...props }) {
       type={type}
       data-slot="input"
       className={cn(
-        "flex w-full rounded-sm border border-input bg-background p-2 text-sm text-foreground transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50",
+        "flex w-full rounded-md bg-muted p-2 text-sm text-foreground transition-colors placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}

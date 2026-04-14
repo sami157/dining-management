@@ -3,9 +3,10 @@ import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
 import useAuth from '../hooks/useAuth';
 import { addDays, format, set, isSameDay } from 'date-fns';
-import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
+import { UserSearch, Utensils } from 'lucide-react';
 import GeneralInfo from './GeneralInfo';
 import { getMealShortLabel } from '../utils/mealTypes';
+import { Input } from './ui/input';
 
 export const MealSheet = () => {
     const axiosSecure = useAxiosSecure()
@@ -15,7 +16,7 @@ export const MealSheet = () => {
         const now = new Date();
         const threshold = set(now, {
             hours: 22,
-            minutes: 30,
+            minutes: 0,
             seconds: 0,
             milliseconds: 0,
         });
@@ -24,7 +25,10 @@ export const MealSheet = () => {
     };
     const [day, setDay] = useState(getInitialDay);
     const todayStr = format(day, 'yyyy-MM-dd');
-    const isTomorrow = isSameDay(day, addDays(new Date(), 1));
+    const today = new Date();
+    const tomorrow = addDays(today, 1);
+    const isTodayActive = isSameDay(day, today);
+    const isTomorrowActive = isSameDay(day, tomorrow);
 
 
     // 1. Fetch all users
@@ -48,15 +52,6 @@ export const MealSheet = () => {
             return response.data.registrations;
         },
     });
-
-    const handleTomorrowToggle = () => {
-        if (isTomorrow) {
-            setDay(new Date());
-        } else {
-            setDay(addDays(new Date(), 1));
-        }
-    };
-
 
     // 3. Calculate Totals for the Brackets
     const mealTotals = useMemo(() => {
@@ -108,10 +103,10 @@ export const MealSheet = () => {
         const reg = getRegistration(userId, mealType);
         return (
             <div
-                className={`w-7 h-7 rounded-md transition-all duration-500 border flex items-center justify-center font-bold text-lg ${reg
+                className={`w-7 h-7 rounded-md transition-all duration-500 flex items-center justify-center font-bold text-lg ${reg
                     ? 'bg-primary border-primary text-white'
-                    : 'bg-base-200/50 border-base-300 text-transparent'
-                    } ${registrationsLoading && 'animate-wiggle border border-dashed border-primary bg-base-300'
+                    : 'bg-muted text-transparent'
+                    } ${registrationsLoading && 'animate-wiggle border border-dashed border-primary bg-background'
                     }`}
                 title={mealType}
             >
@@ -125,25 +120,52 @@ export const MealSheet = () => {
             <div>
                 {/* Header */}
                 <div className='p-2 flex flex-col justify-center gap-6'>
-                    <div className='flex justify-between items-center'>
-                        <div className='flex gap-2 items-center'>
+                    <div className='flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between'>
+                        <div className='flex min-w-0 gap-2 items-center'>
                             <Utensils className="text-primary" size={40} />
-                            <div className='text-xl min-w-60 font-black italic flex flex-col uppercase tracking-tighter'>
+                            <div className='min-w-0 flex-1 text-xl font-black italic flex flex-col uppercase tracking-tighter'>
                                 Daily Meal Sheet
                                 <p className='text-xs text-base-content/40 font-black uppercase transition-all tracking-widest'>
                                     {format(day, 'EEEE, MMMM dd, yyyy')}
                                 </p>
                             </div>
                         </div>
-                        <ArrowRightLeft onClick={handleTomorrowToggle} className='text-primary hover:scale-105 cursor-pointer px-2 py-1 bg-base-200/50 rounded-lg' size={40} />
+
+                        {/* Datepicker */}
+                        <div className='flex items-center gap-2'>
+                            <button
+                                type='button'
+                                onClick={() => setDay(today)}
+                                className={`rounded-md px-3 py-2 text-left transition-all ${isTodayActive
+                                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                                    : 'text-base-content/70 hover:bg-base-100'
+                                    }`}
+                            >
+                                <div className='font-semibold normal-case tracking-normal'>
+                                    {format(today, 'dd MMM, EEE')}
+                                </div>
+                            </button>
+                            <button
+                                type='button'
+                                onClick={() => setDay(tomorrow)}
+                                className={`rounded-md px-3 py-2 text-left transition-all ${isTomorrowActive
+                                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                                    : 'text-base-content/70 hover:bg-base-100'
+                                    }`}
+                            >
+                                <div className='font-semibold normal-case tracking-normal'>
+                                    {format(tomorrow, 'dd MMM, EEE')}
+                                </div>
+                            </button>
+                        </div>
                     </div>
 
                     {/* Search Input */}
                     <div className='w-full'>
-                        <input
+                        <Input
                             type="text"
                             placeholder="Search by Name/Room.."
-                            className='input w-full bg-base-200/70 border-base-200 focus:input-primary tracking-tight h-10 text-sm'
+                            className='w-full rounded-md'
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -151,14 +173,14 @@ export const MealSheet = () => {
                 </div>
                 {/* Table and Footer */}
                 <div className='space-y-2'>
-                    <div className='overflow-x-auto h-95 md:h-screen grow border border-base-300 mask-b-from-98% mask-b-to-100%'>
+                    <div className='overflow-x-auto h-95 md:h-screen grow mask-b-from-98% mask-b-to-100%'>
                         <table className='table table-sm'>
                             <thead className='rounded top-0'>
                                 <tr className='text-base-content/70'>
                                     <th className='font-black uppercase'>Room</th>
                                     <th className='font-black uppercase'>Member</th>
                                     <th className='py-2'>
-                                        <div className='flex  gap-7 items-center justify-center'>
+                                        <div className='flex gap-6 items-center justify-center'>
                                             {/* Breakfast Column Header */}
                                             <div className="flex flex-col font-black justify-center items-center">
                                                 <span>{getMealShortLabel('morning')}</span>
@@ -166,7 +188,7 @@ export const MealSheet = () => {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>
                                                     ) : (
-                                                        <span className=" font-bold text-lg rounded-md">{mealTotals?.morning}</span>
+                                                        <span className=" font-bold text-lg rounded-md">{mealTotals?.morning < 1 ? <span className='text-transparent'>00</span> : mealTotals?.morning}</span>
                                                     )
                                                 }
                                             </div>
@@ -177,7 +199,7 @@ export const MealSheet = () => {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>
                                                     ) : (
-                                                        <span className=" font-bold text-lg rounded-md">{mealTotals?.evening}</span>
+                                                        <span className=" font-bold text-lg rounded-md">{mealTotals?.evening < 1 ? <span className='text-transparent'>0</span> : mealTotals?.evening}</span>
                                                     )
                                                 }
                                             </div>
@@ -188,7 +210,7 @@ export const MealSheet = () => {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>
                                                     ) : (
-                                                        <span className=" font-bold text-lg rounded-md">{mealTotals?.night}</span>
+                                                        <span className=" font-bold text-lg rounded-md">{mealTotals?.night < 1 ? <span className='text-transparent'>0</span> : mealTotals?.night}</span>
                                                     )
                                                 }
                                             </div>

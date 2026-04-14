@@ -42,7 +42,7 @@ const UpcomingMeals = () => {
             <div className="max-w-7xl mx-auto">
 
                 {/* Header Section */}
-                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-base-300">
+                <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
                     <div className="space-y-2">
                         <div className="flex items-center gap-2 text-primary mb-1">
                             <LayoutGrid size={20} />
@@ -56,14 +56,14 @@ const UpcomingMeals = () => {
 
                 {/* Date Range Badge */}
                 <div className="flex justify-center mb-8">
-                    <div className="flex w-fit items-center bg-base-200/50 p-1.5 rounded-2xl border border-base-300 shadow-none">
-                        <button onClick={handlePreviousWeek} className="btn btn-ghost btn-sm btn-circle"><ChevronLeft size={18} /></button>
-                        <button onClick={handleThisWeek} className="btn btn-ghost btn-sm px-4 font-bold uppercase tracking-widest">
+                    <div className="flex w-fit items-center bg-muted p-1 rounded-lg">
+                        <button onClick={handlePreviousWeek} className="btn border-0 btn-ghost btn-sm btn-circle"><ChevronLeft size={18} /></button>
+                        <button onClick={handleThisWeek} className="btn border-0 btn-ghost btn-sm px-4 font-bold uppercase tracking-widest">
                             <span className="text-sm font-bold uppercase tracking-tight">
                             {format(currentWeekStart, 'MMM dd')} — {format(weekEnd, 'MMM dd')}
                         </span>
                         </button>
-                        <button onClick={handleNextWeek} className="btn btn-ghost btn-sm btn-circle"><ChevronRight size={18} /></button>
+                        <button onClick={handleNextWeek} className="btn border-0 btn-ghost btn-sm btn-circle"><ChevronRight size={18} /></button>
                     </div>
                 </div>
 

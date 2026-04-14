@@ -23,7 +23,7 @@
   --border: oklch(92% 0 0);
   --input: oklch(92% 0 0);
   --ring: oklch(90% 0.2 55.934);
-  --radius: 1rem;
+  --radius: 0.5rem;
 }
 
 .dark,
@@ -71,7 +71,7 @@
   --color-ring: var(--ring);
   --radius-sm: calc(var(--radius) - 0.25rem);
   --radius-md: calc(var(--radius) - 0.125rem);
-  --radius-lg: var(--radius);
+  --radius-lg: calc(var(--radius) + 0.25rem);
   --radius-xl: calc(var(--radius) + 0.5rem);
 }
 

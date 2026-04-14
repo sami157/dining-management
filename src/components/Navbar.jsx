@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Link, NavLink } from 'react-router'
 import toast from 'react-hot-toast'
 import { LayoutDashboard, LogOut, Menu, Moon, Settings, Sun, X } from 'lucide-react'
 import { GiCampCookingPot } from 'react-icons/gi'
 
 import useAuth from '../hooks/useAuth'
+import useAxiosSecure from '../hooks/useAxiosSecure'
 import useRole from '../hooks/useRole'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,19 +20,34 @@ import {
 
 const Navbar = () => {
     const { user, loading, signOutUser } = useAuth()
+    const axiosSecure = useAxiosSecure()
     const { role } = useRole()
-    const [theme, setTheme] = useState('light')
+    const [theme, setTheme] = useState(() => {
+        if (typeof window === 'undefined') return 'light'
+
+        const root = document.documentElement
+        return localStorage.getItem('theme') || root.dataset.theme || 'light'
+    })
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const { data: profile, isLoading: profileLoading } = useQuery({
+        queryKey: ['navbar-user-profile', user?.email],
+        enabled: !!user?.email,
+        queryFn: async () => {
+            const response = await axiosSecure.get('/users/profile')
+            return response.data?.user
+        },
+    })
+
+    const identityLoading = loading || (!!user && profileLoading)
+    const displayName = profile?.name || user?.displayName || ''
+    const avatarLetter = (displayName || user?.email || '?').charAt(0).toUpperCase()
 
     useEffect(() => {
         const root = document.documentElement
-        const savedTheme = localStorage.getItem('theme')
-        const nextTheme = savedTheme || root.dataset.theme || 'light'
-
-        root.dataset.theme = nextTheme
-        root.classList.toggle('dark', nextTheme === 'dark')
-        setTheme(nextTheme)
-    }, [])
+        root.dataset.theme = theme
+        root.classList.toggle('dark', theme === 'dark')
+        localStorage.setItem('theme', theme)
+    }, [theme])
 
     useEffect(() => {
         document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''
@@ -41,12 +58,7 @@ const Navbar = () => {
     }, [mobileMenuOpen])
 
     const toggleTheme = () => {
-        const root = document.documentElement
         const nextTheme = theme === 'dark' ? 'light' : 'dark'
-
-        root.dataset.theme = nextTheme
-        root.classList.toggle('dark', nextTheme === 'dark')
-        localStorage.setItem('theme', nextTheme)
         setTheme(nextTheme)
     }
 
@@ -59,7 +71,7 @@ const Navbar = () => {
     }
 
     return (
-        <header className="sticky top-0 z-50 w-full bg-muted/70 backdrop-blur-md">
+        <header className="sticky top-0 z-50 w-full backdrop-blur-md">
             <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
                 <Link viewTransition to="/" className="flex min-w-0 items-center gap-3 transition-transform hover:scale-[1.01]">
                     <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-primary text-primary-foreground shadow-lg shadow-primary/20">
@@ -83,8 +95,14 @@ const Navbar = () => {
                         {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                     </Button>
 
-                    {loading ? (
-                        <div className="h-10 w-28 animate-pulse rounded-full border border-border/60 bg-muted/70" />
+                    {identityLoading ? (
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="h-10 w-10 animate-pulse rounded-full bg-muted/70 md:hidden" />
+                            <div className="hidden h-10 items-center gap-3 rounded-full border border-border/60 bg-background px-1.5 md:inline-flex">
+                                <div className="h-3 w-24 animate-pulse rounded-full bg-muted/70" />
+                                <div className="h-8 w-8 animate-pulse rounded-full bg-muted/70" />
+                            </div>
+                        </div>
                     ) : user ? (
                         <>
                             <Button
@@ -105,13 +123,13 @@ const Navbar = () => {
                                         className="hidden h-10 rounded-full bg-background px-1.5 shadow-none backdrop-blur hover:bg-muted/80 md:inline-flex"
                                     >
                                         <span className="hidden max-w-40 truncate text-sm font-medium md:block">
-                                            {user.email}
+                                            {displayName || 'User'}
                                         </span>
                                         {user.photoURL ? (
                                             <img src={user.photoURL} alt="User" className="h-8 w-8 rounded-full object-cover" />
                                         ) : (
                                             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
-                                                {user.email.charAt(0).toUpperCase()}
+                                                {avatarLetter}
                                             </span>
                                         )}
                                     </Button>
@@ -119,7 +137,7 @@ const Navbar = () => {
                                 <DropdownMenuContent align="end" className="w-64">
                                     <DropdownMenuLabel>
                                         <p className="text-[11px] font-black uppercase tracking-[0.28em] text-muted-foreground">Signed in as</p>
-                                        <p className="mt-1 truncate text-sm font-semibold text-foreground">{user.email}</p>
+                                        <p className="mt-1 truncate text-sm font-semibold text-foreground">{displayName || 'User'}</p>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     {role !== 'member' && (
@@ -166,12 +184,12 @@ const Navbar = () => {
                                     <img src={user.photoURL} alt="User" className="h-11 w-11 rounded-full object-cover" />
                                 ) : (
                                     <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">
-                                        {user.email.charAt(0).toUpperCase()}
+                                        {avatarLetter}
                                     </span>
                                 )}
                                 <div className="min-w-0">
                                     <p className="text-[11px] font-black uppercase tracking-[0.28em] text-muted-foreground">Signed in as</p>
-                                    <p className="truncate text-sm font-semibold text-foreground">{user.email}</p>
+                                    <p className="truncate text-sm font-semibold text-foreground">{displayName || 'User'}</p>
                                 </div>
                             </div>
                             <Button
