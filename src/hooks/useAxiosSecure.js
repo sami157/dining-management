@@ -2,9 +2,10 @@ import { useEffect } from "react";
 import axios from "axios";
 import useAuth from "./useAuth";
 
+const apiBaseUrl = import.meta.env.VITE_API_URL;
+
 const axiosSecure = axios.create({
-    // baseURL: 'http://localhost:5000',
-    baseURL: 'https://dining-management-server.vercel.app'
+    baseURL: apiBaseUrl
 });
 
 const useAxiosSecure = () => {
