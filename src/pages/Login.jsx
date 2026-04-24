@@ -2,20 +2,21 @@ import React, { useState } from 'react'
 import { useForm } from "react-hook-form"
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
-import { Key, ShieldCheck } from 'lucide-react'
+import { Key, Mail, ShieldCheck } from 'lucide-react'
 import useAuth from '../hooks/useAuth'
 import useAxiosSecure from '../hooks/useAxiosSecure'
 
 const Login = () => {
     const navigate = useNavigate()
     const axiosSecure = useAxiosSecure()
-    const { signInUser } = useAuth()
+    const { signInUser, resetPasswordByEmail } = useAuth()
     const [isRecoveryMode, setIsRecoveryMode] = useState(false)
 
     const {
         register: registerLogin,
         formState: { errors: loginErrors },
         handleSubmit: handleLoginSubmit,
+        getValues: getLoginValues,
     } = useForm()
 
     const {
@@ -62,6 +63,24 @@ const Login = () => {
         )
     }
 
+    const handleEmailPasswordReset = () => {
+        const email = getLoginValues('email')
+
+        if (!email) {
+            toast.error('Enter your email first')
+            return
+        }
+
+        toast.promise(
+            resetPasswordByEmail(email),
+            {
+                loading: 'Sending reset email...',
+                success: 'Password reset email sent. Check your inbox.',
+                error: 'Could not send reset email',
+            }
+        )
+    }
+
     return (
         <div className='flex flex-col gap-4 min-h-screen items-center mt-[calc(100vh/5)]'>
             <p className='text-4xl font-bold'>{isRecoveryMode ? 'Account Recovery' : 'Login'}</p>
@@ -73,7 +92,7 @@ const Login = () => {
                             {isRecoveryMode ? (
                                 <>
                                     <div className='rounded-box bg-base-200 px-4 py-3 text-sm text-base-content/70'>
-                                        Ask a super admin for a one-time recovery code. Keep that code private and use it here to set a new password.
+                                        Ask an admin for a one-time recovery code. Keep that code private and use it here to set a new password.
                                     </div>
 
                                     <label className="label">Email</label>
@@ -90,7 +109,7 @@ const Login = () => {
                                         {...registerRecovery("recoveryCode", { required: "Recovery code is required" })}
                                         type="text"
                                         className="input uppercase"
-                                        placeholder="Super admin-issued recovery code"
+                                        placeholder="Admin-issued recovery code"
                                     />
                                     {recoveryErrors.recoveryCode && <p className='text-error font-semibold' role="alert">{recoveryErrors.recoveryCode.message}</p>}
 
@@ -167,14 +186,21 @@ const Login = () => {
             </form>
 
             {!isRecoveryMode && (
-                <div className='gap-1 flex flex-col items-center'>
+                <div className='gap-2 flex flex-col items-center'>
                     <button
+                        type='button'
+                        onClick={handleEmailPasswordReset}
+                        className='btn font-bold bg-base-100'>
+                        <span><Mail size={18} /></span>Email Password Reset
+                    </button>
+                    <button
+                        type='button'
                         onClick={() => setIsRecoveryMode(true)}
                         className='btn font-bold bg-base-100'>
-                        <span><Key size={18} /></span>Forgot Password?
+                        <span><Key size={18} /></span>Admin Assisted Reset
                     </button>
                     <p className='px-4 py-1 text-xs text-center text-base-content/50'>
-                        Ask a super admin for a one-time recovery code, then use it to reset your password here.
+                        Use Firebase email recovery or ask an admin for a one-time recovery code.
                     </p>
                 </div>
             )}
