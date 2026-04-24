@@ -87,7 +87,7 @@ const FundManagement = () => {
   const { data: mealRateData } = useQuery({
     queryKey: ['runningMealRate', currentMonth],
     queryFn: async () => {
-      const response = await axiosSecure.get(`/finance/meal-rate?month=${currentMonth}&date=${format(new Date(), 'yyyy-MM-dd')}`);
+      const response = await axiosSecure.get(`/stats/meal-rate?month=${currentMonth}&date=${format(new Date(), 'yyyy-MM-dd')}`);
       return response.data;
     },
     enabled: !monthFinalized, // no need to fetch if already finalized
