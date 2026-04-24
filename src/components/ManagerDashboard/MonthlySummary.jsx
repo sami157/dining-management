@@ -2,7 +2,17 @@ import React from 'react';
 import { FaCircleCheck } from "react-icons/fa6";
 import { TrendingUp, TrendingDown, Wallet, CheckCircle2, BanknoteArrowUp, Info } from "lucide-react";
 
-const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, totalFixedDeposit, mealRate }) => {
+const SummaryCardSkeleton = () => (
+    <div className="bg-base-200/50 border border-base-300 p-6 rounded-xl space-y-3">
+        <div className="flex items-center gap-2">
+            <div className="skeleton h-4 w-4 rounded-full"></div>
+            <div className="skeleton h-3 w-28"></div>
+        </div>
+        <div className="skeleton h-9 w-32"></div>
+    </div>
+);
+
+const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing }) => {
     const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
     const balance = totalDeposit - totalExpenses;
     const isPositive = balance >= 0;
@@ -21,14 +31,19 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
 
                         <button
                             onClick={finalizeMonth}
-                            disabled={monthFinalized}
+                            disabled={monthFinalized || isLoading}
                             className={`btn btn-md rounded-2xl gap-1 px-3 border-none transition-all active:scale-95
                                 ${monthFinalized
                                     ? 'bg-base-200 text-base-content/30 cursor-not-allowed'
                                     : 'bg-primary text-primary-content hover:bg-primary/90 shadow-none'
                                 }`}
                         >
-                            {monthFinalized ? (
+                            {isLoading ? (
+                                <>
+                                    <span className="loading loading-spinner loading-sm" />
+                                    <span className="font-bold uppercase text-xs tracking-widest">Loading</span>
+                                </>
+                            ) : monthFinalized ? (
                                 <>
                                     <CheckCircle2 size={18} />
                                     <span className="font-bold uppercase text-xs tracking-widest">Finalized</span>
@@ -44,6 +59,14 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {isLoading ? (
+                            <>
+                                {Array.from({ length: 6 }).map((_, index) => (
+                                    <SummaryCardSkeleton key={index} />
+                                ))}
+                            </>
+                        ) : (
+                            <>
 
                         {/* Deposit Card */}
                         <div className="bg-base-200/50 border border-base-300 p-6 rounded-xl space-y-3">
@@ -99,9 +122,18 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                                 <Info size={16} className='text-base-content' />
                                 <span className="text-[10px] font-black uppercase tracking-widest text-base-content">Running Meal Rate</span>
                             </div>
-                            <div className={`text-3xl font-black tracking-tighter text-base-content`}>
+                            {mealRateLoading && (
+                                <div className="skeleton h-9 w-24"></div>
+                            )}
+                            <div className={`text-3xl font-black tracking-tighter text-base-content ${mealRateLoading ? 'hidden' : ''}`}>
                                 ৳{mealRate}
                             </div>
+                            {mealRateRefreshing && (
+                                <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
+                                    <span className="loading loading-spinner loading-xs text-primary"></span>
+                                    Updating
+                                </div>
+                            )}
                         </div>
                         {/* Deposit Count Card */}
                         <div className={`border p-6 rounded-xl space-y-3 transition-colors flex-3 bg-base-200 border-base-200/20`}>
@@ -113,7 +145,15 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                                 {uniqueEmailCount} <span className='text-lg tracking-normal font-normal'>People</span>
                             </div>
                         </div>
+                            </>
+                        )}
                     </div>
+                    {isRefreshing && !isLoading && (
+                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-base-content/40">
+                            <span className="loading loading-spinner loading-xs text-primary"></span>
+                            Refreshing summary
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

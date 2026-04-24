@@ -6,7 +6,25 @@ import { motion, AnimatePresence } from "motion/react"
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 
-const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refetchExpenses }) => {
+const CategorySkeleton = () => (
+    <div className='flex justify-between p-2 bg-base-100 rounded-lg'>
+        <div className='skeleton h-4 w-20'></div>
+        <div className='skeleton h-4 w-14'></div>
+    </div>
+);
+
+const ExpenseRowSkeleton = () => (
+    <tr>
+        <td><div className='skeleton h-3 w-12'></div></td>
+        <td><div className='skeleton h-3 w-16'></div></td>
+        <td><div className='skeleton h-3 w-14'></div></td>
+        <td><div className='skeleton h-3 w-14'></div></td>
+        <td><div className='skeleton h-3 w-28'></div></td>
+        <td><div className='skeleton h-7 w-16'></div></td>
+    </tr>
+);
+
+const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refetchExpenses, isLoading, isRefreshing }) => {
     const axiosSecure = useAxiosSecure();
     const [showExpenseModal, setShowExpenseModal] = useState(false);
     const [expenseData, setExpenseData] = useState({
@@ -138,18 +156,34 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                         <div className='space-y-4'>
                             <h3 className='card-title'>Expenses by Category</h3>
                             <div className='grid grid-cols-2 gap-2'>
-                                {Object.entries(expensesByCategory).map(([category, amount]) => (
+                                {isLoading ? (
+                                    Array.from({ length: 4 }).map((_, index) => (
+                                        <CategorySkeleton key={index} />
+                                    ))
+                                ) : Object.entries(expensesByCategory).length ? Object.entries(expensesByCategory).map(([category, amount]) => (
                                     <div key={category} className='flex justify-between p-2 bg-base-100 rounded-lg'>
                                         <span className='capitalize'>{category}</span>
                                         <span className='font-medium'>৳{amount}</span>
                                     </div>
-                                ))}
+                                )) : (
+                                    <div className='col-span-2 rounded-lg bg-base-100 p-4 text-center text-sm text-base-content/50'>
+                                        No expenses recorded
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className='flex justify-between'>
-                            <h2 className='card-title'>Expense Log</h2>
+                            <div className='flex items-center gap-3'>
+                                <h2 className='card-title'>Expense Log</h2>
+                                {isRefreshing && !isLoading && (
+                                    <span className='flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-base-content/40'>
+                                        <span className='loading loading-spinner loading-xs text-primary'></span>
+                                        Updating
+                                    </span>
+                                )}
+                            </div>
                             <motion.button
-                                onClick={() => openExpenseModal()} disabled={monthFinalized}
+                                onClick={() => openExpenseModal()} disabled={monthFinalized || isLoading}
                                 className='active:scale-90 transition-transform rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
                             >
                                 <div className='flex items-center gap-1'>
@@ -172,7 +206,11 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                 </tr>
                             </thead>
                             <tbody>
-                                {expensesData?.map((expense) => (
+                                {isLoading ? (
+                                    Array.from({ length: 6 }).map((_, index) => (
+                                        <ExpenseRowSkeleton key={index} />
+                                    ))
+                                ) : expensesData?.length ? expensesData.map((expense) => (
                                     <tr key={expense._id}>
                                         <td>{format(new Date(expense.date), 'dd MMM')}</td>
                                         <td className='capitalize'>{expense.category}</td>
@@ -196,7 +234,11 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
+                                )) : (
+                                    <tr>
+                                        <td colSpan={6} className='text-center text-base-content/50 py-6'>No expenses recorded</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

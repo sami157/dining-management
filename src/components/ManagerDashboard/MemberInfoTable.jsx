@@ -9,7 +9,37 @@ import { useQueryClient } from '@tanstack/react-query';
 
 
 
-const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized, refetchDeposits, refetchBalances, currentMonth }) => {
+const MemberRowSkeleton = () => (
+    <tr>
+        <td>
+            <div className='flex flex-col gap-2'>
+                <div className='skeleton h-4 w-32'></div>
+                <div className='skeleton h-3 w-16'></div>
+            </div>
+        </td>
+        <td className='text-center'>
+            <div className='skeleton h-4 w-20 mx-auto'></div>
+        </td>
+        <td className='text-center'>
+            <div className='skeleton h-4 w-20 mx-auto'></div>
+        </td>
+        <td>
+            <div className='skeleton h-9 w-24 rounded-full mx-auto'></div>
+        </td>
+    </tr>
+);
+
+const DepositRowSkeleton = () => (
+    <tr>
+        <td><div className='skeleton h-3 w-12'></div></td>
+        <td><div className='skeleton h-3 w-24'></div></td>
+        <td><div className='skeleton h-3 w-16'></div></td>
+        <td><div className='skeleton h-3 w-28'></div></td>
+        <td><div className='skeleton h-7 w-7 rounded-full'></div></td>
+    </tr>
+);
+
+const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized, refetchDeposits, refetchBalances, currentMonth, isLoading, isRefreshing, depositsLoading }) => {
     const axiosSecure = useAxiosSecure();
     const queryClient = useQueryClient();
     const [showDepositModal, setShowDepositModal] = useState(false);
@@ -109,7 +139,15 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
         <div className='w-full'>
             {/* Member List with Balances and Deposit Actions */}
             <div>
-                <h2 className='text-xl mb-4 font-semibold'>Member Information</h2>
+                <div className='flex items-center justify-between gap-3 mb-4'>
+                    <h2 className='text-xl font-semibold'>Member Information</h2>
+                    {isRefreshing && !isLoading && (
+                        <span className='flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-base-content/40'>
+                            <span className='loading loading-spinner loading-xs text-primary'></span>
+                            Updating
+                        </span>
+                    )}
+                </div>
 
                 <div className='overflow-auto max-h-screen'>
                     <table className='table table-sm'>
@@ -122,7 +160,11 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                             </tr>
                         </thead>
                         <tbody>
-                            {usersData?.map((user) => {
+                            {isLoading ? (
+                                Array.from({ length: 8 }).map((_, index) => (
+                                    <MemberRowSkeleton key={index} />
+                                ))
+                            ) : usersData?.length ? usersData.map((user) => {
                                 const userDeposits = depositsData?.filter(d => d.userId === user._id.toString()) || [];
                                 const monthlyDeposits = userDeposits.reduce((sum, d) => sum + d.amount, 0);
 
@@ -153,7 +195,11 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                         </td>
                                     </tr>
                                 );
-                            })}
+                            }) : (
+                                <tr>
+                                    <td colSpan={4} className='text-center text-base-content/50 py-8'>No members found</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -173,7 +219,11 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                 </tr>
                             </thead>
                             <tbody>
-                                {depositsData?.slice(0, 10).map((deposit) => (
+                                {depositsLoading ? (
+                                    Array.from({ length: 5 }).map((_, index) => (
+                                        <DepositRowSkeleton key={index} />
+                                    ))
+                                ) : depositsData?.length ? depositsData.slice(0, 10).map((deposit) => (
                                     <tr key={deposit._id}>
                                         <td>{format(new Date(deposit.depositDate), 'dd MMM')}</td>
                                         <td>{deposit.userName}</td>
@@ -188,7 +238,11 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                             </button>
                                         </td>
                                     </tr>
-                                ))}
+                                )) : (
+                                    <tr>
+                                        <td colSpan={5} className='text-center text-base-content/50 py-6'>No deposits recorded</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
