@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { GiCampCookingPot } from "react-icons/gi";
 import useRole from '../hooks/useRole';
+import { isAdminRole } from '../utils/roles';
 
 const Navbar = () => {
     const { user, loading, signOutUser } = useAuth();
@@ -47,8 +48,8 @@ const Navbar = () => {
     );
 
     return (
-        <div className="w-full flex justify-center">
-            <nav className="w-[98vw] bg-base-100 border border-base-300 rounded-xl px-2 py-2 flex items-center justify-between relative">
+        <div className="sticky top-0 z-50 w-full">
+            <nav className="w-full bg-base-100/30 backdrop-blur-md  px-3 sm:px-4 py-2 flex items-center justify-between relative">
 
                 {/* Logo Section */}
                 <Link viewTransition to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
@@ -62,7 +63,7 @@ const Navbar = () => {
                 </Link>
 
                 {/* Right Side Controls */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3">
                     {themeController}
 
                     {loading ? (
@@ -73,7 +74,7 @@ const Navbar = () => {
                             <div
                                 className="dropdown dropdown-end">
                                 <div tabIndex={0} ref={dropdownRef}
-                                    className="flex items-center gap-2 p-2 rounded-full bg-base-300/80 hover:bg-base-200 transition-colors"
+                                    className="flex items-center gap-2 p-2 rounded-full bg-base-100/80 hover:bg-base-200 transition-colors"
                                 >
                                     <span className="hidden cursor-pointer md:block text-sm font-semibold p-0 md:px-2">
                                         {user.email}
@@ -91,12 +92,12 @@ const Navbar = () => {
                                     </div>
                                 </div>
                                 <ul tabIndex="-1"
-                                    className="menu dropdown-content z-100 shadow-2xl p-2 bg-base-100 border border-base-300 rounded-2xl w-60 mt-4">
+                                    className="menu dropdown-content z-60 shadow-2xl p-2 bg-base-200 rounded-xl w-60 mt-4">
                                     <li className="px-4 py-3 border-b border-base-200 mb-2">
                                         <p className="text-sm font-black uppercase text-base-content/40 hover:bg-transparent tracking-widest cursor-default">Signed in as</p>
                                         <p className="text-xs hover:bg-transparent font-bold truncate cursor-default">{user.email}</p>
                                     </li>
-                                    {role !== "member" && (
+                                    {isAdminRole(role) && (
                                         <AnimatePresence>
                                             <motion.li onClick={closeDropdown}
                                                 initial={{ x: -20 }}
@@ -109,7 +110,7 @@ const Navbar = () => {
                                             </motion.li>
                                         </AnimatePresence>
                                     )}
-                                        <li onClick={closeDropdown}>
+                                    <li onClick={closeDropdown}>
                                         <NavLink viewTransition to="/user-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
                                             <LayoutDashboard size={18} /> User Dashboard
                                         </NavLink>

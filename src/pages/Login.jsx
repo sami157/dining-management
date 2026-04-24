@@ -1,30 +1,34 @@
 import React, { useState } from 'react'
 import { useForm } from "react-hook-form"
-import useAuth from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router'
-import { SearchX , Key } from 'lucide-react'
+import { Key, ShieldCheck } from 'lucide-react'
+import useAuth from '../hooks/useAuth'
 import useAxiosSecure from '../hooks/useAxiosSecure'
-import { useQuery } from '@tanstack/react-query'
 
 const Login = () => {
     const navigate = useNavigate()
-    const { signInUser, sendEmailToResetPassword } = useAuth()
-    const { register, formState: { errors }, handleSubmit } = useForm()
-    const [email, setEmail] = useState('')
     const axiosSecure = useAxiosSecure()
+    const { signInUser } = useAuth()
+    const [isRecoveryMode, setIsRecoveryMode] = useState(false)
 
-    const { refetch, isFetching } = useQuery({
-        queryKey: ['userExists', email],
-        queryFn: async () => {
-            const response = await axiosSecure.get(`/users/check-user/${email}`)
-            return response.data.doesExist
-        },
-        enabled: false, // Won't run automatically
-        retry: false,
-    })
+    const {
+        register: registerLogin,
+        formState: { errors: loginErrors },
+        handleSubmit: handleLoginSubmit,
+    } = useForm()
 
-    const onSubmit = (data) => {
+    const {
+        register: registerRecovery,
+        formState: { errors: recoveryErrors },
+        handleSubmit: handleRecoverySubmit,
+        reset: resetRecoveryForm,
+        watch,
+    } = useForm()
+
+    const newPassword = watch('newPassword')
+
+    const onLoginSubmit = (data) => {
         toast.promise(
             async () => {
                 await signInUser(data.email, data.password)
@@ -38,74 +42,142 @@ const Login = () => {
         )
     }
 
-    const forgotPasswordAction = async () => {
-        if (!email) {
-            toast('Email address is required')
-            return
-        }
-
-        const { data: userExists, isError } = await refetch()
-
-        if (isError || !userExists) {
-            toast(
-                <span className='text-center'>
-                    No user found with this email address
-                </span>,
-                {
-                    icon: <SearchX stroke='red' size={18} />,
-                }
-            );
-            return
-        }
-
+    const onRecoverySubmit = (data) => {
         toast.promise(
             async () => {
-                await sendEmailToResetPassword(email)
+                await axiosSecure.post('/auth/recover-password', {
+                    email: data.email,
+                    recoveryCode: data.recoveryCode,
+                    newPassword: data.newPassword,
+                })
+
+                resetRecoveryForm()
+                setIsRecoveryMode(false)
             },
             {
-                loading: 'Sending email...',
-                success: 'Password reset email sent! Check your inbox and spam folder',
-                error: 'Operation failed',
+                loading: 'Updating password...',
+                success: 'Password updated. You can now log in.',
+                error: 'Recovery failed',
             }
         )
     }
 
     return (
         <div className='flex flex-col gap-4 min-h-screen items-center mt-[calc(100vh/5)]'>
-            <p className='text-4xl font-bold'>Login</p>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="card bg-base-100 w-[85vw] md:w-full">
+            <p className='text-4xl font-bold'>{isRecoveryMode ? 'Account Recovery' : 'Login'}</p>
+
+            <form onSubmit={isRecoveryMode ? handleRecoverySubmit(onRecoverySubmit) : handleLoginSubmit(onLoginSubmit)}>
+                <div className="card bg-base-100 w-[85vw] md:w-full max-w-sm">
                     <div className="card-body">
                         <fieldset className="fieldset">
-                            {/* Email */}
-                            <label className="label">Email</label>
-                            <input {...register("email", { required: "Email Address is required" })} type="email" className="input" placeholder="Email " onChange={(e) => {
-                                setEmail(e.target.value)
-                            }} />
-                            {errors.email && <p className='text-error font-semibold' role="alert">{errors.email.message}</p>}
+                            {isRecoveryMode ? (
+                                <>
+                                    <div className='rounded-box bg-base-200 px-4 py-3 text-sm text-base-content/70'>
+                                        Ask a super admin for a one-time recovery code. Keep that code private and use it here to set a new password.
+                                    </div>
 
-                            {/* Password */}
-                            <div className='flex items-center justify-between'>
-                                <label className="label">Password</label>
-                            </div>
-                            <input {...register("password", { required: "Password is required" })} type="password" className="input" placeholder="Password" />
-                            {errors.password && <p className='text-error font-semibold' role="alert">{errors.password.message}</p>}
+                                    <label className="label">Email</label>
+                                    <input
+                                        {...registerRecovery("email", { required: "Email address is required" })}
+                                        type="email"
+                                        className="input"
+                                        placeholder="Email"
+                                    />
+                                    {recoveryErrors.email && <p className='text-error font-semibold' role="alert">{recoveryErrors.email.message}</p>}
 
-                            <div><a onClick={() => navigate('/register')} className="link link-info">Not registered yet? Click here</a></div>
-                            <button type='submit' className="btn btn-primary mt-2">Login</button>
+                                    <label className="label">Recovery Code</label>
+                                    <input
+                                        {...registerRecovery("recoveryCode", { required: "Recovery code is required" })}
+                                        type="text"
+                                        className="input uppercase"
+                                        placeholder="Super admin-issued recovery code"
+                                    />
+                                    {recoveryErrors.recoveryCode && <p className='text-error font-semibold' role="alert">{recoveryErrors.recoveryCode.message}</p>}
+
+                                    <label className="label">New Password</label>
+                                    <input
+                                        {...registerRecovery("newPassword", {
+                                            required: "New password is required",
+                                            minLength: {
+                                                value: 6,
+                                                message: "Password must be at least 6 characters long"
+                                            }
+                                        })}
+                                        type="password"
+                                        className="input"
+                                        placeholder="New password"
+                                    />
+                                    {recoveryErrors.newPassword && <p className='text-error font-semibold' role="alert">{recoveryErrors.newPassword.message}</p>}
+
+                                    <label className="label">Confirm Password</label>
+                                    <input
+                                        {...registerRecovery("confirmPassword", {
+                                            required: "Please confirm your new password",
+                                            validate: (value) => value === newPassword || "Passwords do not match"
+                                        })}
+                                        type="password"
+                                        className="input"
+                                        placeholder="Confirm new password"
+                                    />
+                                    {recoveryErrors.confirmPassword && <p className='text-error font-semibold' role="alert">{recoveryErrors.confirmPassword.message}</p>}
+
+                                    <button type='submit' className="btn btn-primary mt-3">
+                                        <ShieldCheck size={18} />
+                                        Set New Password
+                                    </button>
+
+                                    <button
+                                        type='button'
+                                        className="btn btn-ghost"
+                                        onClick={() => {
+                                            resetRecoveryForm()
+                                            setIsRecoveryMode(false)
+                                        }}
+                                    >
+                                        Back To Login
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <label className="label">Email</label>
+                                    <input
+                                        {...registerLogin("email", { required: "Email Address is required" })}
+                                        type="email"
+                                        className="input"
+                                        placeholder="Email"
+                                    />
+                                    {loginErrors.email && <p className='text-error font-semibold' role="alert">{loginErrors.email.message}</p>}
+
+                                    <label className="label">Password</label>
+                                    <input
+                                        {...registerLogin("password", { required: "Password is required" })}
+                                        type="password"
+                                        className="input"
+                                        placeholder="Password"
+                                    />
+                                    {loginErrors.password && <p className='text-error font-semibold' role="alert">{loginErrors.password.message}</p>}
+
+                                    <div><a onClick={() => navigate('/register')} className="link link-info">Not registered yet? Click here</a></div>
+                                    <button type='submit' className="btn btn-primary mt-2">Login</button>
+                                </>
+                            )}
                         </fieldset>
                     </div>
                 </div>
             </form>
-            <div className='gap-1 flex flex-col items-center'>
-                <button
-                    disabled={isFetching}
-                    onClick={forgotPasswordAction}
-                    className='btn font-bold bg-base-100'>
-                    <span><Key size={18} /></span>Forgot Password?
-                </button>
-                <p className='px-4 py-1 text-xs text-center text-base-content/50'>In such case, write your email address above and click this button</p>
-            </div>
+
+            {!isRecoveryMode && (
+                <div className='gap-1 flex flex-col items-center'>
+                    <button
+                        onClick={() => setIsRecoveryMode(true)}
+                        className='btn font-bold bg-base-100'>
+                        <span><Key size={18} /></span>Forgot Password?
+                    </button>
+                    <p className='px-4 py-1 text-xs text-center text-base-content/50'>
+                        Ask a super admin for a one-time recovery code, then use it to reset your password here.
+                    </p>
+                </div>
+            )}
         </div>
     )
 }

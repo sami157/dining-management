@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
 import { AuthContext } from './AuthContext.jsx';
 import { auth } from '../../firebase/firebase.init.js';
 
@@ -39,10 +39,6 @@ const AuthProvider = ({ children }) => {
         else return Promise.reject()
     }
 
-    const sendEmailToResetPassword = (email) => {
-        return sendPasswordResetEmail(auth, email)
-    }
-
     const authData = {
         auth,
         user,
@@ -53,8 +49,7 @@ const AuthProvider = ({ children }) => {
         signOutUser,
         setErrorMessage,
         errorMessage,
-        updateUserProfile,
-        sendEmailToResetPassword
+        updateUserProfile
     }
     return (
         <AuthContext value={authData}>

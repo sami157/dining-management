@@ -6,6 +6,7 @@ import { addDays, format, set, isSameDay } from 'date-fns';
 import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
 import GeneralInfo from './GeneralInfo';
 import { getMealShortLabel } from '../utils/mealTypes';
+import { isAdminRole } from '../utils/roles';
 
 export const MealSheet = () => {
     const axiosSecure = useAxiosSecure()
@@ -37,7 +38,7 @@ export const MealSheet = () => {
         },
     });
 
-    const managers = usersData?.filter(user => user.role === 'admin' && user.name !== 'Kawsar Molla' && user.name !== 'Tanzir Ahmed Sami') || [];
+    const managers = usersData?.filter(user => isAdminRole(user.role) && user.name !== 'Kawsar Molla' && user.name !== 'Tanzir Ahmed Sami') || [];
 
     // 2. Fetch today's registrations
     const { data: registrationsData, isLoading: registrationsLoading } = useQuery({

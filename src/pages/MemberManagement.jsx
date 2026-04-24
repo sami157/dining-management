@@ -9,13 +9,19 @@ import { Plus, Minus, ChevronLeft, ChevronRight, Cog } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
 import { getMealShortLabel } from '../utils/mealTypes';
+import useRole from '../hooks/useRole';
+import { ROLES, isSuperAdminRole } from '../utils/roles';
+
+const MotionDiv = motion.div;
 
 // ─── User Edit Modal 
-const UserEditModal = ({ user, onClose, onSave }) => {
+const UserEditModal = ({ user, onClose, onSave, onGenerateRecoveryCode, canGenerateRecoveryCode }) => {
   const [role, setRole] = useState(user.role);
   const [fixedDeposit, setFixedDeposit] = useState(user.fixedDeposit ?? 1000);
   const [mosqueFee, setMosqueFee] = useState(user.mosqueFee ?? 300);
   const [saving, setSaving] = useState(false);
+  const [generatingRecoveryCode, setGeneratingRecoveryCode] = useState(false);
+  const [recoveryCodeData, setRecoveryCodeData] = useState(null);
 
   const handleSave = async () => {
     setSaving(true);
@@ -33,10 +39,20 @@ const UserEditModal = ({ user, onClose, onSave }) => {
     }
   };
 
+  const handleGenerateRecoveryCode = async () => {
+    setGeneratingRecoveryCode(true);
+    try {
+      const recoveryData = await onGenerateRecoveryCode(user);
+      setRecoveryCodeData(recoveryData);
+    } finally {
+      setGeneratingRecoveryCode(false);
+    }
+  };
+
   return (
     <AnimatePresence>
       <div className="modal modal-open">
-        <motion.div layout
+        <MotionDiv layout
           initial={{ filter: "blur(5px)", y: 30 }}
           animate={{ filter: "none", y: 0, opacity: 1 }}
           exit={{ filter: "blur(10px)", y: 20, opacity: 0 }}
@@ -64,8 +80,9 @@ const UserEditModal = ({ user, onClose, onSave }) => {
                 value={role}
                 onChange={e => setRole(e.target.value)}
               >
-                <option value="member">Member</option>
-                <option value="admin">Admin</option>
+                <option value={ROLES.MEMBER}>Member</option>
+                <option value={ROLES.ADMIN}>Admin</option>
+                <option value={ROLES.SUPER_ADMIN}>Super Admin</option>
               </select>
             </div>
 
@@ -96,6 +113,39 @@ const UserEditModal = ({ user, onClose, onSave }) => {
             </div>
           </div>
 
+          {canGenerateRecoveryCode && (
+            <div className="mt-6 rounded-xl border border-base-300 bg-base-200/70 p-4">
+              <div className="flex flex-col gap-3">
+                <div>
+                  <h4 className="text-sm font-black uppercase tracking-wide">Password Recovery</h4>
+                  <p className="text-xs opacity-60 mt-1">
+                    Generate a one-time recovery code and share it with the member through a private channel.
+                  </p>
+                </div>
+
+                <button
+                  className="btn btn-secondary btn-sm w-full sm:w-auto"
+                  onClick={handleGenerateRecoveryCode}
+                  disabled={generatingRecoveryCode}
+                >
+                  {generatingRecoveryCode ? <span className="loading loading-spinner loading-sm" /> : 'Generate Recovery Code'}
+                </button>
+
+                {recoveryCodeData && (
+                  <div className="rounded-lg bg-base-100 p-3 border border-base-300">
+                    <p className="text-[10px] uppercase tracking-widest opacity-50">Recovery Code</p>
+                    <p className="font-mono text-sm font-bold break-all mt-1">{recoveryCodeData.recoveryCode}</p>
+                    {recoveryCodeData.expiresAt && (
+                      <p className="text-xs opacity-60 mt-2">
+                        Expires at: {format(new Date(recoveryCodeData.expiresAt), 'dd MMM yyyy, hh:mm a')}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="modal-action mt-8 flex flex-col-reverse sm:flex-row gap-2">
             <button
               className="btn btn-ghost w-full sm:w-auto font-bold uppercase"
@@ -112,7 +162,7 @@ const UserEditModal = ({ user, onClose, onSave }) => {
               {saving ? <span className="loading loading-spinner loading-sm" /> : 'SAVE UPDATES'}
             </button>
           </div>
-        </motion.div>
+        </MotionDiv>
         {/* Backdrop for mobile tapping to close */}
         <form method="dialog" className="modal-backdrop" onClick={onClose}>
           <button>close</button>
@@ -126,6 +176,8 @@ const UserEditModal = ({ user, onClose, onSave }) => {
 const MemberManagement = () => {
   const axiosSecure = useAxiosSecure();
   const { loading } = useAuth();
+  const { role, roleLoading } = useRole();
+  const canGenerateRecoveryCode = isSuperAdminRole(role);
   const [currentWeekStart, setCurrentWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 0 }));
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 0 });
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
@@ -173,6 +225,26 @@ const MemberManagement = () => {
       Promise.all(promises).then(() => userRefetch()),
       { loading: 'Saving...', success: 'User updated successfully', error: 'Failed to update user' }
     );
+  };
+
+  const handleGenerateRecoveryCode = async (user) => {
+    if (!canGenerateRecoveryCode) {
+      toast.error('Only super admins can generate recovery codes');
+      return null;
+    }
+
+    const { data } = await toast.promise(
+      axiosSecure.post('/auth/admin/create-recovery-code', {
+        userId: user._id,
+      }),
+      {
+        loading: 'Generating recovery code...',
+        success: 'Recovery code generated',
+        error: 'Failed to generate recovery code'
+      }
+    );
+
+    return data;
   };
 
   // Helper functions
@@ -231,11 +303,19 @@ const MemberManagement = () => {
     );
   };
 
-  if (usersLoading) return <Loading />;
+  if (usersLoading || roleLoading) return <Loading />;
 
   return (
     <div className='p-4 md:w-full w-[94vw] mx-auto'>
-      {editingUser && <UserEditModal user={editingUser} onClose={() => setEditingUser(null)} onSave={handleSaveUser} />}
+      {editingUser && (
+        <UserEditModal
+          user={editingUser}
+          onClose={() => setEditingUser(null)}
+          onSave={handleSaveUser}
+          onGenerateRecoveryCode={handleGenerateRecoveryCode}
+          canGenerateRecoveryCode={canGenerateRecoveryCode}
+        />
+      )}
 
       <div className='flex flex-col md:flex-row justify-between items-center mb-8 gap-4'>
         <div className='flex items-center gap-2 bg-base-200 p-1 rounded-xl'>

@@ -13,6 +13,7 @@ import { NotFound } from "../components/NotFound";
 import { PrivateRoute } from "../components/PrivateRoute";
 import PreviousData from "../pages/PreviousData";
 import { UserProfile } from "../pages/UserProfile";
+import AdminRoute from "../components/AdminRoute";
 
 export const router = createBrowserRouter([
     {
@@ -42,27 +43,27 @@ export const router = createBrowserRouter([
             },
             {
                 path: '/admin-dashboard',
-                element: <PrivateRoute><AdminDashboardLayout /></PrivateRoute>,
+                element: <PrivateRoute><AdminRoute><AdminDashboardLayout /></AdminRoute></PrivateRoute>,
                 children: [
                     {
                         index: true,
-                        element: <PrivateRoute><MealSchedule /></PrivateRoute>
+                        element: <MealSchedule />
                     },
                     {
                         path: 'meal-schedule',
-                        element: <PrivateRoute><MealSchedule /></PrivateRoute>
+                        element: <MealSchedule />
                     },
                     {
                         path: 'fund-management',
-                        element: <PrivateRoute><FundManagement /></PrivateRoute>
+                        element: <FundManagement />
                     },
                     {
                         path: 'member-management',
-                        element: <PrivateRoute><MemberManagement /></PrivateRoute>
+                        element: <MemberManagement />
                     },
                     {
                         path: 'history',
-                        element: <PrivateRoute><PreviousData /></PrivateRoute>
+                        element: <PreviousData />
                     },
                 ]
             },

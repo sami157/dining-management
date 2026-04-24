@@ -6,9 +6,11 @@ import Footer from '../components/Footer'
 
 const HomeLayout = () => {
   return (
-    <div className='py-2 flex flex-col bg-base-300 min-h-screen'>
+    <div className='flex flex-col bg-base-300 min-h-screen'>
       <Navbar/>
-      <Outlet/>
+      <main className='flex-1 py-2'>
+        <Outlet/>
+      </main>
       <Footer/>
       <Toaster/>
     </div>
