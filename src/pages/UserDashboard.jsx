@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { format, addMonths, subMonths, lastDayOfMonth, startOfMonth, eachDayOfInterval } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import useAuth from '../hooks/useAuth';
-import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, BadgeInfo, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, Info } from 'lucide-react';
 import { getMealLabel, getMealShortLabel } from '../utils/mealTypes';
 
 
@@ -31,8 +31,9 @@ const StatItem = ({ label, value, colorClass, isLoading, symbol = "৳" }) => (
     </div>
 );
 
-const UserDashboard = () => {
+const UserDashboard = ({ showFinancialStats = true }) => {
     const axiosSecure = useAxiosSecure();
+    const queryClient = useQueryClient();
     const { user, loading } = useAuth()
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const firstDate = startOfMonth(currentMonth);
@@ -40,6 +41,7 @@ const UserDashboard = () => {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [requested, setRequested] = useState(false);
+    const [optimisticMealDefault, setOptimisticMealDefault] = useState(null);
 
     const dateArray = eachDayOfInterval({
         start: firstDate,
@@ -204,6 +206,31 @@ const UserDashboard = () => {
         );
     };
 
+    const updateMealDefault = useMutation({
+        mutationFn: async (nextValue) => {
+            const response = await axiosSecure.patch('/users/meal-default', {
+                mealDefault: nextValue,
+            });
+            return response.data;
+        },
+        onSuccess: async (data) => {
+            toast.success(data.message || 'Meal default updated');
+            queryClient.setQueryData(['userData', user?.email], data.user);
+            queryClient.setQueryData(['userProfile'], data.user);
+            setOptimisticMealDefault(null);
+        },
+        onError: (error) => {
+            setOptimisticMealDefault(null);
+            toast.error(error?.response?.data?.error || 'Failed to update meal default');
+        }
+    });
+
+    const handleMealDefaultChange = (event) => {
+        const nextValue = event.target.checked;
+        setOptimisticMealDefault(nextValue);
+        updateMealDefault.mutate(nextValue);
+    };
+
     // Modal Edit Handler (For the + / - buttons)
     const handleUpdateQty = async (registrationId, currentQty, delta) => {
         const newQty = currentQty + delta;
@@ -225,6 +252,7 @@ const UserDashboard = () => {
     };
 
     const dataLoading = depositLoading || countLoading || userDataLoading || mealLoading || finalizationLoading || userBalanceLoading;
+    const mealDefault = optimisticMealDefault ?? Boolean(userData?.mealDefault);
 
     const MealBox = ({ status, date, mealType }) => {
         let bgColor = 'bg-base-300';
@@ -256,114 +284,148 @@ const UserDashboard = () => {
         <div>
             <div className='p-4 flex flex-col items-center'>
                 {/* Header / Stats Navigation */}
-                <div className="w-full flex flex-col gap-4 mb-4">
-                    <div className='flex items-center justify-between bg-base-200 p-2 rounded-lg max-w-md mx-auto w-full'>
-                        <button onClick={() => setCurrentMonth(prev => subMonths(prev, 1))} className='p-1.5 cursor-pointer hover:bg-base-300 rounded-full transition-all active:scale-95'>
+                <div className="flex flex-col gap-4 mb-4">
+                    <div className='flex items-center justify-between border border-base-300/70 p-2 rounded-lg max-w-md mx-auto w-full'>
+                        <button onClick={() => setCurrentMonth(prev => subMonths(prev, 1))} className='p-1.5 cursor-pointer hover:bg-base-200 rounded-full transition-all active:scale-95'>
                             <ChevronLeft size={20} />
                         </button>
-                        <h2 className='text-sm md:text-base font-bold uppercase'>{format(currentMonth, 'MMMM yyyy')}</h2>
-                        <button onClick={() => setCurrentMonth(prev => addMonths(prev, 1))} className='p-1.5 cursor-pointer hover:bg-base-300 rounded-full transition-all active:scale-95'>
+                        <h2 className='text-sm md:text-base font-bold uppercase px-6'>{format(currentMonth, 'MMMM yyyy')}</h2>
+                        <button onClick={() => setCurrentMonth(prev => addMonths(prev, 1))} className='p-1.5 cursor-pointer hover:bg-base-200 rounded-full transition-all active:scale-95'>
                             <ChevronRight size={20} />
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:w-70 mx-auto gap-3 p-3 bg-base-200/80 border border-base-300 rounded-2xl shadow-inner">
+                    {showFinancialStats && (
+                        <div className="grid grid-cols-1 md:w-70 mx-auto gap-3 p-3 bg-base-200/80 border border-base-300 rounded-2xl shadow-inner">
 
-                        {/* Primary Stats */}
-                        <StatItem
-                            label="Fixed Deposit"
-                            value={userData?.fixedDeposit || 0}
-                            colorClass="bg-info/10 text-info"
-                            isLoading={dataLoading}
-                        />
+                            {/* Primary Stats */}
+                            <StatItem
+                                label="Fixed Deposit"
+                                value={userData?.fixedDeposit || 0}
+                                colorClass="bg-info/10 text-info"
+                                isLoading={dataLoading}
+                            />
 
-                        <StatItem
-                            label="Mosque"
-                            value={userData?.mosqueFee || 0}
-                            colorClass="bg-base-300 text-base-content"
-                            isLoading={dataLoading}
-                        />
-                        <StatItem
-                            label="Monthly Deposit"
-                            value={depositData?.deposit || 0}
-                            colorClass={
-                                depositData?.deposit <= 0 ? "bg-error/10 text-error border border-dashed border-error" :
-                                    "bg-success/10 text-success"
+                            <StatItem
+                                label="Mosque"
+                                value={userData?.mosqueFee || 0}
+                                colorClass="bg-base-300 text-base-content"
+                                isLoading={dataLoading}
+                            />
+                            <StatItem
+                                label="Monthly Deposit"
+                                value={depositData?.deposit || 0}
+                                colorClass={
+                                    depositData?.deposit <= 0 ? "bg-error/10 text-error border border-dashed border-error" :
+                                        "bg-success/10 text-success"
+                                }
+                                isLoading={dataLoading}
+                            />
+
+                            <StatItem
+                                label="Total Meals"
+                                value={mealCountData?.totalMeals || 0}
+                                colorClass="bg-primary/10 text-primary"
+                                isLoading={dataLoading}
+                            />
+
+
+                            {
+                                !finalizationData && (
+                                    <StatItem
+                                        label="Current Balance"
+                                        value={userBalanceData?.balance || 0}
+                                        colorClass={
+                                            userBalanceData?.balance < 0
+                                                ? "bg-error/10 text-error border border-error border-dashed"
+                                                : "bg-success/10 text-success border border-success border-dashed"
+                                        }
+                                        isLoading={dataLoading}
+                                    />
+                                )
                             }
-                            isLoading={dataLoading}
-                        />
-
-                        <StatItem
-                            label="Total Meals"
-                            value={mealCountData?.totalMeals || 0}
-                            colorClass="bg-primary/10 text-primary"
-                            isLoading={dataLoading}
-                        />
 
 
-                        {
-                            !finalizationData && (
-                                <StatItem
-                                    label="Current Balance"
-                                    value={userBalanceData?.balance || 0}
-                                    colorClass={
-                                        userBalanceData?.balance < 0
-                                            ? "bg-error/10 text-error border border-error border-dashed"
-                                            : "bg-success/10 text-success border border-success border-dashed"
-                                    }
-                                    isLoading={dataLoading}
-                                />
-                            )
-                        }
+                            {/* Finalization Section */}
+                            {finalizationData && (
+                                <div className="mt-2 pt-4 border-t border-base-300 space-y-3">
+                                    <StatItem
+                                        label="Meal Rate"
+                                        value={finalizationData?.mealRate || 0}
+                                        colorClass="bg-primary/5 text-primary border border-primary border-dashed"
+                                        isLoading={dataLoading}
+                                    />
 
+                                    <StatItem
+                                        label="Meal Cost"
+                                        value={finalizationData?.mealCost || 0}
+                                        colorClass="bg-error/10 text-error border border-error border-dashed"
+                                        isLoading={dataLoading}
+                                    />
 
-                        {/* Finalization Section */}
-                        {finalizationData && (
-                            <div className="mt-2 pt-4 border-t border-base-300 space-y-3">
-                                <StatItem
-                                    label="Meal Rate"
-                                    value={finalizationData?.mealRate || 0}
-                                    colorClass="bg-primary/5 text-primary border border-primary border-dashed"
-                                    isLoading={dataLoading}
-                                />
-
-                                <StatItem
-                                    label="Meal Cost"
-                                    value={finalizationData?.mealCost || 0}
-                                    colorClass="bg-error/10 text-error border border-error border-dashed"
-                                    isLoading={dataLoading}
-                                />
-
-                                <StatItem
-                                    label="Closing Balance"
-                                    value={finalizationData?.newBalance || 0}
-                                    colorClass={
-                                        finalizationData?.newBalance < 0
-                                            ? "bg-error/10 text-error border border-error border-dashed"
-                                            : "bg-success/10 text-success border border-success border-dashed"
-                                    }
-                                    isLoading={dataLoading}
-                                />
-                            </div>
-                        )}
-                    </div>
+                                    <StatItem
+                                        label="Closing Balance"
+                                        value={finalizationData?.newBalance || 0}
+                                        colorClass={
+                                            finalizationData?.newBalance < 0
+                                                ? "bg-error/10 text-error border border-error border-dashed"
+                                                : "bg-success/10 text-success border border-success border-dashed"
+                                        }
+                                        isLoading={dataLoading}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className='grid-cols-1 w-[94vw] md:w-2/5'>
                     <div className='flex flex-col gap-4 justify-center items-center'>
-                        <div className='p-2 flex flex-col items-center gap-2'>
-                            <button
-                                disabled={finalizationData || mealLoading || requested}
-                                onClick={handleBulkToggle} className='btn w-fit btn-primary btn-sm font-black uppercase  tracking-tight shadow-lg'><SquareCheckBig size={18} />Bulk Register
-                            </button>
-                            <div className='flex items-center w-2/3 text-xs text-base-content/40 text-center'><span><BadgeInfo size={20} /></span>Click this button to register for all the remaining meals of this month</div>
+                        <div className='space-y-4 p-3 bg-base-200 rounded-lg'>
+                            <div className="flex items-center max-w-70 justify-between gap-4">
+                                <div>
+                                    <p className="text-sm font-bold uppercase">Auto Register</p>
+                                    <p className="text-xs text-base-content/50">
+                                        Get automatically registered for offered meals
+                                    </p>
+                                </div>
+                                <input
+                                    type="checkbox"
+                                    className="toggle toggle-primary"
+                                    checked={mealDefault}
+                                    onChange={handleMealDefaultChange}
+                                    disabled={userDataLoading || updateMealDefault.isPending}
+                                />
+                            </div>
+                            {/* <div className="w-full flex items-center justify-between gap-4">
+                                <div>
+                                    <p className="text-sm font-black uppercase tracking-widest">Bulk Register</p>
+                                    <p className="text-xs text-base-content/50">
+                                        Register for all remaining meals of this month.
+                                    </p>
+                                </div>
+                                <button
+                                    disabled={finalizationData || mealLoading || requested}
+                                    onClick={handleBulkToggle}
+                                    className="btn btn-primary btn-sm font-black uppercase tracking-tight shadow-lg shrink-0"
+                                >
+                                    <SquareCheckBig size={18} />
+                                    Register
+                                </button>
+                            </div> */}
                         </div>
                         <div className="overflow-x-auto h-[60vh] mask-b-from-98% mask-b-to-100%">
                             <table className="table table-xs table-pin-rows">
                                 <thead>
                                     <tr className='bg-base-300'>
                                         <th className='text-center'>Date</th>
-                                        <th className='text-center'>Meals
+                                        <th className='text-center'>
+                                            <div className="inline-flex items-baseline justify-center gap-1 whitespace-nowrap">
+                                                <span>Meals</span>
+                                                <span className="text-[10px] font-black text-base-content/50">
+                                                    ({countLoading ? '...' : mealCountData?.totalMeals || 0})
+                                                </span>
+                                            </div>
                                         </th>
                                         <th className='text-center'>Action</th>
                                     </tr>

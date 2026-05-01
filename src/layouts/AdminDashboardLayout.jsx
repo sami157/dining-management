@@ -1,15 +1,56 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Sidebar from '../components/Sidebar'
 import { Outlet } from 'react-router'
+import { Menu, X } from 'lucide-react'
 
 const AdminDashboardLayout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
-    <div className='flex flex-col md:flex-row gap-4'>
-      <div className='p-2 min-w-50'>
-        <Sidebar />
+    <div className='min-h-screen'>
+      <div className='md:hidden sticky top-14 z-40 bg-base-100/80 backdrop-blur-md border-b border-base-300 px-2 py-1'>
+        <button
+          type='button'
+          className='btn btn-ghost btn-sm'
+          onClick={() => setSidebarOpen(true)}
+          aria-label='Open manager dashboard menu'
+        >
+          <Menu size={14} />
+          Navigation Menu
+        </button>
       </div>
-      <div className='lg:w-11/12 mx-auto'>
-        <Outlet />
+
+      {sidebarOpen && (
+        <div className='md:hidden fixed inset-0 z-50'>
+          <button
+            type='button'
+            className='absolute inset-0 bg-black/40'
+            onClick={() => setSidebarOpen(false)}
+            aria-label='Close manager dashboard menu'
+          />
+          <div className='relative h-full w-72 max-w-[86vw] bg-base-100 shadow-2xl'>
+            <div className='flex justify-end p-2'>
+              <button
+                type='button'
+                className='btn btn-ghost btn-circle btn-sm'
+                onClick={() => setSidebarOpen(false)}
+                aria-label='Close manager dashboard menu'
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <Sidebar onNavigate={() => setSidebarOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      <div className='flex flex-col md:flex-row gap-4'>
+        <div className='hidden md:block p-2 min-w-50'>
+          <Sidebar />
+        </div>
+        <div className='lg:w-11/12 mx-auto'>
+          <Outlet />
+        </div>
       </div>
     </div>
   )

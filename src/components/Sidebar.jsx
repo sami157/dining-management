@@ -9,7 +9,7 @@ import {
   ChevronRight
 } from 'lucide-react'
 
-const Sidebar = () => {
+const Sidebar = ({ onNavigate }) => {
   const navItems = [
     { to: '/admin-dashboard/meal-schedule', label: 'Meal Schedule', icon: CalendarDays },
     { to: '/admin-dashboard/member-management', label: 'Members', icon: Users2 },
@@ -31,12 +31,13 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation Links */}
-      <nav className='grid grid-cols-2 gap-2 lg:grid-cols-1'>
+      <nav className='grid gap-2 md:grid-cols-1'>
         {navItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             viewTransition
+            onClick={onNavigate}
             // The function below provides { isActive }
             className={({ isActive }) => `
         group flex items-center justify-between px-4 py-4 rounded-xl transition-all duration-300

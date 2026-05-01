@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import Registration from "../pages/Registration";
 import MealSchedule from "../pages/MealSchedule";
 import UserDashboard from "../pages/UserDashboard";
+import UserDashboardLayout from "../layouts/UserDashboardLayout";
 import MemberManagement from "../pages/MemberManagement";
 import FundManagement from "../pages/FundManagement";
 import AdminDashboardLayout from "../layouts/AdminDashboardLayout";
@@ -13,6 +14,7 @@ import { NotFound } from "../components/NotFound";
 import { PrivateRoute } from "../components/PrivateRoute";
 import PreviousData from "../pages/PreviousData";
 import { UserProfile } from "../pages/UserProfile";
+import UserFinancialInfo from "../pages/UserFinancialInfo";
 import AdminRoute from "../components/AdminRoute";
 
 export const router = createBrowserRouter([
@@ -35,7 +37,25 @@ export const router = createBrowserRouter([
             },
             {
                 path: '/user-dashboard',
-                element: <PrivateRoute><UserDashboard /></PrivateRoute>
+                element: <PrivateRoute><UserDashboardLayout /></PrivateRoute>,
+                children: [
+                    {
+                        index: true,
+                        element: <UserDashboard showFinancialStats={false} />
+                    },
+                    {
+                        path: 'meal-sheet',
+                        element: <UserDashboard showFinancialStats={false} />
+                    },
+                    {
+                        path: 'financial-information',
+                        element: <UserFinancialInfo />
+                    },
+                    {
+                        path: 'profile',
+                        element: <UserProfile />
+                    },
+                ]
             },
             {
                 path: '/user-profile',
