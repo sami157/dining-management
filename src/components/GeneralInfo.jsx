@@ -1,10 +1,39 @@
-import { Mail, Phone } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import React from 'react';
 import { getMealLabel } from '../utils/mealTypes';
 
+const ManagerListSkeleton = () => (
+    <div className="p-2">
+        <h2 className="text-2xl py-4 font-black tracking-tighter uppercase italic text-base-content">Managers</h2>
+
+        <div className="flex flex-col gap-4 bg-base-200 p-4 rounded-xl" aria-label="Loading managers">
+            {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="w-full">
+                    <div className="flex gap-4 items-center">
+                        <div className="skeleton h-10 w-10 rounded-lg bg-base-300" />
+                        <div className="flex flex-col gap-2 grow">
+                            <div className="skeleton h-4 w-36 bg-base-300" />
+                            <div className="flex items-center gap-2">
+                                <div className="skeleton h-4 w-4 rounded-full bg-base-300" />
+                                <div className="skeleton h-3 w-28 bg-base-300" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+
+        <h2 className="text-2xl py-4 font-black tracking-tighter uppercase italic text-base-content">Meal Deadlines</h2>
+        <div className="tabs tabs-box p-2">
+            <div className="skeleton h-10 w-full bg-base-300" />
+            <div className="skeleton h-14 w-full bg-base-200 mt-2" />
+        </div>
+    </div>
+);
+
 const GeneralInfo = ({ managerList, isLoading }) => {
     if (isLoading) {
-        return <div className="text-center p-10 font-semibold">Loading managers...</div>;
+        return <ManagerListSkeleton />;
     }
 
     if (!managerList || managerList.length === 0) {
@@ -46,15 +75,15 @@ const GeneralInfo = ({ managerList, isLoading }) => {
 
             <h2 className="text-2xl py-4 font-black tracking-tighter uppercase italic text-base-content">Meal Deadlines</h2>
             {/* name of each tab group should be unique */}
-            <div className="tabs tabs-box p-2">
-                <input type="radio" name="my_tabs_6" className="tab font-bold drop-shadow-xs shadow-none" aria-label={getMealLabel('morning')} defaultChecked/>
-                <div className="tab-content bg-base-100 drop-shadow-xs border-base-200 p-4 mt-2">Previous Day 10 PM</div>
+            <div className="tabs tabs-box rounded-2xl p-2">
+                <input type="radio" name="my_tabs_6" className="tab font-bold" aria-label={getMealLabel('morning')} defaultChecked/>
+                <div className="tab-content bg-base-100 border-base-200 p-4 mt-2">Previous Day 10 PM</div>
 
-                <input type="radio" name="my_tabs_6" className="tab font-bold drop-shadow-xs shadow-none" aria-label={getMealLabel('evening')} />
-                <div className="tab-content bg-base-100 drop-shadow-xs border-base-200 p-4 mt-2">Same Day 8 AM</div>
+                <input type="radio" name="my_tabs_6" className="tab font-bold" aria-label={getMealLabel('evening')} />
+                <div className="tab-content bg-base-100 border-base-200 p-4 mt-2">Same Day 8 AM</div>
 
-                <input type="radio" name="my_tabs_6" className="tab font-bold drop-shadow-xs shadow-none" aria-label={getMealLabel('night')} />
-                <div className="tab-content bg-base-100 drop-shadow-xs border-base-200 p-4 mt-2">Same Day 2 PM</div>
+                <input type="radio" name="my_tabs_6" className="tab font-bold" aria-label={getMealLabel('night')} />
+                <div className="tab-content bg-base-100 border-base-200 p-4 mt-2">Same Day 2 PM</div>
             </div>
         </div>
     );

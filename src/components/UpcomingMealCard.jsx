@@ -6,6 +6,40 @@ import useAuth from '../hooks/useAuth';
 import { useState } from 'react';
 import { getMealLabel } from '../utils/mealTypes';
 
+const MealRowSkeleton = () => (
+    <div className="relative min-h-32 rounded-lg border border-base-300 bg-base-200/70 overflow-hidden">
+        <div className="p-4">
+            <div className="flex justify-between items-center mb-3">
+                <div className="flex items-center gap-3">
+                    <div className="skeleton h-11 w-11 rounded-full bg-base-300" />
+                    <div className="flex flex-col gap-2">
+                        <div className="skeleton h-4 w-24 bg-base-300" />
+                        <div className="skeleton h-3 w-10 bg-base-300" />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    <div className="skeleton h-8 w-16 rounded-lg bg-base-300" />
+                    <div className="skeleton h-7 w-7 rounded-full bg-base-300" />
+                </div>
+            </div>
+
+            <div className="rounded-lg border border-base-300 bg-base-100 p-3 space-y-2">
+                <div className="skeleton h-3 w-11/12 mx-auto bg-base-300" />
+                <div className="skeleton h-3 w-7/12 mx-auto bg-base-300" />
+            </div>
+        </div>
+    </div>
+);
+
+const MealsSkeleton = () => (
+    <div className="grow space-y-5" aria-label="Loading upcoming meals">
+        {Array.from({ length: 3 }).map((_, index) => (
+            <MealRowSkeleton key={index} />
+        ))}
+    </div>
+);
+
 const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
     const axiosSecure = useAxiosSecure();
     const { loading } = useAuth();
@@ -74,11 +108,11 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
     if (loading) return null;
 
     return (
-        <div className={`h-full mx-auto md:w-100 bg-base-100 border ${isToday ? 'border-primary' : 'border-base-300'} rounded-2xl overflow-hidden transition-all duration-500 ease-in-out`}>
-            <div className="p-6 flex flex-col h-full">
+        <div className={`h-full mx-auto md:w-100 bg-base-100 border ${isToday ? 'border-primary border-dashed' : 'border-base-300'} rounded-xl overflow-hidden transition-all duration-500 ease-in-out`}>
+            <div className="p-5 flex flex-col h-full">
 
                 {/* Card Header */}
-                <div className="mb-6">
+                <div className="mb-4">
                     <div className="flex justify-between items-start">
                         <div>
                             <h2 className={`text-2xl font-black tracking-tighter italic uppercase ${isToday ? 'text-primary' : ''}`}>
@@ -89,23 +123,20 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                             </p>
                         </div>
                         {isToday && (
-                            <span className="badge badge-primary font-black text-[9px] tracking-widest rounded-full px-3 py-3 border-none">
-                                TODAY
+                            <span className="text-sm px-2 py-1 rounded-md bg-primary text-primary-content font-bold">
+                                Today
                             </span>
                         )}
                     </div>
                 </div>
 
                 {/* Meals List */}
-                <div className="grow space-y-6">
+                {dataLoading ? (
+                    <MealsSkeleton />
+                ) : (
+                <div className="grow space-y-5">
                     {
-                        dataLoading
-                            ? <div className='space-y-6'>
-                                <div className='skeleton bg-base-200 w-70 mx-auto md:w-88 h-32'></div>
-                                <div className='skeleton bg-base-200 w-70 mx-auto md:w-88 h-32'></div>
-                                <div className='skeleton bg-base-200 w-70 mx-auto md:w-88 h-32'></div>
-                            </div>
-                            : meals.length > 0
+                        meals.length > 0
                                 ?
                                 (
                                     meals.map((meal) => {
@@ -114,7 +145,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                         return (
                                             <div
                                                 key={meal.mealType}
-                                                className={`relative min-h-32 group rounded-xl transition-all duration-300 overflow-hidden ${!meal.isAvailable ? 'bg-none border-dashed border-base-300 border' : isReg ? 'bg-primary/10 border-primary/30' : 'bg-base-200 border-base-300'
+                                                className={`relative min-h-32 group rounded-lg transition-all duration-300 overflow-hidden ${!meal.isAvailable ? 'bg-none border-dashed border-base-300 border' : isReg ? 'bg-primary/10 border-primary/30' : 'bg-base-200 border-base-300'
                                                     }`}
                                             >
                                                 <div className="p-4">
@@ -142,7 +173,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                                         {/* Action Area: Qty Controls + Toggle */}
                                                         <div className="flex items-center gap-3">
                                                             {isReg && (
-                                                                <div className="flex items-center gap-1 bg-base-100 px-2 py-1 rounded-lg border border-base-300 shadow-sm">
+                                                                <div className="flex items-center gap-1 bg-base-100 px-2 py-1 rounded-lg border border-base-300">
                                                                     <button
                                                                         type="button" // Explicitly set type to prevent form issues
                                                                         onClick={(e) => {
@@ -220,6 +251,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                 )
                     }
                 </div>
+                )}
             </div>
         </div >
     );
