@@ -10,3 +10,7 @@ Feature draft:
 5. Add admin action statistics to the monthly finalization records
 
 6. Add a full fledged inventory management system, tracking and linking key items like meat, eggs, fish etc directly to expenses 
+
+7. Make registration deadlines configurable by the managers from dashboard
+
+8. Move role assignment and other member actions to a seperate route on manager dashboard
