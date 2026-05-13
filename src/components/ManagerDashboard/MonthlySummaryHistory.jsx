@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, TrendingDown, Utensils, Zap, History } from "lucide-react";
+import { getDiningIndicatorClass, getDiningLabel, isOfficeDining } from '../../utils/dining';
 
 export const MonthlySummaryHistory = ({ totalExpenses, depositsData, finalizationData }) => {
     const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
@@ -71,6 +72,31 @@ export const MonthlySummaryHistory = ({ totalExpenses, depositsData, finalizatio
                         </div>
 
                     </div>
+                    {finalizationData?.cashAtHand !== undefined && (
+                        <div className="bg-success/5 border border-success/20 p-4 sm:p-6 rounded-3xl space-y-2">
+                            <div className="flex items-center gap-2 opacity-60">
+                                <TrendingUp size={14} className="text-success" />
+                                <span className="text-[9px] font-black uppercase tracking-widest text-success">Cash At Hand</span>
+                            </div>
+                            <div className="text-xl sm:text-2xl font-black tracking-tighter text-success">
+                                ৳{Number(finalizationData.cashAtHand || 0).toLocaleString()}
+                            </div>
+                        </div>
+                    )}
+                    {finalizationData?.diningBreakdown?.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {finalizationData.diningBreakdown.map(item => (
+                                <div key={item.diningId} className={`border rounded-2xl p-4 space-y-2 ${isOfficeDining(item.diningId) ? getDiningIndicatorClass(item.diningId) : 'bg-base-200 border-base-300 text-base-content'}`}>
+                                    <div className="text-[10px] font-black uppercase tracking-widest">{getDiningLabel(item.diningId)}</div>
+                                    <div className="grid grid-cols-3 gap-2 text-xs font-bold">
+                                        <span>Meals: {item.totalMealsServed || 0}</span>
+                                        <span>Expense: ৳{Number(item.totalExpenses || 0).toLocaleString()}</span>
+                                        <span>Rate: ৳{Number(item.mealRate || 0).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

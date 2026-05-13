@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import MemberInfoTable from '../components/ManagerDashboard/MemberInfoTable';
 import MonthlySummary from '../components/ManagerDashboard/MonthlySummary';
 import MonthlyExpense from '../components/ManagerDashboard/MonthlyExpense';
+import { DINING_IDS } from '../utils/dining';
 
 const FundManagement = () => {
 
@@ -90,18 +91,29 @@ const FundManagement = () => {
 
   //Running Meal Rate
   const { data: mealRateData, isLoading: mealRateLoading, isFetching: mealRateFetching } = useQuery({
-    queryKey: ['runningMealRate', currentMonth],
+    queryKey: ['runningMealRates', currentMonth],
     queryFn: async () => {
-      const response = await axiosSecure.get(`/stats/meal-rate?month=${currentMonth}&date=${format(new Date(), 'yyyy-MM-dd')}`);
-      return response.data;
+      const rateResponses = await Promise.all(
+        Object.values(DINING_IDS).map(async (diningId) => {
+          const response = await axiosSecure.get(`/stats/meal-rate?month=${currentMonth}&date=${format(new Date(), 'yyyy-MM-dd')}&diningId=${diningId}`);
+          return [diningId, response.data];
+        })
+      );
+
+      return Object.fromEntries(rateResponses);
     },
     enabled: currentMonth === currentCalendarMonth && !finalizationLoading && !monthFinalized,
   });
 
-  const runningMealRate = currentMonth === currentCalendarMonth ?
-  finalizationData?.isFinalized ?
-  finalizationData?.mealRate?.toFixed(2) || '0.00' :
-  mealRateData?.mealRate?.toFixed(2) || '0.00' : '0.00';
+  const runningMealRates = Object.values(DINING_IDS).reduce((acc, diningId) => {
+    const finalizedBreakdown = finalizationData?.diningBreakdown?.find(item => item.diningId === diningId);
+    const rate = finalizationData?.isFinalized
+      ? finalizedBreakdown?.mealRate
+      : mealRateData?.[diningId]?.mealRate;
+
+    acc[diningId] = Number(rate || 0).toFixed(2);
+    return acc;
+  }, {});
 
   // Fetch deposits for current month
   const { data: depositsData, isLoading: depositsLoading, isFetching: depositsFetching, refetch: refetchDeposits } = useQuery({
@@ -204,7 +216,7 @@ const FundManagement = () => {
       {/* Monthly Summary */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
         <div className='flex flex-col gap-4'>
-          <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} totalFixedDeposit={amount} mealRate={runningMealRate} isLoading={summaryLoading} isRefreshing={summaryRefreshing} mealRateLoading={mealRateCardLoading} mealRateRefreshing={mealRateCardRefreshing} />
+          <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} totalFixedDeposit={amount} mealRates={runningMealRates} finalizationData={finalizationData} isLoading={summaryLoading} isRefreshing={summaryRefreshing} mealRateLoading={mealRateCardLoading} mealRateRefreshing={mealRateCardRefreshing} />
           <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} isLoading={expenseLoading} isRefreshing={expenseRefreshing} />
         </div>
         <div className='grid grid-cols-1 gap-8'>

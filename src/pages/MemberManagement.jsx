@@ -11,6 +11,7 @@ import Loading from '../components/Loading';
 import { getMealShortLabel } from '../utils/mealTypes';
 import useRole from '../hooks/useRole';
 import { ROLES, isSuperAdminRole } from '../utils/roles';
+import { DINING_IDS, getDiningLabel, normalizeDiningId } from '../utils/dining';
 
 const MotionDiv = motion.div;
 
@@ -258,18 +259,20 @@ const MemberManagement = () => {
     );
   };
 
-  const isMealAvailable = (date, mealType) => {
-    if (!schedulesData) return false;
+  const getScheduleMeal = (date, mealType) => {
+    if (!schedulesData) return null;
     const dateStr = format(date, 'yyyy-MM-dd');
     const schedule = schedulesData.find(s => format(new Date(s.date), 'yyyy-MM-dd') === dateStr);
-    return schedule?.availableMeals?.find(m => m.mealType === mealType)?.isAvailable || false;
+    const meal = schedule?.availableMeals?.find(m => m.mealType === mealType);
+
+    return meal ? { ...meal, diningId: normalizeDiningId(meal.diningId) } : null;
   };
 
   const handleMealToggle = async (userId, date, mealType) => {
     setRequested(true)
     const reg = getRegistration(userId, date, mealType);
-    const available = isMealAvailable(date, mealType);
-    if (!available) {
+    const scheduleMeal = getScheduleMeal(date, mealType);
+    if (!scheduleMeal?.isAvailable) {
       toast.error('Meal not available')
       setRequested(false)
       return
@@ -285,7 +288,13 @@ const MemberManagement = () => {
       );
     } else {
       toast.promise(
-        axiosSecure.post('/users/meals/register', { userId, date: format(date, 'yyyy-MM-dd'), mealType, numberOfMeals: 1 }).then(() => {
+        axiosSecure.post('/users/meals/register', {
+          userId,
+          date: format(date, 'yyyy-MM-dd'),
+          mealType,
+          diningId: scheduleMeal.diningId,
+          numberOfMeals: 1
+        }).then(() => {
           refetch()
           setRequested(false)
         }),
@@ -371,7 +380,10 @@ const MemberManagement = () => {
                           <div className='flex gap-1'>
                             {['morning', 'evening', 'night'].map(type => {
                               const reg = getRegistration(user._id, date, type);
-                              const available = isMealAvailable(date, type);
+                              const scheduleMeal = getScheduleMeal(date, type);
+                              const available = Boolean(scheduleMeal?.isAvailable);
+                              const diningId = normalizeDiningId(reg?.diningId || scheduleMeal?.diningId);
+                              const isOfficeMeal = diningId === DINING_IDS.office;
                               const canEditQty = isEditingThis && reg;
 
                               return (
@@ -386,8 +398,9 @@ const MemberManagement = () => {
                                     <button
                                       disabled={requested}
                                       onClick={() => !isEditingThis && available && handleMealToggle(user._id, date, type)}
+                                      title={available ? getDiningLabel(diningId) : 'Unavailable'}
                                       className={`w-7 h-7 flex items-center justify-center rounded-sm font-bold transition-all
-                                                                            ${reg ? 'bg-primary text-white' : available ? 'bg-base-200 text-base-content/20' : 'bg-transparent text-transparent'} 
+                                                                            ${reg ? isOfficeMeal ? 'bg-office border border-office text-white' : 'bg-primary text-white' : available ? isOfficeMeal ? 'bg-office-soft border border-office-soft text-office-content' : 'bg-base-200 text-base-content/20' : 'bg-transparent text-transparent'}
                                                                             ${available && !isEditingThis ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default'}
                                                                             ${canEditQty ? 'scale-90 opacity-90' : ''} 
                                                                             ${registrationsLoading && 'border skeleton'}`}

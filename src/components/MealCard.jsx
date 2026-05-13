@@ -2,12 +2,18 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { Check, X, Edit2, Trash2, XCircle, Info } from 'lucide-react'; // Modern icons
 import { getMealLabel } from '../utils/mealTypes';
+import { DINING_IDS, diningLabels, getDiningIndicatorClass, getDiningLabel, isOfficeDining, normalizeDiningId } from '../utils/dining';
+
+const withDiningFallback = (meals = []) => meals.map(meal => ({
+    ...meal,
+    diningId: normalizeDiningId(meal.diningId),
+}));
 
 const MealCard = ({ schedule, onUpdate, onDelete }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedSchedule, setEditedSchedule] = useState({
         isHoliday: schedule.isHoliday,
-        availableMeals: schedule.availableMeals
+        availableMeals: withDiningFallback(schedule.availableMeals)
     });
 
     const handleMealToggle = (mealType) => {
@@ -37,6 +43,15 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
         }));
     };
 
+    const handleDiningChange = (mealType, diningId) => {
+        setEditedSchedule(prev => ({
+            ...prev,
+            availableMeals: prev.availableMeals.map(meal =>
+                meal.mealType === mealType ? { ...meal, diningId: normalizeDiningId(diningId) } : meal
+            )
+        }));
+    };
+
     const handleDelete = async () => {
         await onDelete(schedule._id);
     };
@@ -48,12 +63,20 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
     const handleCancel = () => {
         setEditedSchedule({
             isHoliday: schedule.isHoliday,
-            availableMeals: schedule.availableMeals
+            availableMeals: withDiningFallback(schedule.availableMeals)
         });
         setIsEditing(false);
     };
 
-    const displayMeals = isEditing ? editedSchedule.availableMeals : schedule.availableMeals;
+    const handleStartEditing = () => {
+        setEditedSchedule({
+            isHoliday: schedule.isHoliday,
+            availableMeals: withDiningFallback(schedule.availableMeals)
+        });
+        setIsEditing(true);
+    };
+
+    const displayMeals = isEditing ? editedSchedule.availableMeals : withDiningFallback(schedule.availableMeals);
 
     return (
         <div className={`group flex flex-col bg-base-100 rounded-2xl border transition-all duration-200 
@@ -92,7 +115,7 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
                     ) : (
                         <button
                             disabled={isEditing}
-                            onClick={() => setIsEditing(true)}
+                            onClick={handleStartEditing}
                             className='hover:bg-base-300 border border-base-200 cursor-pointer p-2 rounded-lg'
                         >
                             <Edit2 size={16} />
@@ -113,11 +136,18 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
                     >
                         <div className='p-3'>
                             <div className='flex justify-between items-center mb-1'>
-                                <span className={`text-xs font-bold uppercase tracking-widest ${meal?.isAvailable ? 'text-primary' : 'text-base-content/40'}`}>
-                                    {
-                                        getMealLabel(meal.mealType)
-                                    }
-                                </span>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className={`text-xs font-bold uppercase tracking-widest ${meal?.isAvailable ? 'text-primary' : 'text-base-content/40'}`}>
+                                        {
+                                            getMealLabel(meal.mealType)
+                                        }
+                                    </span>
+                                    {isOfficeDining(meal.diningId) && (
+                                        <span className={`border px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getDiningIndicatorClass(meal.diningId)}`}>
+                                            {getDiningLabel(meal.diningId)}
+                                        </span>
+                                    )}
+                                </div>
                                 {meal?.isAvailable && (
                                     <span className='badge badge-primary badge-sm font-bold'>
                                         {meal?.weight}
@@ -145,6 +175,20 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
                                                     onChange={(e) => handleWeightChange(meal.mealType, e.target.value)}
                                                     className='input input-xs input-bordered w-20'
                                                 />
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-bold text-base-content/40 uppercase">Location:</span>
+                                                <select
+                                                    value={normalizeDiningId(meal.diningId)}
+                                                    onChange={(e) => handleDiningChange(meal.mealType, e.target.value)}
+                                                    className='select select-xs select-bordered grow focus:select-primary'
+                                                >
+                                                    {Object.values(DINING_IDS).map(diningId => (
+                                                        <option key={diningId} value={diningId}>
+                                                            {diningLabels[diningId]}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </div>
                                         </div>
                                     ) : (

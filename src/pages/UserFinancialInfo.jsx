@@ -5,6 +5,7 @@ import { BanknoteArrowUp, ChevronLeft, ChevronRight, HandCoins, ReceiptText, Ute
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import useAuth from '../hooks/useAuth';
 import useAxiosSecure from '../hooks/useAxiosSecure';
+import { getDiningIndicatorClass, getDiningLabel, isOfficeDining } from '../utils/dining';
 
 const currency = (value) => `Tk ${Number(value || 0).toLocaleString(undefined, {
     minimumFractionDigits: Number(value || 0) % 1 !== 0 ? 2 : 0
@@ -260,9 +261,25 @@ const UserFinancialInfo = () => {
                 </div>
 
                 {finalizationData && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t border-base-300">
-                        <InfoCard label="Meal Rate" value={currency(finalizationData?.mealRate)} icon={ReceiptText} tone="primary" isLoading={dataLoading} />
-                        <InfoCard label="Meal Cost" value={currency(finalizationData?.mealCost)} icon={ReceiptText} tone="error" isLoading={dataLoading} />
+                    <div className="space-y-3 pt-4 border-t border-base-300">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <InfoCard label="Meal Rate" value={currency(finalizationData?.mealRate)} icon={ReceiptText} tone="primary" isLoading={dataLoading} />
+                            <InfoCard label="Meal Cost" value={currency(finalizationData?.mealCost)} icon={ReceiptText} tone="error" isLoading={dataLoading} />
+                        </div>
+                        {finalizationData?.diningDetails?.length > 0 && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {finalizationData.diningDetails.map(detail => (
+                                    <div key={detail.diningId} className={`border rounded-xl p-3 ${isOfficeDining(detail.diningId) ? getDiningIndicatorClass(detail.diningId) : 'bg-base-200 border-base-300 text-base-content'}`}>
+                                        {isOfficeDining(detail.diningId) && (
+                                            <p className="text-[10px] font-black uppercase tracking-widest">{getDiningLabel(detail.diningId)}</p>
+                                        )}
+                                        <p className="text-sm font-bold mt-1">
+                                            {detail.totalMeals || 0} meals / {currency(detail.mealCost)}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 

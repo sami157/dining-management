@@ -23,6 +23,8 @@
   --color-neutral-content: oklch(92% 0.003 48.717);
   --color-info: oklch(74% 0.16 232.661);
   --color-info-content: oklch(39% 0.09 240.876);
+  --color-office: oklch(72% 0.14 185);
+  --color-office-content: oklch(25% 0.06 185);
   --color-success: oklch(76% 0.177 163.223);
   --color-success-content: oklch(37% 0.077 168.94);
   --color-warning: oklch(82% 0.189 84.429);
@@ -60,6 +62,8 @@
   --color-neutral-content: oklch(83.302% 0.003 326.261);
   --color-info: oklch(79.49% 0.063 184.558);
   --color-info-content: oklch(15.898% 0.012 184.558);
+  --color-office: oklch(79% 0.12 185);
+  --color-office-content: oklch(15% 0.035 185);
   --color-success: oklch(74.722% 0.072 131.116);
   --color-success-content: oklch(14.944% 0.014 131.116);
   --color-warning: oklch(88.15% 0.14 87.722);
@@ -110,6 +114,40 @@ a.active {
 }
 
 @layer utilities {
+  .bg-office {
+    background-color: var(--color-office);
+  }
+
+  .bg-office-soft {
+    background-color: color-mix(in oklch, var(--color-office) 12%, transparent);
+  }
+
+  .text-office {
+    color: var(--color-office);
+  }
+
+  .text-office-content {
+    color: var(--color-office-content);
+  }
+
+  .border-office {
+    border-color: var(--color-office);
+  }
+
+  .border-office-soft {
+    border-color: color-mix(in oklch, var(--color-office) 35%, transparent);
+  }
+
+  .ring-office {
+    --tw-ring-color: var(--color-office);
+  }
+
+  .badge-office {
+    border-color: color-mix(in oklch, var(--color-office) 35%, transparent);
+    background-color: color-mix(in oklch, var(--color-office) 12%, transparent);
+    color: var(--color-office-content);
+  }
+
   @keyframes wiggle {
     0%,
     100% {

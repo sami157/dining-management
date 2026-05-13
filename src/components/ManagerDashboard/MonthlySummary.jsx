@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaCircleCheck } from "react-icons/fa6";
 import { TrendingUp, TrendingDown, Wallet, CheckCircle2, BanknoteArrowUp, Info } from "lucide-react";
+import { DINING_IDS, getDiningIndicatorClass, getDiningLabel, isOfficeDining } from '../../utils/dining';
 
 const SummaryCardSkeleton = () => (
     <div className="bg-base-200/50 border border-base-300 p-6 rounded-xl space-y-3">
@@ -12,7 +13,7 @@ const SummaryCardSkeleton = () => (
     </div>
 );
 
-const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing }) => {
+const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, totalFixedDeposit, mealRates = {}, finalizationData, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing }) => {
     const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
     const balance = totalDeposit - totalExpenses;
     const isPositive = balance >= 0;
@@ -116,25 +117,39 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                             </div>
                         </div>
 
-                        {/* Meal Rate Card */}
-                        <div className={`border p-6 rounded-xl space-y-3 transition-colors flex-3 bg-base-200 border-base-200/20`}>
-                            <div className="flex items-center gap-2 opacity-60">
-                                <Info size={16} className='text-base-content' />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-base-content">Running Meal Rate</span>
-                            </div>
-                            {mealRateLoading && (
-                                <div className="skeleton h-9 w-24"></div>
-                            )}
-                            <div className={`text-3xl font-black tracking-tighter text-base-content ${mealRateLoading ? 'hidden' : ''}`}>
-                                ৳{mealRate}
-                            </div>
-                            {mealRateRefreshing && (
-                                <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
-                                    <span className="loading loading-spinner loading-xs text-primary"></span>
-                                    Updating
+                        {Object.values(DINING_IDS).map(diningId => (
+                            <div key={diningId} className={`border p-6 rounded-xl space-y-3 transition-colors flex-3 ${diningId === DINING_IDS.office ? 'bg-office-soft border-office-soft' : 'bg-primary/5 border-primary/20'}`}>
+                                <div className="flex items-center gap-2 opacity-80">
+                                    <Info size={16} className={diningId === DINING_IDS.office ? 'text-office' : 'text-primary'} />
+                                    <span className={`text-[10px] font-black uppercase tracking-widest ${diningId === DINING_IDS.office ? 'text-office-content' : 'text-primary'}`}>
+                                        {getDiningLabel(diningId)} Meal Rate
+                                    </span>
                                 </div>
-                            )}
-                        </div>
+                                {mealRateLoading && (
+                                    <div className="skeleton h-9 w-24"></div>
+                                )}
+                                <div className={`text-3xl font-black tracking-tighter ${diningId === DINING_IDS.office ? 'text-office-content' : 'text-primary'} ${mealRateLoading ? 'hidden' : ''}`}>
+                                    ৳{mealRates[diningId] || '0.00'}
+                                </div>
+                                {mealRateRefreshing && (
+                                    <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
+                                        <span className="loading loading-spinner loading-xs text-primary"></span>
+                                        Updating
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                        {finalizationData?.isFinalized && (
+                            <div className={`border p-6 rounded-xl space-y-3 transition-colors flex-3 bg-success/5 border-success/20`}>
+                                <div className="flex items-center gap-2 opacity-60">
+                                    <Wallet size={16} className='text-success' />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-success">Cash At Hand</span>
+                                </div>
+                                <div className={`text-3xl font-black tracking-tighter text-success`}>
+                                    ৳{Number(finalizationData?.cashAtHand || 0).toLocaleString()}
+                                </div>
+                            </div>
+                        )}
                         {/* Deposit Count Card */}
                         <div className={`border p-6 rounded-xl space-y-3 transition-colors flex-3 bg-base-200 border-base-200/20`}>
                             <div className="flex items-center gap-2 opacity-60">
@@ -148,6 +163,20 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                             </>
                         )}
                     </div>
+                    {finalizationData?.diningBreakdown?.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {finalizationData.diningBreakdown.map(item => (
+                                <div key={item.diningId} className={`border rounded-xl p-4 space-y-2 ${isOfficeDining(item.diningId) ? getDiningIndicatorClass(item.diningId) : 'bg-base-200 border-base-300 text-base-content'}`}>
+                                    <div className="text-[10px] font-black uppercase tracking-widest">{getDiningLabel(item.diningId)}</div>
+                                    <div className="grid grid-cols-3 gap-2 text-xs font-bold">
+                                        <span>Meals: {item.totalMealsServed || 0}</span>
+                                        <span>Expense: ৳{Number(item.totalExpenses || 0).toLocaleString()}</span>
+                                        <span>Rate: ৳{Number(item.mealRate || 0).toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                     {isRefreshing && !isLoading && (
                         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-base-content/40">
                             <span className="loading loading-spinner loading-xs text-primary"></span>

@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import useAuth from '../hooks/useAuth';
 import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, Info } from 'lucide-react';
 import { getMealLabel, getMealShortLabel } from '../utils/mealTypes';
+import { DINING_IDS, getDiningIndicatorClass, getDiningLabel, isOfficeDining, normalizeDiningId } from '../utils/dining';
 
 
 const getToday = () => {
@@ -42,6 +43,7 @@ const UserDashboard = ({ showFinancialStats = true }) => {
     const [showModal, setShowModal] = useState(false);
     const [requested, setRequested] = useState(false);
     const [optimisticMealDefault, setOptimisticMealDefault] = useState(null);
+    const [optimisticMealDefaultOffice, setOptimisticMealDefaultOffice] = useState(null);
 
     const dateArray = eachDayOfInterval({
         start: firstDate,
@@ -136,7 +138,8 @@ const UserDashboard = ({ showFinancialStats = true }) => {
             canRegister: meal.canRegister,
             registrationId: meal.registrationId,
             weight: meal.weight,
-            numberOfMeals: meal.numberOfMeals || 1
+            numberOfMeals: meal.numberOfMeals || 1,
+            diningId: normalizeDiningId(meal.diningId)
         };
     };
 
@@ -175,7 +178,12 @@ const UserDashboard = ({ showFinancialStats = true }) => {
 
         const dateStr = format(date, 'yyyy-MM-dd');
         toast.promise(
-            axiosSecure.post('/users/meals/register', { date: dateStr, mealType, numberOfMeals: 1 }).then(() => {
+            axiosSecure.post('/users/meals/register', {
+                date: dateStr,
+                mealType,
+                diningId: status.diningId,
+                numberOfMeals: 1
+            }).then(() => {
                 refetch();
                 refetchCount();
                 setRequested(false)
@@ -207,9 +215,10 @@ const UserDashboard = ({ showFinancialStats = true }) => {
     };
 
     const updateMealDefault = useMutation({
-        mutationFn: async (nextValue) => {
+        mutationFn: async ({ diningId, nextValue }) => {
             const response = await axiosSecure.patch('/users/meal-default', {
                 mealDefault: nextValue,
+                diningId,
             });
             return response.data;
         },
@@ -218,17 +227,23 @@ const UserDashboard = ({ showFinancialStats = true }) => {
             queryClient.setQueryData(['userData', user?.email], data.user);
             queryClient.setQueryData(['userProfile'], data.user);
             setOptimisticMealDefault(null);
+            setOptimisticMealDefaultOffice(null);
         },
         onError: (error) => {
             setOptimisticMealDefault(null);
+            setOptimisticMealDefaultOffice(null);
             toast.error(error?.response?.data?.error || 'Failed to update meal default');
         }
     });
 
-    const handleMealDefaultChange = (event) => {
+    const handleMealDefaultChange = (event, diningId) => {
         const nextValue = event.target.checked;
-        setOptimisticMealDefault(nextValue);
-        updateMealDefault.mutate(nextValue);
+        if (diningId === DINING_IDS.office) {
+            setOptimisticMealDefaultOffice(nextValue);
+        } else {
+            setOptimisticMealDefault(nextValue);
+        }
+        updateMealDefault.mutate({ diningId, nextValue });
     };
 
     // Modal Edit Handler (For the + / - buttons)
@@ -253,23 +268,29 @@ const UserDashboard = ({ showFinancialStats = true }) => {
 
     const dataLoading = depositLoading || countLoading || userDataLoading || mealLoading || finalizationLoading || userBalanceLoading;
     const mealDefault = optimisticMealDefault ?? Boolean(userData?.mealDefault);
+    const mealDefaultOffice = optimisticMealDefaultOffice ?? Boolean(userData?.mealDefaultOffice);
 
     const MealBox = ({ status, date, mealType }) => {
         let bgColor = 'bg-base-300';
+        let borderColor = 'border-transparent';
         let cursorClass = 'cursor-not-allowed';
+        const isOfficeMeal = status.diningId === DINING_IDS.office;
 
         if (status.registered) {
-            bgColor = 'bg-primary/80';
-            cursorClass = 'cursor-pointer hover:bg-primary';
+            bgColor = isOfficeMeal ? 'bg-office text-white' : 'bg-primary/80 text-white';
+            borderColor = isOfficeMeal ? 'border-office' : 'border-primary';
+            cursorClass = isOfficeMeal ? 'cursor-pointer hover:bg-office' : 'cursor-pointer hover:bg-primary';
         } else if (status.available) {
-            bgColor = 'bg-base-200';
+            bgColor = isOfficeMeal ? 'bg-office-soft text-office-content' : 'bg-base-200';
+            borderColor = isOfficeMeal ? 'border-office-soft' : 'border-transparent';
             cursorClass = status.canRegister ? 'cursor-pointer hover:bg-base-100' : 'cursor-not-allowed';
         }
 
         return (
             <button
                 disabled={requested}
-                className={`w-7 flex items-center justify-center h-7 rounded ${bgColor} ${cursorClass} transition-colors ${mealLoading && 'border border-dotted border-primary animate-wiggle'} duration-250 ease-in-out text-center font-semibold`}
+                title={status.available ? getDiningLabel(status.diningId) : 'Unavailable'}
+                className={`w-7 flex items-center justify-center h-7 rounded border ${borderColor} ${bgColor} ${cursorClass} transition-colors ${mealLoading && 'border-dotted border-primary animate-wiggle'} duration-250 ease-in-out text-center font-semibold`}
                 onClick={() => handleMealClick(date, mealType, status)}
             >
                 {status.available && (status.registered && status.numberOfMeals > 1 ? `x${status.numberOfMeals}` : null)}
@@ -384,16 +405,31 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                         <div className='space-y-4 p-3 bg-base-200 rounded-lg'>
                             <div className="flex items-center max-w-70 justify-between gap-4">
                                 <div>
-                                    <p className="text-sm font-bold uppercase">Auto Register</p>
+                                    <p className="text-sm font-bold uppercase">Township Auto Register</p>
                                     <p className="text-xs text-base-content/50">
-                                        Get automatically registered for offered meals
+                                        Get automatically registered for township meals
                                     </p>
                                 </div>
                                 <input
                                     type="checkbox"
                                     className="toggle toggle-primary"
                                     checked={mealDefault}
-                                    onChange={handleMealDefaultChange}
+                                    onChange={(event) => handleMealDefaultChange(event, DINING_IDS.township)}
+                                    disabled={userDataLoading || updateMealDefault.isPending}
+                                />
+                            </div>
+                            <div className="flex items-center max-w-70 justify-between gap-4">
+                                <div>
+                                    <p className="text-sm font-bold uppercase">Office Auto Register</p>
+                                    <p className="text-xs text-base-content/50">
+                                        Get automatically registered for office meals
+                                    </p>
+                                </div>
+                                <input
+                                    type="checkbox"
+                                    className="toggle"
+                                    checked={mealDefaultOffice}
+                                    onChange={(event) => handleMealDefaultChange(event, DINING_IDS.office)}
                                     disabled={userDataLoading || updateMealDefault.isPending}
                                 />
                             </div>
@@ -558,6 +594,11 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                                                             <div className="bg-base-300 px-4 py-1 rounded-full text-xs font-bold opacity-70">
                                                                 {status.weight}
                                                             </div>
+                                                            {isOfficeDining(status.diningId) && (
+                                                                <span className={`border px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${getDiningIndicatorClass(status.diningId)}`}>
+                                                                    {getDiningLabel(status.diningId)}
+                                                                </span>
+                                                            )}
                                                         </h4>
                                                         {!status.canRegister && !status.registered && (
                                                             <span className=" text-error font-bold uppercase mt-1">Deadline Passed</span>

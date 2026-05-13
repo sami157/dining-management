@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { MonthlySummaryHistory } from '../components/ManagerDashboard/MonthlySummaryHistory';
+import { getDiningIndicatorClass, getDiningLabel, isOfficeDining } from '../utils/dining';
 
 const PreviousData = () => {
   const axiosSecure = useAxiosSecure();
@@ -156,6 +157,7 @@ const PreviousData = () => {
                       <thead>
                         <tr>
                           <th>Date</th>
+                          <th>Dining</th>
                           <th>Category</th>
                           <th>Amount</th>
                           <th>Description</th>
@@ -165,6 +167,13 @@ const PreviousData = () => {
                         {expensesData?.map((expense) => (
                           <tr key={expense._id}>
                             <td>{format(new Date(expense.date), 'dd MMM')}</td>
+                            <td>
+                              {isOfficeDining(expense.diningId) ? (
+                                <span className={`border px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getDiningIndicatorClass(expense.diningId)}`}>
+                                  {getDiningLabel(expense.diningId)}
+                                </span>
+                              ) : '-'}
+                            </td>
                             <td className='capitalize'>{expense.category}</td>
                             <td className='font-medium'>৳{expense.amount}</td>
                             <td className='text-xs'>{expense.description || '-'}</td>
@@ -188,6 +197,7 @@ const PreviousData = () => {
                           <tr>
                             <th>Name</th>
                             <th className='text-center'>Meals</th>
+                            <th className='text-center'>Dining</th>
                             <th className='text-center'>Deposits</th>
                             <th className='text-center'>Meal Cost</th>
                             <th className='text-center'>Mosque Fee</th>
@@ -200,6 +210,15 @@ const PreviousData = () => {
                             <tr key={member.userId}>
                               <td className='font-semibold'>{member.userName}</td>
                               <td className='text-center'>{member.totalMeals}</td>
+                              <td>
+                                <div className='flex flex-col gap-1'>
+                                  {member.diningDetails?.length ? member.diningDetails.map(detail => (
+                                    <span key={detail.diningId} className={isOfficeDining(detail.diningId) ? `border px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getDiningIndicatorClass(detail.diningId)}` : 'text-[9px] font-black uppercase tracking-widest text-base-content/60'}>
+                                      {isOfficeDining(detail.diningId) ? `${getDiningLabel(detail.diningId)}: ` : ''}{detail.totalMeals || 0} meals / ৳{Number(detail.mealCost || 0).toFixed(0)}
+                                    </span>
+                                  )) : '-'}
+                                </div>
+                              </td>
                               <td className='text-center text-success'>৳{member.totalDeposits}</td>
                               <td className='text-center text-error'>৳{member.mealCost?.toFixed(0)}</td>
                               <td className='text-center text-error'>৳{member.mosqueFee || 0}</td>

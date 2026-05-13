@@ -5,6 +5,7 @@ import useAxiosSecure from '../hooks/useAxiosSecure';
 import useAuth from '../hooks/useAuth';
 import { useState } from 'react';
 import { getMealLabel } from '../utils/mealTypes';
+import { DINING_IDS, getDiningIndicatorClass, getDiningLabel, isOfficeDining, normalizeDiningId } from '../utils/dining';
 
 const MealRowSkeleton = () => (
     <div className="relative min-h-32 rounded-lg border border-base-300 bg-base-200/70 overflow-hidden">
@@ -76,6 +77,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
             axiosSecure.post('/users/meals/register', {
                 date: dateStr,
                 mealType: meal.mealType,
+                diningId: normalizeDiningId(meal.diningId),
                 numberOfMeals: 1 // Default to 1
             }).then(() => {
                 refetch()
@@ -141,17 +143,27 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                 (
                                     meals.map((meal) => {
                                         const isReg = meal.isRegistered;
+                                        const diningId = normalizeDiningId(meal.diningId);
+                                        const isOfficeMeal = diningId === DINING_IDS.office;
+                                        const mealCardTone = !meal.isAvailable
+                                            ? 'bg-none border-dashed border-base-300 border'
+                                            : isReg
+                                                ? isOfficeMeal
+                                                    ? 'bg-office-soft border-office-soft'
+                                                    : 'bg-primary/10 border-primary/30'
+                                                : isOfficeMeal
+                                                    ? 'bg-office-soft border-office-soft'
+                                                    : 'bg-base-200 border-base-300';
 
                                         return (
                                             <div
-                                                key={meal.mealType}
-                                                className={`relative min-h-32 group rounded-lg transition-all duration-300 overflow-hidden ${!meal.isAvailable ? 'bg-none border-dashed border-base-300 border' : isReg ? 'bg-primary/10 border-primary/30' : 'bg-base-200 border-base-300'
-                                                    }`}
+                                                key={`${meal.mealType}-${diningId}`}
+                                                className={`relative min-h-32 group rounded-lg transition-all duration-300 overflow-hidden ${mealCardTone}`}
                                             >
                                                 <div className="p-4">
                                                     <div className="flex justify-between items-center mb-3">
                                                         <div className="flex items-center gap-3">
-                                                            <div className={`p-3 rounded-full ${isReg ? 'bg-primary text-white' : 'bg-base-100 border border-base-300'}`}>
+                                                            <div className={`p-3 rounded-full ${isReg ? isOfficeMeal ? 'bg-office text-white' : 'bg-primary text-white' : 'bg-base-100 border border-base-300'}`}>
                                                                 {
                                                                     meal.isAvailable ?
                                                                         <Utensils size={18} /> :
@@ -161,6 +173,11 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                                             <div className='flex flex-col items-start'>
                                                                 <h3 className="font-bold uppercase tracking-wide text-sm flex items-center gap-2">
                                                                     {getMealLabel(meal.mealType)}
+                                                                    {isOfficeDining(diningId) && (
+                                                                        <span className={`border px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getDiningIndicatorClass(diningId)}`}>
+                                                                            {getDiningLabel(diningId)}
+                                                                        </span>
+                                                                    )}
                                                                 </h3>
                                                                 <div>
                                                                     {meal.weight && <span className="opacity-40 text-xs font-bold">{
@@ -187,7 +204,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                                                         <Minus size={12} strokeWidth={3} />
                                                                     </button>
 
-                                                                    <span className="font-black min-w-3 text-center text-primary">
+                                                                    <span className={`font-black min-w-3 text-center ${isOfficeMeal ? 'text-office-content' : 'text-primary'}`}>
                                                                         {meal.numberOfMeals || 1}
                                                                     </span>
 
@@ -212,7 +229,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                                                     }`}
                                                             >
                                                                 {isReg ? (
-                                                                    <CircleCheckBig size={28} className="text-primary fill-primary/10" />
+                                                                    <CircleCheckBig size={28} className={isOfficeMeal ? 'text-office' : 'text-primary fill-primary/10'} />
                                                                 ) :
                                                                     meal.isAvailable ?
                                                                         (
