@@ -26,7 +26,7 @@ const ExpenseRowSkeleton = () => (
     </tr>
 );
 
-const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refetchExpenses, isLoading, isRefreshing }) => {
+const MonthlyExpense = ({ expensesData, monthFinalized, refetchExpenses, isLoading, isRefreshing, diningId: fixedDiningId }) => {
     const axiosSecure = useAxiosSecure();
     const [showExpenseModal, setShowExpenseModal] = useState(false);
     const [expenseData, setExpenseData] = useState({
@@ -38,10 +38,11 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
         diningId: DINING_IDS.township
     });
     const [editingExpense, setEditingExpense] = useState(null);
-    const [diningFilter, setDiningFilter] = useState('all');
+    const [diningFilter, setDiningFilter] = useState(fixedDiningId || 'all');
+    const activeDiningFilter = fixedDiningId || diningFilter;
 
     const filteredExpenses = expensesData?.filter(expense => (
-        diningFilter === 'all' || normalizeDiningId(expense.diningId) === diningFilter
+        activeDiningFilter === 'all' || normalizeDiningId(expense.diningId) === activeDiningFilter
     )) || [];
 
     const filteredExpensesByCategory = filteredExpenses.reduce((acc, exp) => {
@@ -59,7 +60,7 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                 amount: existingExpense.amount,
                 description: existingExpense.description,
                 person: existingExpense.person,
-                diningId: normalizeDiningId(existingExpense.diningId)
+                diningId: fixedDiningId || normalizeDiningId(existingExpense.diningId)
             });
         } else {
             setEditingExpense(null);
@@ -69,7 +70,7 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                 amount: 0,
                 description: '',
                 person: '',
-                diningId: DINING_IDS.township
+                diningId: fixedDiningId || DINING_IDS.township
             });
         }
         setShowExpenseModal(true);
@@ -163,26 +164,28 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
     };
 
     return (
-        <div>
+        <div className='h-full'>
             {/* Expense Logging */}
-            <div className='card bg-base-200'>
-                <div className='card-body'>
-                    <div className='flex flex-col gap-4 mb-3'>
+            <div className='card h-[34rem] bg-base-200'>
+                <div className='card-body flex min-h-0 flex-col'>
+                    <div className='flex shrink-0 flex-col gap-4 mb-3'>
                         <div className='space-y-4'>
                             <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
-                                <h3 className='card-title'>Expenses by Category</h3>
-                                <select
-                                    value={diningFilter}
-                                    onChange={(e) => setDiningFilter(e.target.value)}
-                                    className='select select-sm select-bordered w-full sm:w-44'
-                                >
-                                    <option value="all">All Dining</option>
-                                    {Object.values(DINING_IDS).map(diningId => (
-                                        <option key={diningId} value={diningId}>
-                                            {diningLabels[diningId]}
-                                        </option>
-                                    ))}
-                                </select>
+                                <h3 className='card-title'>{fixedDiningId ? `${diningLabels[fixedDiningId]} Expenses` : 'Expenses by Category'}</h3>
+                                {!fixedDiningId && (
+                                    <select
+                                        value={diningFilter}
+                                        onChange={(e) => setDiningFilter(e.target.value)}
+                                        className='select select-sm select-bordered w-full sm:w-44'
+                                    >
+                                        <option value="all">All Dining</option>
+                                        {Object.values(DINING_IDS).map(diningId => (
+                                            <option key={diningId} value={diningId}>
+                                                {diningLabels[diningId]}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
                             </div>
                             <div className='grid grid-cols-2 gap-2'>
                                 {isLoading ? (
@@ -222,12 +225,12 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                             </motion.button>
                         </div>
                     </div>
-                    <div className='overflow-x-auto'>
+                    <div className='min-h-0 grow overflow-auto'>
                         <table className='table table-xs'>
                             <thead>
                                 <tr>
                                     <th>Date</th>
-                                    <th>Dining</th>
+                                    {!fixedDiningId && <th>Dining</th>}
                                     <th>Category</th>
                                     <th>Amount</th>
                                     <th>Person</th>
@@ -243,13 +246,15 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                 ) : filteredExpenses.length ? filteredExpenses.map((expense) => (
                                     <tr key={expense._id}>
                                         <td>{format(new Date(expense.date), 'dd MMM')}</td>
-                                        <td>
-                                            {isOfficeDining(expense.diningId) ? (
-                                                <span className={`border px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getDiningIndicatorClass(expense.diningId)}`}>
-                                                    {getDiningLabel(expense.diningId)}
-                                                </span>
-                                            ) : '-'}
-                                        </td>
+                                        {!fixedDiningId && (
+                                            <td>
+                                                {isOfficeDining(expense.diningId) ? (
+                                                    <span className={`border px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getDiningIndicatorClass(expense.diningId)}`}>
+                                                        {getDiningLabel(expense.diningId)}
+                                                    </span>
+                                                ) : '-'}
+                                            </td>
+                                        )}
                                         <td className='capitalize'>{expense.category}</td>
                                         <td className='font-medium'>৳{expense.amount}</td>
                                         <td className='text-xs'>{expense.person || '-'}</td>
@@ -273,7 +278,7 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan={7} className='text-center text-base-content/50 py-6'>No expenses recorded</td>
+                                        <td colSpan={fixedDiningId ? 6 : 7} className='text-center text-base-content/50 py-6'>No expenses recorded</td>
                                     </tr>
                                 )}
                             </tbody>
@@ -321,6 +326,7 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                     </select>
                                 </div>
 
+                                {!fixedDiningId && (
                                 <div>
                                     <label className='label'>Dining</label>
                                     <select
@@ -335,6 +341,7 @@ const MonthlyExpense = ({ expensesData, expensesByCategory, monthFinalized, refe
                                         ))}
                                     </select>
                                 </div>
+                                )}
 
                                 <div>
                                     <label className='label'>Amount (৳)</label>

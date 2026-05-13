@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import MemberInfoTable from '../components/ManagerDashboard/MemberInfoTable';
 import MonthlySummary from '../components/ManagerDashboard/MonthlySummary';
 import MonthlyExpense from '../components/ManagerDashboard/MonthlyExpense';
-import { DINING_IDS } from '../utils/dining';
+import { DINING_IDS, getDiningLabel, isOfficeDining, normalizeDiningId } from '../utils/dining';
 
 const FundManagement = () => {
 
@@ -139,12 +139,14 @@ const FundManagement = () => {
   });
 
 
-  // Calculate expense summary
-  const totalExpenses = expensesData?.reduce((sum, exp) => sum + exp.amount, 0) || 0;
-  const expensesByCategory = expensesData?.reduce((acc, exp) => {
-    acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+  const expensesByDining = Object.values(DINING_IDS).reduce((acc, diningId) => {
+    const expenses = expensesData?.filter(expense => normalizeDiningId(expense.diningId) === diningId) || [];
+    acc[diningId] = {
+      expenses,
+      total: expenses.reduce((sum, exp) => sum + exp.amount, 0),
+    };
     return acc;
-  }, {}) || {};
+  }, {});
 
   const finalizeMonth = async () => {
     toast.promise(
@@ -214,14 +216,52 @@ const FundManagement = () => {
         )}
       </div>
       {/* Monthly Summary */}
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        <div className='flex flex-col gap-4'>
-          <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} totalFixedDeposit={amount} mealRates={runningMealRates} finalizationData={finalizationData} isLoading={summaryLoading} isRefreshing={summaryRefreshing} mealRateLoading={mealRateCardLoading} mealRateRefreshing={mealRateCardRefreshing} />
-          <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} isLoading={expenseLoading} isRefreshing={expenseRefreshing} />
-        </div>
-        <div className='grid grid-cols-1 gap-8'>
+      <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 items-start'>
+        {Object.values(DINING_IDS).map((diningId) => (
+          <section
+            key={diningId}
+            className={`flex flex-col gap-4 rounded-2xl border p-3 ${isOfficeDining(diningId) ? 'border-office-soft bg-office-soft' : 'border-base-300 bg-base-100'}`}
+          >
+            <div className='px-2 pt-1'>
+              <h2 className={`text-lg font-black uppercase italic tracking-tight ${isOfficeDining(diningId) ? 'text-office-content' : 'text-primary'}`}>
+                {getDiningLabel(diningId)}
+              </h2>
+              <p className='text-[10px] font-bold uppercase tracking-[0.2em] opacity-40'>Summary And Expenses</p>
+            </div>
+            <MonthlySummary
+              mode='dining'
+              diningId={diningId}
+              totalExpenses={expensesByDining[diningId]?.total || 0}
+              depositsData={depositsData}
+              monthFinalized={monthFinalized}
+              finalizeMonth={finalizeMonth}
+              totalFixedDeposit={amount}
+              mealRates={runningMealRates}
+              finalizationData={finalizationData}
+              isLoading={summaryLoading}
+              isRefreshing={summaryRefreshing}
+              mealRateLoading={mealRateCardLoading}
+              mealRateRefreshing={mealRateCardRefreshing}
+            />
+            <MonthlyExpense
+              diningId={diningId}
+              expensesData={expensesByDining[diningId]?.expenses || []}
+              monthFinalized={monthFinalized}
+              refetchExpenses={refetchExpenses}
+              isLoading={expenseLoading}
+              isRefreshing={expenseRefreshing}
+            />
+          </section>
+        ))}
+
+        <section className='grid grid-cols-1 gap-4 rounded-2xl border border-base-300 bg-base-100 p-3'>
+          <div className='px-2 pt-1'>
+            <h2 className='text-lg font-black uppercase italic tracking-tight'>Common Deposit</h2>
+            <p className='text-[10px] font-bold uppercase tracking-[0.2em] opacity-40'>Deposits, balances, and finalization</p>
+          </div>
+          <MonthlySummary totalExpenses={0} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} totalFixedDeposit={amount} finalizationData={finalizationData} isLoading={summaryLoading} isRefreshing={summaryRefreshing} />
           <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} refetchBalances={refetchBalances} currentMonth={currentMonth} isLoading={memberTableLoading} isRefreshing={memberTableRefreshing} depositsLoading={depositsLoading} />
-        </div>
+        </section>
       </div>
     </div>
   );

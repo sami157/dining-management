@@ -500,24 +500,24 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                                                                 <div key={type} className='flex flex-col items-center gap-1.5'>
                                                                     <div className="relative flex flex-col items-center">
                                                                         {/* VERTICAL FLOATING CONTROLS */}
-                                                                        {canEditQty && (
-                                                                            <>
-                                                                                <button
-                                                                                    onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, 1)}
-                                                                                    disabled={!status.available}
-                                                                                    className="absolute -top-4 z-10 w-5 h-5 flex items-center justify-center bg-primary text-white rounded-full shadow-md border border-base-100 hover:scale-110 transition-transform disabled:opacity-50"
-                                                                                >
-                                                                                    <Plus size={10} strokeWidth={4} />
-                                                                                </button>
+                                                        {canEditQty && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, 1)}
+                                                                    disabled={!status.available}
+                                                                    className={`absolute -top-4 z-10 w-5 h-5 flex items-center justify-center text-white rounded-full shadow-md border border-base-100 hover:scale-110 transition-transform disabled:opacity-50 ${isOfficeDining(status.diningId) ? 'bg-office' : 'bg-primary'}`}
+                                                                >
+                                                                    <Plus size={10} strokeWidth={4} />
+                                                                </button>
 
                                                                                 <button
-                                                                                    onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, -1)}
-                                                                                    // FIX: Only disable if qty is 1 or meal isn't available
-                                                                                    disabled={status.numberOfMeals <= 1 || !status.available}
-                                                                                    className="absolute -bottom-4 z-10 w-5 h-5 flex items-center justify-center bg-base-100 border-2 border-primary text-primary rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-30"
-                                                                                >
-                                                                                    <Minus size={10} strokeWidth={4} />
-                                                                                </button>
+                                                                    onClick={() => handleUpdateQty(status.registrationId, status.numberOfMeals, -1)}
+                                                                    // FIX: Only disable if qty is 1 or meal isn't available
+                                                                    disabled={status.numberOfMeals <= 1 || !status.available}
+                                                                    className={`absolute -bottom-4 z-10 w-5 h-5 flex items-center justify-center bg-base-100 border-2 rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-30 ${isOfficeDining(status.diningId) ? 'border-office text-office' : 'border-primary text-primary'}`}
+                                                                >
+                                                                    <Minus size={10} strokeWidth={4} />
+                                                                </button>
                                                                             </>
                                                                         )}
 
@@ -577,21 +577,24 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                                 {['morning', 'evening', 'night'].map((mealType) => {
                                     const status = getMealStatus(selectedDate, mealType);
                                     if (!status.available) return null;
+                                    const isOfficeMeal = isOfficeDining(status.diningId);
 
                                     return (
                                         <div
                                             key={mealType}
-                                            className={`relative overflow-hidden rounded-2xl transition-all duration-300 ${status.registered
-                                                ? 'bg-primary/20'
-                                                : 'bg-base-300/80'
+                                            className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${isOfficeMeal
+                                                ? 'bg-office-soft border-office-soft text-office-content'
+                                                : status.registered
+                                                    ? 'bg-primary/20 border-primary/20'
+                                                    : 'bg-base-300/80 border-base-300'
                                                 }`}
                                         >
                                             <div className="p-4 flex flex-col gap-3">
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex flex-col">
-                                                        <h4 className="font-black text-lg capitalize tracking-tight flex items-center gap-2">
+                                                        <h4 className={`font-black text-lg capitalize tracking-tight flex items-center gap-2 ${isOfficeMeal ? 'text-office-content' : ''}`}>
                                                             {getMealLabel(mealType)}
-                                                            <div className="bg-base-300 px-4 py-1 rounded-full text-xs font-bold opacity-70">
+                                                            <div className={`${isOfficeMeal ? 'bg-office text-white' : 'bg-base-300'} px-4 py-1 rounded-full text-xs font-bold opacity-70`}>
                                                                 {status.weight}
                                                             </div>
                                                             {isOfficeDining(status.diningId) && (
@@ -608,14 +611,14 @@ const UserDashboard = ({ showFinancialStats = true }) => {
 
                                                 {/* Menu section - only show if menu exists */}
                                                 {status.menu ? (
-                                                    <div className="bg-base-100/50 rounded-xl p-3 border border-dashed border-base-300">
-                                                        <p className="text-xs italic text-center text-base-content/70">
+                                                    <div className={`bg-base-100/50 rounded-xl p-3 border border-dashed ${isOfficeMeal ? 'border-office-soft' : 'border-base-300'}`}>
+                                                        <p className={`text-xs italic text-center ${isOfficeMeal ? 'text-office-content' : 'text-base-content/70'}`}>
                                                             "{status.menu}"
                                                         </p>
                                                     </div>
                                                 ) : (
                                                     <div className="text-center py-1">
-                                                        <p className=" text-base-content/30 uppercase font-bold tracking-widest">No Menu Set</p>
+                                                        <p className={`uppercase font-bold tracking-widest ${isOfficeMeal ? 'text-office-content opacity-60' : 'text-base-content/30'}`}>No Menu Set</p>
                                                     </div>
                                                 )}
                                             </div>

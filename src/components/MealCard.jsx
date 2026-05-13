@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { Check, X, Edit2, Trash2, XCircle, Info } from 'lucide-react'; // Modern icons
+import toast from 'react-hot-toast';
 import { getMealLabel } from '../utils/mealTypes';
 import { DINING_IDS, diningLabels, getDiningIndicatorClass, getDiningLabel, isOfficeDining, normalizeDiningId } from '../utils/dining';
 
@@ -52,8 +53,36 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
         }));
     };
 
-    const handleDelete = async () => {
-        await onDelete(schedule._id);
+    const handleDelete = () => {
+        toast.custom((t) => (
+            <div className='flex w-80 max-w-[92vw] flex-col gap-4 rounded-2xl border border-base-300 bg-base-100 p-4 shadow-2xl'>
+                <div>
+                    <p className='text-sm font-black uppercase tracking-wide text-error'>Delete schedule?</p>
+                    <p className='mt-1 text-xs text-base-content/60'>
+                        {format(new Date(schedule.date), 'EEEE, MMM dd, yyyy')}
+                    </p>
+                </div>
+                <div className='flex justify-end gap-2'>
+                    <button
+                        type='button'
+                        className='btn btn-sm btn-ghost'
+                        onClick={() => toast.dismiss(t.id)}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type='button'
+                        className='btn btn-sm btn-error text-error-content'
+                        onClick={async () => {
+                            toast.dismiss(t.id);
+                            await onDelete(schedule._id);
+                        }}
+                    >
+                        Delete
+                    </button>
+                </div>
+            </div>
+        ), { duration: 8000 });
     };
     const handleSave = async () => {
         await onUpdate(schedule._id, editedSchedule);
@@ -126,30 +155,41 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
 
             {/* Meals Section */}
             <div className='p-4 space-y-3'>
-                {displayMeals?.map((meal) => (
+                {displayMeals?.map((meal) => {
+                    const isOfficeMeal = isOfficeDining(meal.diningId);
+                    const mealTone = meal?.isAvailable
+                        ? isOfficeMeal
+                            ? 'bg-office-soft border-office-soft'
+                            : 'bg-primary/5 border-primary/20'
+                        : isOfficeMeal
+                            ? 'bg-office-soft border-office-soft opacity-60'
+                            : 'bg-base-200/50 border-transparent opacity-60';
+                    const hoverTone = isEditing
+                        ? isOfficeMeal ? 'cursor-pointer hover:border-office' : 'cursor-pointer hover:border-primary/40'
+                        : '';
+
+                    return (
                     <div
                         key={meal.mealType}
                         onClick={isEditing ? () => handleMealToggle(meal.mealType) : undefined}
-                        className={`relative overflow-hidden rounded-xl border transition-all 
-                        ${meal?.isAvailable ? 'bg-primary/5 border-primary/20' : 'bg-base-200/50 border-transparent opacity-60'} 
-                        ${isEditing ? 'cursor-pointer hover:border-primary/40' : ''}`}
+                        className={`relative overflow-hidden rounded-xl border transition-all ${mealTone} ${hoverTone}`}
                     >
                         <div className='p-3'>
                             <div className='flex justify-between items-center mb-1'>
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <span className={`text-xs font-bold uppercase tracking-widest ${meal?.isAvailable ? 'text-primary' : 'text-base-content/40'}`}>
+                                    <span className={`text-xs font-bold uppercase tracking-widest ${meal?.isAvailable ? isOfficeMeal ? 'text-office-content' : 'text-primary' : 'text-base-content/40'}`}>
                                         {
                                             getMealLabel(meal.mealType)
                                         }
                                     </span>
-                                    {isOfficeDining(meal.diningId) && (
+                                    {isOfficeMeal && (
                                         <span className={`border px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${getDiningIndicatorClass(meal.diningId)}`}>
                                             {getDiningLabel(meal.diningId)}
                                         </span>
                                     )}
                                 </div>
                                 {meal?.isAvailable && (
-                                    <span className='badge badge-primary badge-sm font-bold'>
+                                    <span className={`badge badge-sm font-bold ${isOfficeMeal ? 'bg-office text-white border-office' : 'badge-primary'}`}>
                                         {meal?.weight}
                                     </span>
                                 )}
@@ -192,7 +232,7 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <p className='text-sm text-center text-base-content/80 bangla-text leading-snug'>
+                                        <p className={`text-sm text-center bangla-text leading-snug ${isOfficeMeal ? 'text-office-content' : 'text-base-content/80'}`}>
                                             {meal.menu || <span className="text-base-content/30 italic">মেন্যু পেন্ডিং</span>}
                                         </p>
                                     )}
@@ -205,7 +245,8 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
                             )}
                         </div>
                     </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Optional: Footer hint when editing */}

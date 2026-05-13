@@ -391,8 +391,8 @@ const MemberManagement = () => {
                                   <div className='relative flex flex-col items-center'>
                                     {canEditQty && (
                                       <>
-                                        <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, 1)} className="absolute -top-4 z-10 w-4 h-4 flex items-center justify-center bg-primary text-white rounded-full shadow-md hover:scale-110 transition-transform"><Plus size={8} strokeWidth={4} /></button>
-                                        <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, -1)} disabled={(reg.numberOfMeals || 1) <= 1} className="absolute -bottom-4 z-10 w-4 h-4 flex items-center justify-center bg-base-100 border-2 border-primary text-primary rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-0"><Minus size={8} strokeWidth={4} /></button>
+                                        <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, 1)} className={`absolute -top-4 z-10 w-4 h-4 flex items-center justify-center text-white rounded-full shadow-md hover:scale-110 transition-transform ${isOfficeMeal ? 'bg-office' : 'bg-primary'}`}><Plus size={8} strokeWidth={4} /></button>
+                                        <button onClick={() => handleUpdateQty(reg._id, reg.numberOfMeals || 1, -1)} disabled={(reg.numberOfMeals || 1) <= 1} className={`absolute -bottom-4 z-10 w-4 h-4 flex items-center justify-center bg-base-100 border-2 rounded-full shadow-md hover:scale-110 transition-transform disabled:opacity-0 ${isOfficeMeal ? 'border-office text-office' : 'border-primary text-primary'}`}><Minus size={8} strokeWidth={4} /></button>
                                       </>
                                     )}
                                     <button
