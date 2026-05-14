@@ -40,6 +40,7 @@ const MonthlyExpense = ({ expensesData, monthFinalized, refetchExpenses, isLoadi
     const [editingExpense, setEditingExpense] = useState(null);
     const [diningFilter, setDiningFilter] = useState(fixedDiningId || 'all');
     const activeDiningFilter = fixedDiningId || diningFilter;
+    const officeLane = isOfficeDining(fixedDiningId);
 
     const filteredExpenses = expensesData?.filter(expense => (
         activeDiningFilter === 'all' || normalizeDiningId(expense.diningId) === activeDiningFilter
@@ -164,9 +165,9 @@ const MonthlyExpense = ({ expensesData, monthFinalized, refetchExpenses, isLoadi
     };
 
     return (
-        <div className='h-full'>
+        <div className='h-full grow'>
             {/* Expense Logging */}
-            <div className='card h-[34rem] bg-base-200'>
+            <div className='card h-full min-h-[34rem] bg-base-200'>
                 <div className='card-body flex min-h-0 flex-col'>
                     <div className='flex shrink-0 flex-col gap-4 mb-3'>
                         <div className='space-y-4'>
@@ -216,7 +217,7 @@ const MonthlyExpense = ({ expensesData, monthFinalized, refetchExpenses, isLoadi
                             </div>
                             <motion.button
                                 onClick={() => openExpenseModal()} disabled={monthFinalized || isLoading}
-                                className='active:scale-90 transition-transform rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
+                                className={`active:scale-90 transition-transform rounded-full font-semibold flex gap-2 cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed ${officeLane ? 'bg-office text-office-content hover:bg-office/90 disabled:bg-office-soft disabled:text-office-content/40' : 'bg-primary text-primary-content hover:bg-primary/90 disabled:bg-primary/10 disabled:text-primary-content/50'}`}
                             >
                                 <div className='flex items-center gap-1'>
                                     <IoIosAddCircle className='text-2xl' />

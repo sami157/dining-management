@@ -3,8 +3,7 @@ import axios from "axios";
 import useAuth from "./useAuth";
 
 const axiosSecure = axios.create({
-    baseURL: 'http://localhost:5000',
-    // baseURL: 'https://dining-management-server.vercel.app'
+    baseURL: import.meta.env.VITE_API_URL || 'https://dining-management-server-sami157-samis-projects-5699449c.vercel.app'
 });
 
 const useAxiosSecure = () => {

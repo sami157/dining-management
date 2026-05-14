@@ -47,6 +47,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
     const [depositAmount, setDepositAmount] = useState(0);
     const [depositNotes, setDepositNotes] = useState('');
     const [editingDeposit, setEditingDeposit] = useState(false);
+    const [memberSearch, setMemberSearch] = useState('');
 
     // Open deposit modal
     const openDepositModal = (user, existingDeposit = null) => {
@@ -122,6 +123,15 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
         return balance?.balance || 0;
     };
 
+    const filteredUsers = usersData?.filter(user => {
+        const query = memberSearch.trim().toLowerCase();
+        if (!query) return true;
+
+        return [user.name, user.room, user.email].some(value =>
+            String(value || '').toLowerCase().includes(query)
+        );
+    }) || [];
+
     // Delete deposit
     const handleDeleteDeposit = async (depositId) => {
         if (!confirm('Are you sure you want to delete this deposit?')) return;
@@ -136,27 +146,36 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
         }
     };
     return (
-        <div className='w-full'>
+        <div className='flex h-full min-h-0 w-full flex-col gap-4'>
             {/* Member List with Balances and Deposit Actions */}
-            <div>
-                <div className='flex items-center justify-between gap-3 mb-4'>
-                    <h2 className='text-xl font-semibold'>Member Information</h2>
+            <div className='flex h-[34rem] min-h-0 flex-col rounded-2xl bg-base-200 p-4'>
+                <div className='flex flex-col gap-3 mb-4'>
+                    <div className='flex items-center justify-between gap-3'>
+                        <h2 className='text-xl font-semibold'>Member Information</h2>
                     {isRefreshing && !isLoading && (
                         <span className='flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-base-content/40'>
                             <span className='loading loading-spinner loading-xs text-primary'></span>
                             Updating
                         </span>
                     )}
+                    </div>
+                    <input
+                        type='search'
+                        value={memberSearch}
+                        onChange={(e) => setMemberSearch(e.target.value)}
+                        className='input w-full bg-base-200/70 border-base-200 focus:input-primary tracking-tight h-10 text-sm'
+                        placeholder='Search by Name/Room..'
+                    />
                 </div>
 
-                <div className='overflow-auto max-h-screen'>
+                <div className='min-h-0 grow overflow-auto'>
                     <table className='table table-sm'>
                         <thead className='sticky top-0 z-10 bg-base-300'>
                             <tr>
                                 <th>Member</th>
-                                <th className='text-center'>Balance</th>
-                                <th className='text-center'>Deposit</th>
                                 <th className='text-center'>Action</th>
+                                <th className='text-center'>Deposit</th>
+                                <th className='text-center'>Balance</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -164,7 +183,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                 Array.from({ length: 8 }).map((_, index) => (
                                     <MemberRowSkeleton key={index} />
                                 ))
-                            ) : usersData?.length ? usersData.map((user) => {
+                            ) : filteredUsers.length ? filteredUsers.map((user) => {
                                 const userDeposits = depositsData?.filter(d => d.userId === user._id.toString()) || [];
                                 const monthlyDeposits = userDeposits.reduce((sum, d) => sum + d.amount, 0);
 
@@ -176,16 +195,10 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                                 <span className='text-xs text-base-content/60'>{user.room}</span>
                                             </div>
                                         </td>
-                                        <td className='text-center'>
-                                            <span className={`font-bold ${getUserBalance(user._id) < 0 ? 'text-error' : 'text-success'}`}>
-                                                ৳{getUserBalance(user._id).toFixed(2)}
-                                            </span>
-                                        </td>
-                                        <td className='text-center'>৳{monthlyDeposits.toFixed(2)}</td>
                                         <td className='flex justify-center'>
                                             <button
                                                 onClick={() => openDepositModal(user)} disabled={monthFinalized}
-                                                className='active:scale-90 transition-transform rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
+                                                className='active:scale-90 transition-transform rounded-full font-semibold text-info-content flex gap-2 bg-info cursor-pointer items-center px-2 py-2 hover:bg-info/90 disabled:cursor-not-allowed disabled:bg-info/10 disabled:text-info-content/50'
                                             >
                                                 <div className='flex gap-2 items-center'>
                                                     <IoIosAddCircle className='text-2xl' />
@@ -193,59 +206,67 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                                 </div>
                                             </button>
                                         </td>
+                                        <td className='text-center'>৳{monthlyDeposits.toFixed(2)}</td>
+                                        <td className='text-center'>
+                                            <span className={`font-bold ${getUserBalance(user._id) < 0 ? 'text-error' : 'text-success'}`}>
+                                                ৳{getUserBalance(user._id).toFixed(2)}
+                                            </span>
+                                        </td>
                                     </tr>
                                 );
                             }) : (
                                 <tr>
-                                    <td colSpan={4} className='text-center text-base-content/50 py-8'>No members found</td>
+                                    <td colSpan={4} className='text-center text-base-content/50 py-8'>
+                                        {usersData?.length ? 'No matching members' : 'No members found'}
+                                    </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
+            </div>
 
-                {/* Recent Deposits */}
-                <div className='mt-6'>
-                    <h3 className='text-lg font-semibold mb-3'>Recent Deposits</h3>
-                    <div className='overflow-x-auto'>
-                        <table className='table table-xs'>
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Member</th>
-                                    <th>Amount</th>
-                                    <th>Notes</th>
-                                    <th></th>
+            {/* Recent Deposits */}
+            <div className='flex h-[24rem] min-h-0 flex-col rounded-2xl bg-base-200 p-4'>
+                <h3 className='text-lg font-semibold mb-3'>Recent Deposits</h3>
+                <div className='min-h-0 grow overflow-auto'>
+                    <table className='table table-xs'>
+                        <thead className='sticky top-0 z-10 bg-base-300'>
+                            <tr>
+                                <th>Date</th>
+                                <th>Member</th>
+                                <th>Amount</th>
+                                <th>Notes</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {depositsLoading ? (
+                                Array.from({ length: 5 }).map((_, index) => (
+                                    <DepositRowSkeleton key={index} />
+                                ))
+                            ) : depositsData?.length ? depositsData.slice(0, 10).map((deposit) => (
+                                <tr key={deposit._id}>
+                                    <td>{format(new Date(deposit.depositDate), 'dd MMM')}</td>
+                                    <td>{deposit.userName}</td>
+                                    <td className='font-medium'>৳{deposit.amount.toFixed(2)}</td>
+                                    <td className='text-xs'>{deposit.notes || '-'}</td>
+                                    <td>
+                                        <button
+                                            onClick={() => handleDeleteDeposit(deposit._id)}
+                                            className=' cursor-pointer text-error self-center hover:bg-base-100 p-2 rounded-full text-sm'
+                                        >
+                                            <FiTrash2 />
+                                        </button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {depositsLoading ? (
-                                    Array.from({ length: 5 }).map((_, index) => (
-                                        <DepositRowSkeleton key={index} />
-                                    ))
-                                ) : depositsData?.length ? depositsData.slice(0, 10).map((deposit) => (
-                                    <tr key={deposit._id}>
-                                        <td>{format(new Date(deposit.depositDate), 'dd MMM')}</td>
-                                        <td>{deposit.userName}</td>
-                                        <td className='font-medium'>৳{deposit.amount.toFixed(2)}</td>
-                                        <td className='text-xs'>{deposit.notes || '-'}</td>
-                                        <td>
-                                            <button
-                                                onClick={() => handleDeleteDeposit(deposit._id)}
-                                                className=' cursor-pointer text-error self-center hover:bg-base-200 p-2 rounded-full text-sm'
-                                            >
-                                                <FiTrash2 />
-                                            </button>
-                                        </td>
-                                    </tr>
-                                )) : (
-                                    <tr>
-                                        <td colSpan={5} className='text-center text-base-content/50 py-6'>No deposits recorded</td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                            )) : (
+                                <tr>
+                                    <td colSpan={5} className='text-center text-base-content/50 py-6'>No deposits recorded</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
             {/* Deposit Modal */}

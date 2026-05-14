@@ -18,6 +18,7 @@ const MonthlySummary = ({ mode = 'common', diningId, totalExpenses, depositsData
     const uniqueEmailCount = new Set(depositsData?.map(item => item.userEmail)).size;
     const isDiningSummary = mode === 'dining';
     const officeLane = isOfficeDining(diningId);
+    const townshipLane = isDiningSummary && !officeLane;
     const diningBreakdown = finalizationData?.diningBreakdown?.find(item => item.diningId === diningId);
     const totalMealsServed = diningBreakdown?.totalMealsServed || 0;
     const diningRate = finalizationData?.isFinalized
@@ -26,7 +27,7 @@ const MonthlySummary = ({ mode = 'common', diningId, totalExpenses, depositsData
 
     return (
         <div className="w-full">
-            <div className={`bg-base-100 border rounded-2xl overflow-hidden ${officeLane ? 'border-office-soft' : 'border-base-300'}`}>
+            <div className={`bg-base-100 border rounded-2xl overflow-hidden ${officeLane ? 'border-office-soft' : townshipLane ? 'border-primary/20' : 'border-base-300'}`}>
                 <div className="p-6 md:p-6 space-y-6">
 
                     {/* Header Section */}
@@ -47,7 +48,7 @@ const MonthlySummary = ({ mode = 'common', diningId, totalExpenses, depositsData
                                 className={`btn btn-md rounded-2xl gap-1 px-3 border-none transition-all active:scale-95
                                 ${monthFinalized
                                         ? 'bg-base-200 text-base-content/30 cursor-not-allowed'
-                                        : 'bg-primary text-primary-content hover:bg-primary/90 shadow-none'
+                                        : 'bg-info text-info-content hover:bg-info/90 shadow-none'
                                     }`}
                             >
                                 {isLoading ? (
@@ -71,10 +72,10 @@ const MonthlySummary = ({ mode = 'common', diningId, totalExpenses, depositsData
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className={`grid grid-cols-1 gap-4 ${isDiningSummary ? 'sm:grid-cols-2' : finalizationData?.isFinalized ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
                         {isLoading ? (
                             <>
-                                {Array.from({ length: isDiningSummary ? 3 : 5 }).map((_, index) => (
+                                {Array.from({ length: isDiningSummary ? 3 : finalizationData?.isFinalized ? 4 : 3 }).map((_, index) => (
                                     <SummaryCardSkeleton key={index} />
                                 ))}
                             </>
@@ -141,7 +142,7 @@ const MonthlySummary = ({ mode = 'common', diningId, totalExpenses, depositsData
                                 <span className="text-[10px] font-black uppercase tracking-widest text-info">Fixed Deposits</span>
                             </div>
                             <div className={`text-3xl font-black tracking-tighter text-info`}>
-                                ৳{totalFixedDeposit}
+                                ৳{Number(totalFixedDeposit || 0).toLocaleString()}
                             </div>
                         </div>
 

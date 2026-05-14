@@ -172,6 +172,47 @@ const FundManagement = () => {
   const expenseLoading = expensesLoading;
   const expenseRefreshing = expensesFetching;
 
+  const renderDiningColumn = (diningId) => {
+    const officeLane = isOfficeDining(diningId);
+
+    return (
+      <section
+        key={diningId}
+        className={`flex h-full flex-col gap-4 rounded-2xl border p-3 ${officeLane ? 'border-office-soft bg-office-soft' : 'border-primary/20 bg-primary/5'}`}
+      >
+        <div className='px-2 pt-1'>
+          <h2 className={`text-lg font-black uppercase italic tracking-tight ${officeLane ? 'text-office-content' : 'text-primary'}`}>
+            {getDiningLabel(diningId)}
+          </h2>
+          <p className='text-[10px] font-bold uppercase tracking-[0.2em] opacity-40'>Summary And Expenses</p>
+        </div>
+        <MonthlySummary
+          mode='dining'
+          diningId={diningId}
+          totalExpenses={expensesByDining[diningId]?.total || 0}
+          depositsData={depositsData}
+          monthFinalized={monthFinalized}
+          finalizeMonth={finalizeMonth}
+          totalFixedDeposit={amount}
+          mealRates={runningMealRates}
+          finalizationData={finalizationData}
+          isLoading={summaryLoading}
+          isRefreshing={summaryRefreshing}
+          mealRateLoading={mealRateCardLoading}
+          mealRateRefreshing={mealRateCardRefreshing}
+        />
+        <MonthlyExpense
+          diningId={diningId}
+          expensesData={expensesByDining[diningId]?.expenses || []}
+          monthFinalized={monthFinalized}
+          refetchExpenses={refetchExpenses}
+          isLoading={expenseLoading}
+          isRefreshing={expenseRefreshing}
+        />
+      </section>
+    );
+  };
+
   return (
     <div className='p-4 w-99/100 mx-auto'>
       {/* Month Picker */}
@@ -215,90 +256,31 @@ const FundManagement = () => {
           </div>
         )}
       </div>
-      {/* Monthly Summary */}
-      <div className='grid grid-cols-1 xl:grid-cols-3 gap-6 items-start'>
-        {[DINING_IDS.township].map((diningId) => (
-          <section
-            key={diningId}
-            className={`flex flex-col gap-4 rounded-2xl border p-3 ${isOfficeDining(diningId) ? 'border-office-soft bg-office-soft' : 'border-base-300 bg-base-100'}`}
-          >
-            <div className='px-2 pt-1'>
-              <h2 className={`text-lg font-black uppercase italic tracking-tight ${isOfficeDining(diningId) ? 'text-office-content' : 'text-primary'}`}>
-                {getDiningLabel(diningId)}
-              </h2>
-              <p className='text-[10px] font-bold uppercase tracking-[0.2em] opacity-40'>Summary And Expenses</p>
-            </div>
-            <MonthlySummary
-              mode='dining'
-              diningId={diningId}
-              totalExpenses={expensesByDining[diningId]?.total || 0}
-              depositsData={depositsData}
-              monthFinalized={monthFinalized}
-              finalizeMonth={finalizeMonth}
-              totalFixedDeposit={amount}
-              mealRates={runningMealRates}
-              finalizationData={finalizationData}
-              isLoading={summaryLoading}
-              isRefreshing={summaryRefreshing}
-              mealRateLoading={mealRateCardLoading}
-              mealRateRefreshing={mealRateCardRefreshing}
-            />
-            <MonthlyExpense
-              diningId={diningId}
-              expensesData={expensesByDining[diningId]?.expenses || []}
-              monthFinalized={monthFinalized}
-              refetchExpenses={refetchExpenses}
-              isLoading={expenseLoading}
-              isRefreshing={expenseRefreshing}
-            />
-          </section>
-        ))}
+      <div className='mb-6'>
+        <MonthlySummary
+          totalExpenses={0}
+          depositsData={depositsData}
+          monthFinalized={monthFinalized}
+          finalizeMonth={finalizeMonth}
+          totalFixedDeposit={amount}
+          finalizationData={finalizationData}
+          isLoading={summaryLoading}
+          isRefreshing={summaryRefreshing}
+        />
+      </div>
 
-        <section className='grid grid-cols-1 gap-4 rounded-2xl border border-base-300 bg-base-100 p-3'>
+      <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)_minmax(0,1fr)] gap-6 items-stretch'>
+        {renderDiningColumn(DINING_IDS.township)}
+
+        <section className='flex h-full min-h-0 flex-col gap-4 rounded-2xl border border-base-300 bg-base-100 p-3'>
           <div className='px-2 pt-1'>
-            <h2 className='text-lg font-black uppercase italic tracking-tight'>Common Deposit</h2>
-            <p className='text-[10px] font-bold uppercase tracking-[0.2em] opacity-40'>Deposits, balances, and finalization</p>
+            <h2 className='text-lg font-black uppercase italic tracking-tight'>Member Deposits</h2>
+            <p className='text-[10px] font-bold uppercase tracking-[0.2em] opacity-40'>Balances And Deposit Entries</p>
           </div>
-          <MonthlySummary totalExpenses={0} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} totalFixedDeposit={amount} finalizationData={finalizationData} isLoading={summaryLoading} isRefreshing={summaryRefreshing} />
           <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} refetchBalances={refetchBalances} currentMonth={currentMonth} isLoading={memberTableLoading} isRefreshing={memberTableRefreshing} depositsLoading={depositsLoading} />
         </section>
 
-        {[DINING_IDS.office].map((diningId) => (
-          <section
-            key={diningId}
-            className={`flex flex-col gap-4 rounded-2xl border p-3 ${isOfficeDining(diningId) ? 'border-office-soft bg-office-soft' : 'border-base-300 bg-base-100'}`}
-          >
-            <div className='px-2 pt-1'>
-              <h2 className={`text-lg font-black uppercase italic tracking-tight ${isOfficeDining(diningId) ? 'text-office-content' : 'text-primary'}`}>
-                {getDiningLabel(diningId)}
-              </h2>
-              <p className='text-[10px] font-bold uppercase tracking-[0.2em] opacity-40'>Summary And Expenses</p>
-            </div>
-            <MonthlySummary
-              mode='dining'
-              diningId={diningId}
-              totalExpenses={expensesByDining[diningId]?.total || 0}
-              depositsData={depositsData}
-              monthFinalized={monthFinalized}
-              finalizeMonth={finalizeMonth}
-              totalFixedDeposit={amount}
-              mealRates={runningMealRates}
-              finalizationData={finalizationData}
-              isLoading={summaryLoading}
-              isRefreshing={summaryRefreshing}
-              mealRateLoading={mealRateCardLoading}
-              mealRateRefreshing={mealRateCardRefreshing}
-            />
-            <MonthlyExpense
-              diningId={diningId}
-              expensesData={expensesByDining[diningId]?.expenses || []}
-              monthFinalized={monthFinalized}
-              refetchExpenses={refetchExpenses}
-              isLoading={expenseLoading}
-              isRefreshing={expenseRefreshing}
-            />
-          </section>
-        ))}
+        {renderDiningColumn(DINING_IDS.office)}
       </div>
     </div>
   );
