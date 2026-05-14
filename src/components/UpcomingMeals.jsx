@@ -26,6 +26,15 @@ const UpcomingMeals = () => {
         }
     });
 
+    const { data: userData } = useQuery({
+        queryKey: ['userProfile'],
+        enabled: !loading,
+        queryFn: async () => {
+            const res = await axiosSecure.get('/users/profile');
+            return res.data.user;
+        }
+    });
+
     const scheduleMap = {};
     data?.schedules?.forEach((s) => {
         const key = format(new Date(s.date), 'yyyy-MM-dd');
@@ -80,6 +89,7 @@ const UpcomingMeals = () => {
                                         schedule={schedule}
                                         dataLoading={dataLoading}
                                         refetch={refetch}
+                                        defaultDeliveryLocation={userData?.defaultDeliveryLocation}
                                     />
                                 </div>
                             );

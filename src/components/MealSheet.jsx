@@ -109,7 +109,7 @@ export const MealSheet = () => {
         const reg = getRegistration(userId, mealType);
         return (
             <div
-                className={`w-7 h-7 rounded-md transition-all duration-500 border flex items-center justify-center font-bold text-lg ${reg
+                className={`relative w-7 h-7 rounded-md transition-all duration-500 border flex items-center justify-center font-bold text-lg ${reg
                     ? 'bg-primary border-primary text-white'
                     : 'bg-base-200/50 border-base-300 text-transparent'
                     } ${registrationsLoading && 'animate-wiggle border border-dashed border-primary bg-base-300'
@@ -117,6 +117,11 @@ export const MealSheet = () => {
                 title={mealType}
             >
                 {reg && (reg.numberOfMeals > 1 ? `${reg.numberOfMeals}` : null)}
+                {reg?.mealCategory === 'alternative' && (
+                    <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-base-100 text-[8px] font-black text-primary shadow-sm">
+                        A
+                    </span>
+                )}
             </div>
         );
     };

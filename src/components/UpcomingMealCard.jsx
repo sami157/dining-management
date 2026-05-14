@@ -1,15 +1,16 @@
 import { format } from 'date-fns';
-import { Utensils, CircleCheckBig, Circle, CircleX, Plus, Minus } from 'lucide-react'; // Added Plus, Minus
+import { Utensils, CircleCheckBig, Circle, CircleX, Plus, Minus, Bike, Leaf, PackageX } from 'lucide-react'; // Added Plus, Minus
 import toast from 'react-hot-toast';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import useAuth from '../hooks/useAuth';
 import { useState } from 'react';
 import { getMealLabel } from '../utils/mealTypes';
 import { DINING_IDS, getDiningIndicatorClass, getDiningLabel, isOfficeDining, normalizeDiningId } from '../utils/dining';
+import { DELIVERY_LOCATIONS, deliveryLocationLabels, isDeliveryLocation, normalizeDeliveryLocation } from '../utils/delivery';
 
 const MealRowSkeleton = () => (
-    <div className="relative min-h-32 rounded-lg border border-base-300 bg-base-200/70 overflow-hidden">
-        <div className="p-4">
+    <div className="relative h-52 rounded-lg border border-base-300 bg-base-200/70 overflow-hidden">
+        <div className="flex h-full flex-col p-4">
             <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-3">
                     <div className="skeleton h-11 w-11 rounded-full bg-base-300" />
@@ -29,6 +30,10 @@ const MealRowSkeleton = () => (
                 <div className="skeleton h-3 w-11/12 mx-auto bg-base-300" />
                 <div className="skeleton h-3 w-7/12 mx-auto bg-base-300" />
             </div>
+
+            <div className="mt-auto space-y-2 pt-2">
+                <div className="skeleton h-10 w-full rounded-lg bg-base-300" />
+            </div>
         </div>
     </div>
 );
@@ -41,10 +46,11 @@ const MealsSkeleton = () => (
     </div>
 );
 
-const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
+const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch, defaultDeliveryLocation }) => {
     const axiosSecure = useAxiosSecure();
     const { loading } = useAuth();
     const [requested, setRequested] = useState(false)
+    const [deliveryDrafts, setDeliveryDrafts] = useState({});
 
     const isToday = format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
     const meals = schedule?.meals || [];
@@ -107,6 +113,53 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
             }
         );
     };
+
+    const handleMealCategoryChange = async (meal, mealCategory) => {
+        if (!meal.registrationId || meal.mealCategory === mealCategory) return;
+
+        toast.promise(
+            axiosSecure.patch(`/users/meals/register/${meal.registrationId}`, {
+                mealCategory
+            }).then(() => refetch()),
+            {
+                loading: 'Updating meal type...',
+                success: mealCategory === 'alternative' ? 'Alternative meal selected' : 'Regular meal selected',
+                error: 'Failed to update meal type'
+            }
+        );
+    };
+
+    const handleDeliveryChange = async (meal, deliveryLocation) => {
+        if (!meal.registrationId) return;
+
+        const key = meal.registrationId;
+        setDeliveryDrafts(prev => ({ ...prev, [key]: deliveryLocation }));
+
+        if (!deliveryLocation) {
+            if (!meal.deliveryRequest) return;
+
+            toast.promise(
+                axiosSecure.delete(`/users/meals/register/${meal.registrationId}/delivery`).then(() => refetch()),
+                {
+                    loading: 'Cancelling delivery...',
+                    success: 'Delivery cancelled',
+                    error: 'Failed to cancel delivery'
+                }
+            );
+            return;
+        }
+
+        toast.promise(
+            axiosSecure.put(`/users/meals/register/${meal.registrationId}/delivery`, {
+                deliveryLocation: normalizeDeliveryLocation(deliveryLocation)
+            }).then(() => refetch()),
+            {
+                loading: 'Saving delivery...',
+                success: 'Delivery request saved',
+                error: 'Failed to save delivery'
+            }
+        );
+    };
     if (loading) return null;
 
     return (
@@ -145,6 +198,11 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                         const isReg = meal.isRegistered;
                                         const diningId = normalizeDiningId(meal.diningId);
                                         const isOfficeMeal = diningId === DINING_IDS.office;
+                                        const mealCategory = meal.mealCategory || 'basic';
+                                        const allowAlt = Boolean(meal.allowAlt);
+                                        const deliverySelection = deliveryDrafts[meal.registrationId]
+                                            ?? meal.deliveryRequest?.deliveryLocation
+                                            ?? (isDeliveryLocation(defaultDeliveryLocation) ? defaultDeliveryLocation : '');
                                         const mealCardTone = !meal.isAvailable
                                             ? 'bg-none border-dashed border-base-300 border'
                                             : isReg
@@ -158,9 +216,9 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                         return (
                                             <div
                                                 key={`${meal.mealType}-${diningId}`}
-                                                className={`relative min-h-32 group rounded-lg transition-all duration-300 overflow-hidden ${mealCardTone}`}
+                                                className={`relative h-52 group rounded-lg transition-all duration-300 overflow-hidden ${mealCardTone}`}
                                             >
-                                                <div className="p-4">
+                                                <div className="flex h-full flex-col p-4">
                                                     <div className="flex justify-between items-center mb-3">
                                                         <div className="flex items-center gap-3">
                                                             <div className={`p-3 rounded-full ${isReg ? isOfficeMeal ? 'bg-office text-white' : 'bg-primary text-white' : 'bg-base-100 border border-base-300'}`}>
@@ -243,7 +301,8 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                                     </div>
 
                                                     {/* Menu Description */}
-                                                    <div className={`p-3 bangla-text text-sm rounded-lg font-medium text-center leading-relaxed ${isReg ? isOfficeMeal ? 'bg-base-100/60 text-office-content border border-office-soft' : 'bg-base-100/60 text-base-content border border-primary/30' : isOfficeMeal ? 'bg-base-100 border text-office-content border-office-soft opacity-80' : 'bg-base-100 border text-base-content border-base-300 opacity-70'
+                                                    <div className="flex items-stretch justify-between gap-2">
+                                                        <div className={`min-w-0 grow p-3 bangla-text text-sm rounded-lg font-medium text-center leading-relaxed ${isReg ? isOfficeMeal ? 'bg-base-100/60 text-office-content border border-office-soft' : 'bg-base-100/60 text-base-content border border-primary/30' : isOfficeMeal ? 'bg-base-100 border text-office-content border-office-soft opacity-80' : 'bg-base-100 border text-base-content border-base-300 opacity-70'
                                                         }`}>
                                                         {
                                                             meal.menu || <span className="text-base-content/25 italic">
@@ -254,6 +313,67 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                                                 }
                                                             </span>
                                                         }
+                                                        </div>
+
+                                                        <button
+                                                            type="button"
+                                                            title={!allowAlt ? 'Alternative not available' : isReg ? mealCategory === 'alternative' ? 'Use basic meal' : 'Request alternative meal' : 'Register first to request alternative meal'}
+                                                            aria-label={!allowAlt ? 'Alternative not available' : isReg ? mealCategory === 'alternative' ? 'Use basic meal' : 'Request alternative meal' : 'Register first to request alternative meal'}
+                                                            disabled={!isReg || !allowAlt}
+                                                            onClick={() => handleMealCategoryChange(meal, mealCategory === 'alternative' ? 'basic' : 'alternative')}
+                                                            className={`flex w-10 shrink-0 items-center justify-center rounded-lg border transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-35 ${mealCategory === 'alternative'
+                                                                ? isOfficeMeal ? 'bg-office text-white border-office' : 'bg-primary text-primary-content border-primary'
+                                                                : isOfficeMeal ? 'bg-base-100/60 text-office-content border-office-soft hover:bg-office-soft' : 'bg-base-100/70 text-base-content/45 border-base-300 hover:text-base-content'
+                                                                }`}
+                                                        >
+                                                            <Leaf size={15} />
+                                                        </button>
+                                                    </div>
+
+                                                    <div className="mt-auto pt-2">
+                                                        {isOfficeMeal ? (
+                                                            <div className="grid grid-cols-1 gap-2">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Bike size={14} className={meal.deliveryRequest ? 'text-office' : 'text-base-content/35'} />
+                                                                    <select
+                                                                        value={deliverySelection}
+                                                                        disabled={!isReg}
+                                                                        onChange={(e) => handleDeliveryChange(meal, e.target.value)}
+                                                                        className="select select-sm select-bordered min-w-0 grow bg-base-100 h-10 disabled:cursor-not-allowed disabled:opacity-45"
+                                                                    >
+                                                                        <option value="">{isReg ? 'No delivery' : 'Register for delivery'}</option>
+                                                                        {Object.values(DELIVERY_LOCATIONS).map(location => (
+                                                                            <option key={location} value={location}>
+                                                                                {deliveryLocationLabels[location]}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                    {deliverySelection && !meal.deliveryRequest && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleDeliveryChange(meal, deliverySelection)}
+                                                                            className="btn btn-xs rounded-md bg-office text-white border-office"
+                                                                        >
+                                                                            Request
+                                                                        </button>
+                                                                    )}
+                                                                    {meal.deliveryRequest && (
+                                                                        <button
+                                                                            type="button"
+                                                                            title="Cancel delivery"
+                                                                            onClick={() => handleDeliveryChange(meal, '')}
+                                                                            className="btn btn-xs btn-ghost text-error"
+                                                                        >
+                                                                            <PackageX size={14} />
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex h-10 items-center justify-center text-center text-[10px] font-black uppercase tracking-widest text-base-content/35">
+                                                                Delivery not available
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>

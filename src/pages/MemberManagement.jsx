@@ -406,6 +406,11 @@ const MemberManagement = () => {
                                                                             ${registrationsLoading && 'border skeleton'}`}
                                     >
                                       {reg && (reg.numberOfMeals > 1 ? `x${reg.numberOfMeals}` : null)}
+                                      {reg?.mealCategory === 'alternative' && (
+                                        <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center rounded-full bg-base-100 text-[7px] font-black text-primary shadow-sm">
+                                          A
+                                        </span>
+                                      )}
                                     </button>
                                   </div>
                                   <span className={`text-[7px] font-black opacity-30 ${canEditQty ? 'mt-3' : ''}`}>{getMealShortLabel(type)}</span>
