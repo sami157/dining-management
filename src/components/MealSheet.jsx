@@ -3,9 +3,9 @@ import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
 import useAuth from '../hooks/useAuth';
 import { addDays, format, set, isSameDay } from 'date-fns';
-import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
+import { UserSearch, ArrowRightLeft, Utensils, Bike, Leaf } from 'lucide-react';
 import GeneralInfo from './GeneralInfo';
-import { getMealShortLabel } from '../utils/mealTypes';
+import { getMealLabel, getMealShortLabel } from '../utils/mealTypes';
 import { isAdminRole } from '../utils/roles';
 
 export const MealSheet = () => {
@@ -69,6 +69,32 @@ export const MealSheet = () => {
             if (reg.mealType === 'night') acc.night += qty;
             return acc;
         }, { morning: 0, evening: 0, night: 0 });
+    }, [registrationsData]);
+
+    const dailySummary = useMemo(() => {
+        const initialSummary = {
+            morning: { total: 0, delivery: 0, alternative: 0 },
+            evening: { total: 0, delivery: 0, alternative: 0 },
+            night: { total: 0, delivery: 0, alternative: 0 },
+        };
+
+        if (!registrationsData) return initialSummary;
+
+        return registrationsData.reduce((acc, reg) => {
+            if (!acc[reg.mealType]) return acc;
+
+            acc[reg.mealType].total += reg.numberOfMeals || 1;
+
+            if (reg.deliveryRequest || reg.deliveryLocation) {
+                acc[reg.mealType].delivery += 1;
+            }
+
+            if (reg.mealCategory === 'alternative') {
+                acc[reg.mealType].alternative += reg.numberOfMeals || 1;
+            }
+
+            return acc;
+        }, initialSummary);
     }, [registrationsData]);
 
     // 4. Filtering Logic
@@ -142,6 +168,47 @@ export const MealSheet = () => {
                             </div>
                         </div>
                         <ArrowRightLeft onClick={handleTomorrowToggle} className='text-primary hover:scale-105 cursor-pointer px-2 py-1 bg-base-200/50 rounded-lg' size={40} />
+                    </div>
+
+                    <div className='grid grid-cols-3 gap-2'>
+                        {['morning', 'evening', 'night'].map((mealType) => (
+                            <div key={mealType} className='flex flex-col rounded-lg border border-base-300 bg-base-200/70 p-2'>
+                                <div className='flex flex-col items-center gap-1'>
+                                    <p className='text-[9px] font-black uppercase tracking-widest text-base-content/55'>
+                                        {getMealLabel(mealType)}
+                                    </p>
+                                    {registrationsLoading ? (
+                                        <div className='skeleton h-5 w-8' />
+                                    ) : (
+                                        <p className='text-lg font-black leading-none'>{dailySummary[mealType].total}</p>
+                                    )}
+                                </div>
+                                <div className='mt-2 flex flex-col gap-1'>
+                                    <div className='rounded-md bg-base-100 px-1 py-1 text-center'>
+                                        <div className='flex items-center justify-center gap-1 text-base-content/40'>
+                                            <Bike size={11} />
+                                            <span className='text-[8px] font-black uppercase'>Delivery</span>
+                                        </div>
+                                        {registrationsLoading ? (
+                                            <div className='skeleton mx-auto mt-1 h-4 w-5' />
+                                        ) : (
+                                            <p className='text-sm font-black leading-tight'>{dailySummary[mealType].delivery}</p>
+                                        )}
+                                    </div>
+                                    <div className='rounded-md bg-base-100 px-1 py-1 text-center'>
+                                        <div className='flex items-center justify-center gap-1 text-base-content/40'>
+                                            <Leaf size={11} />
+                                            <span className='text-[8px] font-black uppercase'>Alternative</span>
+                                        </div>
+                                        {registrationsLoading ? (
+                                            <div className='skeleton mx-auto mt-1 h-4 w-5' />
+                                        ) : (
+                                            <p className='text-sm font-black leading-tight'>{dailySummary[mealType].alternative}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
                     {/* Search Input */}
