@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from "motion/react"
 import { MdAdminPanelSettings } from "react-icons/md";
-import { Plus, Minus, ChevronLeft, ChevronRight, Cog } from 'lucide-react';
+import { Plus, Minus, ChevronLeft, ChevronRight, Cog, UserSearch } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import Loading from '../components/Loading';
 import { getMealShortLabel } from '../utils/mealTypes';
@@ -182,6 +182,7 @@ const MemberManagement = () => {
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 0 });
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
   const [requested, setRequested] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const [editingUser, setEditingUser] = useState(null);
   const [editingCell, setEditingCell] = useState(null);
@@ -303,6 +304,22 @@ const MemberManagement = () => {
     );
   };
 
+  const filteredUsers = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    if (!normalizedSearch) return usersData || [];
+
+    return (usersData || []).filter(user => {
+      const buildingRoom = `${user.building?.slice(0, 1) || ''}-${user.room || ''}`.toLowerCase();
+
+      return (
+        user.name?.toLowerCase().includes(normalizedSearch) ||
+        user.room?.toString().toLowerCase().includes(normalizedSearch) ||
+        user.building?.toLowerCase().includes(normalizedSearch) ||
+        buildingRoom.includes(normalizedSearch)
+      );
+    });
+  }, [searchTerm, usersData]);
+
   if (usersLoading || roleLoading) return <Loading />;
 
   return (
@@ -317,7 +334,7 @@ const MemberManagement = () => {
         />
       )}
 
-      <div className='flex flex-col md:flex-row justify-between items-center mb-8 gap-4'>
+      <div className='flex flex-col md:flex-row justify-between items-center mb-4 gap-4'>
         <div className='flex items-center gap-2 bg-base-200 p-1 rounded-xl'>
           <button onClick={() => setCurrentWeekStart(prev => addDays(prev, -7))} className='p-2 hover:bg-base-300 rounded-lg transition-all'><ChevronLeft size={20} /></button>
           <span className='px-4 font-bold text-sm uppercase tracking-wide'>{format(currentWeekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')}</span>
@@ -326,6 +343,19 @@ const MemberManagement = () => {
         <h1 className='text-2xl font-black italic tracking-tight flex items-center gap-2'>
           <MdAdminPanelSettings className='text-primary' /> MEMBER MANAGEMENT
         </h1>
+      </div>
+
+      <div className='mb-4 flex flex-col md:flex-row gap-3 items-center md:justify-between'>
+        <input
+          type="text"
+          placeholder="Search by Name/Room.."
+          className='input w-full md:max-w-sm bg-base-200/70 border-base-200 focus:input-primary tracking-tight h-10 text-sm'
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <span className='text-sm font-semibold opacity-40 uppercase tracking-widest'>
+          <span className='font-black text-lg'>{filteredUsers.length}</span> Members
+        </span>
       </div>
 
       <div className='overflow-auto max-w-screen lg:max-w-max max-h-screen mx-auto rounded-lg bg-base-300'>
@@ -345,7 +375,7 @@ const MemberManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {usersData?.map(user => (
+            {filteredUsers.length ? filteredUsers.map(user => (
               <tr key={user._id}>
                 <td className='text-center px-3'>
                   <button onClick={() => setEditingUser(user)} className='cursor-pointer text-xl text-base-content/30 hover:text-primary'>
@@ -413,7 +443,16 @@ const MemberManagement = () => {
                   );
                 })}
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan={9} className='text-center py-20'>
+                  <div className='flex flex-col items-center opacity-10'>
+                    <UserSearch size={64} />
+                    <p className='mt-2 font-black uppercase tracking-[0.2em]'>No results</p>
+                  </div>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
