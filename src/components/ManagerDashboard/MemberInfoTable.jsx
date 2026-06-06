@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { format } from 'date-fns';
 import { FiTrash2 } from 'react-icons/fi';
 import { motion, AnimatePresence } from "motion/react"
 import { IoIosAddCircle } from "react-icons/io";
+import { UserSearch } from 'lucide-react';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -47,6 +48,23 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
     const [depositAmount, setDepositAmount] = useState(0);
     const [depositNotes, setDepositNotes] = useState('');
     const [editingDeposit, setEditingDeposit] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredUsers = useMemo(() => {
+        const normalizedSearch = searchTerm.trim().toLowerCase();
+        if (!normalizedSearch) return usersData || [];
+
+        return (usersData || []).filter(user => {
+            const buildingRoom = `${user.building?.slice(0, 1) || ''}-${user.room || ''}`.toLowerCase();
+
+            return (
+                user.name?.toLowerCase().includes(normalizedSearch) ||
+                user.room?.toString().toLowerCase().includes(normalizedSearch) ||
+                user.building?.toLowerCase().includes(normalizedSearch) ||
+                buildingRoom.includes(normalizedSearch)
+            );
+        });
+    }, [searchTerm, usersData]);
 
     // Open deposit modal
     const openDepositModal = (user, existingDeposit = null) => {
@@ -148,6 +166,18 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                         </span>
                     )}
                 </div>
+                <div className='mb-4 flex flex-col md:flex-row gap-3 items-center md:justify-between'>
+                    <input
+                        type="text"
+                        placeholder="Search by Name/Room.."
+                        className='input w-full sm:max-w-sm bg-base-200/70 border-base-200 focus:input-primary tracking-tight h-10 text-sm'
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <span className='text-sm font-semibold opacity-40 uppercase tracking-widest'>
+                        <span className='font-black text-lg'>{filteredUsers.length}</span> Members
+                    </span>
+                </div>
 
                 <div className='overflow-auto max-h-screen'>
                     <table className='table table-sm'>
@@ -164,7 +194,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                 Array.from({ length: 8 }).map((_, index) => (
                                     <MemberRowSkeleton key={index} />
                                 ))
-                            ) : usersData?.length ? usersData.map((user) => {
+                            ) : filteredUsers.length ? filteredUsers.map((user) => {
                                 const userDeposits = depositsData?.filter(d => d.userId === user._id.toString()) || [];
                                 const monthlyDeposits = userDeposits.reduce((sum, d) => sum + d.amount, 0);
 
@@ -197,7 +227,12 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                 );
                             }) : (
                                 <tr>
-                                    <td colSpan={4} className='text-center text-base-content/50 py-8'>No members found</td>
+                                    <td colSpan={4} className='text-center py-12'>
+                                        <div className='flex flex-col items-center opacity-10'>
+                                            <UserSearch size={56} />
+                                            <p className='mt-2 font-black uppercase tracking-[0.2em]'>No results</p>
+                                        </div>
+                                    </td>
                                 </tr>
                             )}
                         </tbody>
