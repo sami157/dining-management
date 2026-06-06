@@ -253,6 +253,7 @@ const UserFinancialInfo = () => {
 
     const dataLoading = finalizationLoading || depositLoading || userBalanceLoading || userDataLoading || countLoading;
     const balance = finalizationData?.newBalance ?? userBalanceData?.balance ?? 0;
+    const previousBalance = Number(finalizationData?.previousBalance ?? 0);
     const userId = userData?._id?.toString?.() || userData?._id;
     const trendPoints = (finalizationsData || [])
         .filter((record) => record.month < currentCalendarMonth)
@@ -291,16 +292,25 @@ const UserFinancialInfo = () => {
                         <h1 className="text-2xl font-bold tracking-tight">Finance</h1>
                         <p className="text-sm text-base-content/50">Monthly deposits, meal costs, and balance history.</p>
                     </div>
-                    <div className="flex items-center justify-between border border-base-300 bg-base-100 p-2 rounded-lg w-full sm:w-72">
+                    <div className="flex items-center justify-between border border-base-300/70 p-2 rounded-lg max-w-md mx-auto w-full sm:w-72">
                         <button onClick={() => setCurrentMonth(prev => subMonths(prev, 1))} className="p-1.5 cursor-pointer hover:bg-base-200 rounded-full transition-all active:scale-95">
                             <ChevronLeft size={20} />
                         </button>
-                        <h2 className="text-sm md:text-base font-semibold">{format(currentMonth, 'MMMM yyyy')}</h2>
+                        <h2 className="text-sm md:text-base font-bold uppercase px-6">{format(currentMonth, 'MMMM yyyy')}</h2>
                         <button onClick={() => setCurrentMonth(prev => addMonths(prev, 1))} className="p-1.5 cursor-pointer hover:bg-base-200 rounded-full transition-all active:scale-95">
                             <ChevronRight size={20} />
                         </button>
                     </div>
                 </div>
+
+                {finalizationData && (
+                    <BalanceSummary
+                        label="Previous Month Balance"
+                        value={currency(previousBalance)}
+                        statusText={`Carried from ${format(subMonths(currentMonth, 1), 'MMMM yyyy')}`}
+                        isNegative={previousBalance < 0}
+                    />
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-5 lg:items-start">
                     <div className="flex flex-col gap-5">

@@ -1,10 +1,10 @@
 import React from 'react';
 import { NavLink } from 'react-router';
-import { ChevronRight, ClipboardList, UserRound, WalletCards } from 'lucide-react';
+import { ChevronRight, ClipboardList, TrendingUp, UserRound } from 'lucide-react';
 
 const navItems = [
     { to: '/user-dashboard/meal-sheet', label: 'Meal Sheet', icon: ClipboardList },
-    { to: '/user-dashboard/financial-information', label: 'Finance', icon: WalletCards },
+    { to: '/user-dashboard/financial-information', label: 'Finance', icon: TrendingUp },
     { to: '/user-dashboard/profile', label: 'Profile', icon: UserRound },
 ];
 
