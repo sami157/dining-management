@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="container mx-auto text-center">
         <p className="text-sm text-base-content/70">Developed by</p>
         <p className="text-sm text-base-content/70">Tanzir Ahmed Sami</p>
-        <p className="text-xs text-base-content/70">Assistant Engineer (Electrical)</p>
+        <p className="text-xs text-base-content/70">Sub-Divisional Engineer (Electrical)</p>
         <p className="text-xs text-base-content/70"><PhoneOutgoing size={12} className="inline mr-1" /> 01840406154</p>
       </div>
     </div>
