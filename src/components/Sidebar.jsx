@@ -3,7 +3,7 @@ import { NavLink } from 'react-router'
 import {
   CalendarDays,
   Users2,
-  WalletCards,
+  Landmark,
   History,
   LayoutDashboard,
   ChevronRight
@@ -13,7 +13,7 @@ const Sidebar = ({ onNavigate }) => {
   const navItems = [
     { to: '/admin-dashboard/meal-schedule', label: 'Meal Schedule', icon: CalendarDays },
     { to: '/admin-dashboard/member-management', label: 'Members', icon: Users2 },
-    { to: '/admin-dashboard/fund-management', label: 'Funds', icon: WalletCards },
+    { to: '/admin-dashboard/fund-management', label: 'Funds', icon: Landmark },
     { to: '/admin-dashboard/history', label: 'Previous Data', icon: History },
   ]
 

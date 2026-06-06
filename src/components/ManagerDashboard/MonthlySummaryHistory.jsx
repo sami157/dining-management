@@ -1,78 +1,76 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, Utensils, Zap, History } from "lucide-react";
+import { BanknoteArrowUp, CalendarCheck, Landmark, TrendingUp, TrendingDown, UserCheck, UsersRound, Utensils, Wallet, Zap } from 'lucide-react';
 
-export const MonthlySummaryHistory = ({ totalExpenses, depositsData, finalizationData }) => {
+const currency = (value) => `Tk ${Number(value || 0).toLocaleString(undefined, {
+    maximumFractionDigits: 0
+})}`;
+
+const SummaryRow = ({ label, value, icon, status }) => {
+    return (
+        <div className="flex items-center justify-between gap-4 py-3">
+            <div className="flex items-center gap-3 min-w-0 text-base-content/60">
+                {React.createElement(icon, { size: 18 })}
+                <span className="text-sm font-medium truncate">{label}</span>
+            </div>
+            <p className={`text-sm font-semibold text-right ${status === 'positive' ? 'text-success' : status === 'negative' ? 'text-error' : 'text-base-content'}`}>
+                {value}
+            </p>
+        </div>
+    );
+};
+
+const pickFirstValue = (source, keys) => {
+    for (const key of keys) {
+        if (source?.[key] !== undefined && source?.[key] !== null && source?.[key] !== '') {
+            return source[key];
+        }
+    }
+    return null;
+};
+
+const formatDateTime = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString(undefined, {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
+export const MonthlySummaryHistory = ({ totalExpenses, depositsData, finalizationData, finalizedByName }) => {
     const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
+    const memberDetails = finalizationData?.memberDetails || [];
+    const totalMembers = pickFirstValue(finalizationData, ['totalMembers', 'memberCount', 'totalMemberCount']) ?? memberDetails.length;
+    const totalFixedDeposit = pickFirstValue(finalizationData, ['totalFixedDeposit', 'totalFixedDeposits', 'fixedDepositTotal'])
+        ?? memberDetails.reduce((sum, member) => sum + (Number(member.fixedDeposit) || 0), 0);
+    const totalMosqueFee = pickFirstValue(finalizationData, ['totalMosqueFee', 'totalMosqueFees', 'mosqueFeeTotal'])
+        ?? memberDetails.reduce((sum, member) => sum + (Number(member.mosqueFee) || 0), 0);
+    const totalMemberBalances = pickFirstValue(finalizationData, ['totalMemberBalances', 'totalMemberBalance', 'totalBalancesAfterFinalization', 'totalMemberBalancesAfterFinalization'])
+        ?? memberDetails.reduce((sum, member) => sum + (Number(member.newBalance) || 0), 0);
+    const finalizedAt = pickFirstValue(finalizationData, ['finalizedAt', 'finalizedDate', 'createdAt']);
 
     return (
-        <div className="w-full">
-            <div className="bg-base-100 border border-base-300 rounded-4xl overflow-hidden">
-                <div className="p-6 md:p-8 space-y-6">
-                    
-                    {/* Header Section */}
-                    <div className="flex items-center justify-between border-b border-base-300 pb-6">
-                        <div className="space-y-1">
-                            <h2 className="text-2xl font-black tracking-tight uppercase italic flex items-center gap-2">
-                                <History size={24} className="text-primary" />
-                                Monthly Summary
-                            </h2>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Finalized Report</p>
-                        </div>
-                        <div className="badge badge-outline border-base-300 font-bold px-4 py-3 rounded-full opacity-60">
-                            ARCHIVED
-                        </div>
-                    </div>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        
-                        {/* Deposit Card */}
-                        <div className="bg-base-200/50 border border-base-300 p-4 sm:p-6 rounded-3xl space-y-2">
-                            <div className="flex items-center gap-2 opacity-60">
-                                <TrendingUp size={14} className="text-success" />
-                                <span className="text-[9px] font-black uppercase tracking-widest">Deposit</span>
-                            </div>
-                            <div className="text-xl sm:text-2xl font-black tracking-tighter text-success">
-                                ৳{totalDeposit.toLocaleString()}
-                            </div>
-                        </div>
-
-                        {/* Expense Card */}
-                        <div className="bg-base-200/50 border border-base-300 p-4 sm:p-6 rounded-3xl space-y-2">
-                            <div className="flex items-center gap-2 opacity-60">
-                                <TrendingDown size={14} className="text-error" />
-                                <span className="text-[9px] font-black uppercase tracking-widest">Expense</span>
-                            </div>
-                            <div className="text-xl sm:text-2xl font-black tracking-tighter text-error">
-                                ৳{totalExpenses.toLocaleString()}
-                            </div>
-                        </div>
-
-                        {/* Meals Card */}
-                        <div className="bg-base-200/50 border border-base-300 p-4 sm:p-6 rounded-3xl space-y-2">
-                            <div className="flex items-center gap-2 opacity-60">
-                                <Utensils size={14} className="text-primary" />
-                                <span className="text-[9px] font-black uppercase tracking-widest">Meals</span>
-                            </div>
-                            <div className="text-xl sm:text-2xl font-black tracking-tighter">
-                                {finalizationData?.totalMealsServed || 0}
-                            </div>
-                        </div>
-
-                        {/* Meal Rate Card */}
-                        <div className="bg-primary/5 border border-primary/20 p-4 sm:p-6 rounded-3xl space-y-2">
-                            <div className="flex items-center gap-2 opacity-60">
-                                <Zap size={14} className="text-primary" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-primary">Meal Rate</span>
-                            </div>
-                            <div className="text-xl sm:text-2xl font-black tracking-tighter text-primary">
-                                ৳{finalizationData?.mealRate?.toFixed(0) || 0}
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
+        <section className="rounded-lg border border-base-300 px-4 py-3">
+            <div className="pb-2">
+                <h2 className="text-sm font-bold tracking-tight">Monthly Summary</h2>
+                <p className="text-xs text-base-content/50 mt-0.5">Finalized report totals for the selected month.</p>
             </div>
-        </div>
+            <div className="divide-y divide-base-300">
+                <SummaryRow label="Total Deposit" value={currency(totalDeposit)} icon={TrendingUp} status="positive" />
+                <SummaryRow label="Total Expense" value={currency(totalExpenses)} icon={TrendingDown} status="negative" />
+                <SummaryRow label="Total Meals" value={finalizationData?.totalMealsServed || 0} icon={Utensils} />
+                <SummaryRow label="Meal Rate" value={currency(finalizationData?.mealRate)} icon={Zap} />
+                <SummaryRow label="Finalized At" value={formatDateTime(finalizedAt)} icon={CalendarCheck} />
+                <SummaryRow label="Finalized By" value={finalizedByName || '-'} icon={UserCheck} />
+                <SummaryRow label="Total Members" value={totalMembers || 0} icon={UsersRound} />
+                <SummaryRow label="Total Fixed Deposit" value={currency(totalFixedDeposit)} icon={BanknoteArrowUp} />
+                <SummaryRow label="Total Mosque Fee" value={currency(totalMosqueFee)} icon={Landmark} status="negative" />
+                <SummaryRow label="Total Member Balances" value={currency(totalMemberBalances)} icon={Wallet} status={Number(totalMemberBalances) >= 0 ? 'positive' : 'negative'} />
+            </div>
+        </section>
     );
 };

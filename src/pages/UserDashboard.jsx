@@ -21,7 +21,9 @@ const StatItem = ({ label, value, colorClass, isLoading, symbol = "৳" }) => (
         </span>
         <div className="text-right">
             {isLoading ? (
-                <div className="h-6 w-16 bg-current/20 rounded-md" />
+                <p className="skeleton skeleton-text text-lg font-black leading-none">
+                    Loading
+                </p>
             ) : (
                 <p className="text-lg font-black leading-none">
                     {label !== 'Total Meals' ? `${symbol}${value.toLocaleString(undefined, { minimumFractionDigits: value % 1 !== 0 ? 2 : 0 })}` : value}

@@ -1,162 +1,136 @@
 import React from 'react';
-import { FaCircleCheck } from "react-icons/fa6";
-import { TrendingUp, TrendingDown, Wallet, CheckCircle2, BanknoteArrowUp, Info } from "lucide-react";
+import { BanknoteArrowUp, CalendarCheck, CheckCircle2, Landmark, LockKeyhole, TrendingDown, TrendingUp, UserCheck, UsersRound, Wallet, Zap } from 'lucide-react';
 
-const SummaryCardSkeleton = () => (
-    <div className="bg-base-200/50 border border-base-300 p-6 rounded-xl space-y-3">
-        <div className="flex items-center gap-2">
-            <div className="skeleton h-4 w-4 rounded-full"></div>
-            <div className="skeleton h-3 w-28"></div>
+const currency = (value) => `Tk ${Number(value || 0).toLocaleString(undefined, {
+    maximumFractionDigits: 2
+})}`;
+
+const SummaryRowSkeleton = () => (
+    <div className="flex items-center justify-between gap-4 py-3 animate-pulse">
+        <div className="flex items-center gap-3">
+            <div className="skeleton h-5 w-5 rounded-full" />
+            <div className="skeleton h-4 w-32" />
         </div>
-        <div className="skeleton h-9 w-32"></div>
+        <p className="skeleton skeleton-text text-sm font-semibold">Loading</p>
     </div>
 );
 
-const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing }) => {
-    const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
-    const balance = totalDeposit - totalExpenses;
-    const isPositive = balance >= 0;
-    const uniqueEmailCount = new Set(depositsData?.map(item => item.userEmail)).size;
-    return (
-        <div className="w-full">
-            <div className="bg-base-100 border border-base-300 rounded-2xl overflow-hidden">
-                <div className="p-6 md:p-6 space-y-6">
-
-                    {/* Header Section */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="space-y-1">
-                            <h2 className="text-2xl font-black tracking-tight uppercase italic">Monthly Summary</h2>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Financial Overview</p>
-                        </div>
-
-                        <button
-                            onClick={finalizeMonth}
-                            disabled={monthFinalized || isLoading}
-                            className={`btn btn-md rounded-2xl gap-1 px-3 border-none transition-all active:scale-95
-                                ${monthFinalized
-                                    ? 'bg-base-200 text-base-content/30 cursor-not-allowed'
-                                    : 'bg-primary text-primary-content hover:bg-primary/90 shadow-none'
-                                }`}
-                        >
-                            {isLoading ? (
-                                <>
-                                    <span className="loading loading-spinner loading-sm" />
-                                    <span className="font-bold uppercase text-xs tracking-widest">Loading</span>
-                                </>
-                            ) : monthFinalized ? (
-                                <>
-                                    <CheckCircle2 size={18} />
-                                    <span className="font-bold uppercase text-xs tracking-widest">Finalized</span>
-                                </>
-                            ) : (
-                                <>
-                                    <FaCircleCheck className="text-lg" />
-                                    <span className="font-bold uppercase text-xs tracking-widest">Finalize</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {isLoading ? (
-                            <>
-                                {Array.from({ length: 6 }).map((_, index) => (
-                                    <SummaryCardSkeleton key={index} />
-                                ))}
-                            </>
-                        ) : (
-                            <>
-
-                        {/* Deposit Card */}
-                        <div className="bg-base-200/50 border border-base-300 p-6 rounded-xl space-y-3">
-                            <div className="flex items-center gap-2 opacity-60">
-                                <TrendingUp size={16} className="text-success" />
-                                <span className="text-[10px] font-black uppercase tracking-widest">Total Deposit</span>
-                            </div>
-                            <div className="text-3xl font-black tracking-tighter text-success">
-                                ৳{totalDeposit.toLocaleString()}
-                            </div>
-                        </div>
-
-                        {/* Expense Card */}
-                        <div className="bg-base-200/50 border border-base-300 p-6 rounded-xl space-y-3">
-                            <div className="flex items-center gap-2 opacity-60">
-                                <TrendingDown size={16} className="text-error" />
-                                <span className="text-[10px] font-black uppercase tracking-widest">Total Expense</span>
-                            </div>
-                            <div className="text-3xl font-black tracking-tighter text-error">
-                                ৳{totalExpenses.toLocaleString()}
-                            </div>
-                        </div>
-
-                        {/* Balance Card */}
-                        <div className={`border p-6 rounded-xl space-y-3 transition-colors ${isPositive
-                                ? 'bg-success/5 border-success/20'
-                                : 'bg-error/5 border-error/20'
-                            }`}>
-                            <div className="flex items-center gap-2 opacity-60">
-                                <Wallet size={16} className={isPositive ? 'text-success' : 'text-error'} />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-base-content">Net Balance</span>
-                            </div>
-                            <div className={`text-3xl font-black tracking-tighter ${isPositive ? 'text-success' : 'text-error'
-                                }`}>
-                                ৳{balance.toLocaleString()}
-                            </div>
-                        </div>
-
-                        {/* Fixed Deposit Card */}
-                        <div className={`border p-6 rounded-xl space-y-3 transition-colors bg-info/5 border-info/20`}>
-                            <div className="flex items-center gap-2 opacity-60">
-                                <BanknoteArrowUp size={16} className='text-info' />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-info">Fixed Deposits</span>
-                            </div>
-                            <div className={`text-3xl font-black tracking-tighter text-info`}>
-                                ৳{totalFixedDeposit}
-                            </div>
-                        </div>
-
-                        {/* Meal Rate Card */}
-                        <div className={`border p-6 rounded-xl space-y-3 transition-colors flex-3 bg-base-200 border-base-200/20`}>
-                            <div className="flex items-center gap-2 opacity-60">
-                                <Info size={16} className='text-base-content' />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-base-content">Running Meal Rate</span>
-                            </div>
-                            {mealRateLoading && (
-                                <div className="skeleton h-9 w-24"></div>
-                            )}
-                            <div className={`text-3xl font-black tracking-tighter text-base-content ${mealRateLoading ? 'hidden' : ''}`}>
-                                ৳{mealRate}
-                            </div>
-                            {mealRateRefreshing && (
-                                <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-base-content/40">
-                                    <span className="loading loading-spinner loading-xs text-primary"></span>
-                                    Updating
-                                </div>
-                            )}
-                        </div>
-                        {/* Deposit Count Card */}
-                        <div className={`border p-6 rounded-xl space-y-3 transition-colors flex-3 bg-base-200 border-base-200/20`}>
-                            <div className="flex items-center gap-2 opacity-60">
-                                <Info size={16} className='text-base-content' />
-                                <span className="text-[10px] font-black uppercase tracking-widest text-base-content">Deposit Received Count</span>
-                            </div>
-                            <div className={`text-3xl font-black tracking-tighter text-base-content`}>
-                                {uniqueEmailCount} <span className='text-lg tracking-normal font-normal'>People</span>
-                            </div>
-                        </div>
-                            </>
-                        )}
-                    </div>
-                    {isRefreshing && !isLoading && (
-                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-base-content/40">
-                            <span className="loading loading-spinner loading-xs text-primary"></span>
-                            Refreshing summary
-                        </div>
-                    )}
-                </div>
+const SummaryRow = ({ label, value, icon, status, isLoading, helper }) => (
+    <div className="flex items-center justify-between gap-4 py-3">
+        <div className="flex items-center gap-3 min-w-0 text-base-content/60">
+            {React.createElement(icon, { size: 18 })}
+            <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{label}</p>
+                {helper && <p className="text-xs text-base-content/40">{helper}</p>}
             </div>
         </div>
+        {isLoading ? (
+            <p className="skeleton skeleton-text text-sm font-semibold">Loading</p>
+        ) : (
+            <p className={`text-sm font-semibold text-right ${status === 'positive' ? 'text-success' : status === 'negative' ? 'text-error' : 'text-base-content'}`}>
+                {value}
+            </p>
+        )}
+    </div>
+);
+
+const pickFirstValue = (source, keys) => {
+    for (const key of keys) {
+        if (source?.[key] !== undefined && source?.[key] !== null && source?.[key] !== '') {
+            return source[key];
+        }
+    }
+    return null;
+};
+
+const formatDateTime = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString(undefined, {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
+const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing, finalizationData, finalizedByName }) => {
+    const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
+    const balance = totalDeposit - totalExpenses;
+    const uniqueEmailCount = new Set(depositsData?.map(item => item.userEmail)).size;
+    const memberDetails = finalizationData?.memberDetails || [];
+    const totalMembers = pickFirstValue(finalizationData, ['totalMembers', 'memberCount', 'totalMemberCount']) ?? memberDetails.length;
+    const finalizedTotalFixedDeposit = pickFirstValue(finalizationData, ['totalFixedDeposit', 'totalFixedDeposits', 'fixedDepositTotal'])
+        ?? memberDetails.reduce((sum, member) => sum + (Number(member.fixedDeposit) || 0), 0);
+    const totalMosqueFee = pickFirstValue(finalizationData, ['totalMosqueFee', 'totalMosqueFees', 'mosqueFeeTotal'])
+        ?? memberDetails.reduce((sum, member) => sum + (Number(member.mosqueFee) || 0), 0);
+    const totalMemberBalances = pickFirstValue(finalizationData, ['totalMemberBalances', 'totalMemberBalance', 'totalBalancesAfterFinalization', 'totalMemberBalancesAfterFinalization'])
+        ?? memberDetails.reduce((sum, member) => sum + (Number(member.newBalance) || 0), 0);
+    const finalizedAt = pickFirstValue(finalizationData, ['finalizedAt', 'finalizedDate', 'createdAt']);
+
+    return (
+        <section className="rounded-lg border border-base-300 px-4 py-3">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-2">
+                <div>
+                    <h2 className="text-sm font-bold tracking-tight">Monthly Summary</h2>
+                    <p className="text-xs text-base-content/50 mt-0.5">Live finance overview for the selected month.</p>
+                </div>
+                <button
+                    onClick={finalizeMonth}
+                    disabled={monthFinalized || isLoading}
+                    className="btn btn-sm btn-primary disabled:btn-ghost disabled:text-base-content/40"
+                >
+                    {isLoading ? (
+                        <span className="loading loading-spinner loading-xs" />
+                    ) : monthFinalized ? (
+                        <LockKeyhole size={16} />
+                    ) : (
+                        <CheckCircle2 size={16} />
+                    )}
+                    {monthFinalized ? 'Finalized' : 'Finalize'}
+                </button>
+            </div>
+
+            <div className="divide-y divide-base-300">
+                {isLoading ? (
+                    Array.from({ length: 6 }).map((_, index) => <SummaryRowSkeleton key={index} />)
+                ) : (
+                    <>
+                        <SummaryRow label="Total Deposit" value={currency(totalDeposit)} icon={TrendingUp} status="positive" />
+                        <SummaryRow label="Total Expense" value={currency(totalExpenses)} icon={TrendingDown} status="negative" />
+                        <SummaryRow label="Net Balance" value={currency(balance)} icon={Wallet} status={balance >= 0 ? 'positive' : 'negative'} />
+                        <SummaryRow label="Fixed Deposits" value={currency(totalFixedDeposit)} icon={BanknoteArrowUp} />
+                        <SummaryRow
+                            label={monthFinalized ? 'Finalized Meal Rate' : 'Running Meal Rate'}
+                            value={currency(monthFinalized ? finalizationData?.mealRate : mealRate)}
+                            icon={Zap}
+                            isLoading={mealRateLoading}
+                            helper={mealRateRefreshing ? 'Updating' : null}
+                        />
+                        <SummaryRow label="Deposit Received Count" value={`${uniqueEmailCount} People`} icon={UsersRound} />
+                        {monthFinalized && (
+                            <>
+                                <SummaryRow label="Finalized At" value={formatDateTime(finalizedAt)} icon={CalendarCheck} />
+                                <SummaryRow label="Finalized By" value={finalizedByName || '-'} icon={UserCheck} />
+                                <SummaryRow label="Total Members" value={totalMembers || 0} icon={UsersRound} />
+                                <SummaryRow label="Total Fixed Deposit" value={currency(finalizedTotalFixedDeposit)} icon={BanknoteArrowUp} />
+                                <SummaryRow label="Total Mosque Fee" value={currency(totalMosqueFee)} icon={Landmark} status="negative" />
+                                <SummaryRow label="Total Member Balances" value={currency(totalMemberBalances)} icon={Wallet} status={Number(totalMemberBalances) >= 0 ? 'positive' : 'negative'} />
+                            </>
+                        )}
+                    </>
+                )}
+            </div>
+
+            {isRefreshing && !isLoading && (
+                <div className="flex items-center gap-2 pt-3 text-xs font-semibold uppercase tracking-widest text-base-content/40">
+                    <span className="loading loading-spinner loading-xs text-primary"></span>
+                    Refreshing summary
+                </div>
+            )}
+        </section>
     );
 };
 

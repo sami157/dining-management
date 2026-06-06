@@ -1,20 +1,29 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { NavLink, Link } from 'react-router';
+import { NavLink, Link, useLocation } from 'react-router';
 import useAuth from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
 import { AnimatePresence, motion } from "motion/react"
-import { LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, Settings, X } from "lucide-react";
 import { GiCampCookingPot } from "react-icons/gi";
 import useRole from '../hooks/useRole';
 import { isAdminRole } from '../utils/roles';
+import Sidebar from './Sidebar';
+import UserSidebar from './UserDashboard/UserSidebar';
 
 const Navbar = () => {
     const { user, loading, signOutUser } = useAuth();
     const { role } = useRole();
+    const location = useLocation();
     // eslint-disable-next-line no-unused-vars
     const [visible, setVisible] = useState(false)
+    const [dashboardMenuOpen, setDashboardMenuOpen] = useState(false)
     const dropdownRef = useRef(null)
+
+    const isAdminDashboard = location.pathname.startsWith('/admin-dashboard');
+    const isUserDashboard = location.pathname.startsWith('/user-dashboard');
+    const dashboardMenuLabel = isAdminDashboard ? 'Manager menu' : 'User menu';
+    const DashboardSidebar = isAdminDashboard ? Sidebar : UserSidebar;
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -37,6 +46,7 @@ const Navbar = () => {
         await signOutUser();
         toast.success('Logged out successfully');
         setVisible(false);
+        setDashboardMenuOpen(false);
     };
 
     const themeController = (
@@ -52,15 +62,28 @@ const Navbar = () => {
             <nav className="w-full bg-base-100/30 backdrop-blur-md  px-3 sm:px-4 py-2 flex items-center justify-between relative">
 
                 {/* Logo Section */}
-                <Link viewTransition to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
-                    <div className="bg-primary text-primary-content p-2 rounded-md">
-                        <GiCampCookingPot size={28} />
-                    </div>
-                    <div className="hidden sm:flex flex-col">
-                        <span className="text-[10px] uppercase font-black tracking-widest text-primary leading-none">Township</span>
-                        <span className="text-xl font-bold tracking-tight">Dining</span>
-                    </div>
-                </Link>
+                <div className="flex items-center gap-2">
+                    {(isAdminDashboard || isUserDashboard) && (
+                        <button
+                            type="button"
+                            className="btn btn-ghost btn-circle md:hidden"
+                            onClick={() => setDashboardMenuOpen(true)}
+                            aria-label={`Open ${dashboardMenuLabel}`}
+                        >
+                            <Menu size={22} />
+                        </button>
+                    )}
+
+                    <Link viewTransition to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
+                        <div className="bg-primary text-primary-content p-2 rounded-md">
+                            <GiCampCookingPot size={28} />
+                        </div>
+                        <div className="hidden sm:flex flex-col">
+                            <span className="text-[10px] uppercase font-black tracking-widest text-primary leading-none">Township</span>
+                            <span className="text-xl font-bold tracking-tight">Dining</span>
+                        </div>
+                    </Link>
+                </div>
 
                 {/* Right Side Controls */}
                 <div className="flex items-center gap-2 sm:gap-3">
@@ -136,6 +159,30 @@ const Navbar = () => {
                     )}
                 </div>
             </nav>
+
+            {(isAdminDashboard || isUserDashboard) && dashboardMenuOpen && (
+                <div className='md:hidden fixed inset-0 z-[70]'>
+                    <button
+                        type='button'
+                        className='absolute inset-0 bg-black/50'
+                        onClick={() => setDashboardMenuOpen(false)}
+                        aria-label={`Close ${dashboardMenuLabel}`}
+                    />
+                    <div className='relative h-full w-72 max-w-[86vw] overflow-hidden bg-base-100 text-base-content shadow-2xl'>
+                        <div className='sticky top-0 z-10 flex justify-end border-b border-base-300 bg-base-100 p-2'>
+                            <button
+                                type='button'
+                                className='btn btn-ghost btn-circle btn-sm'
+                                onClick={() => setDashboardMenuOpen(false)}
+                                aria-label={`Close ${dashboardMenuLabel}`}
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <DashboardSidebar onNavigate={() => setDashboardMenuOpen(false)} />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

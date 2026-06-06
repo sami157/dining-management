@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { FiTrash2 } from 'react-icons/fi';
 import { motion, AnimatePresence } from "motion/react"
 import { IoIosAddCircle } from "react-icons/io";
-import { UserSearch } from 'lucide-react';
+import { LockKeyhole, UserSearch } from 'lucide-react';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -218,7 +218,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                                 className='active:scale-90 transition-transform rounded-full font-semibold text-primary-content flex gap-2 bg-primary cursor-pointer items-center px-2 py-2 disabled:cursor-not-allowed disabled:bg-primary/10 disabled:text-primary-content/50'
                                             >
                                                 <div className='flex gap-2 items-center'>
-                                                    <IoIosAddCircle className='text-2xl' />
+                                                    {monthFinalized ? <LockKeyhole size={20} /> : <IoIosAddCircle className='text-2xl' />}
                                                     <p>Deposit</p>
                                                 </div>
                                             </button>
