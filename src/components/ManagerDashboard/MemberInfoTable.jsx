@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns';
 import { FiTrash2 } from 'react-icons/fi';
-import { motion, AnimatePresence } from "motion/react"
+import { motion as Motion, AnimatePresence } from "motion/react"
 import { IoIosAddCircle } from "react-icons/io";
 import { LockKeyhole, UserSearch } from 'lucide-react';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
@@ -49,6 +49,15 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
     const [depositNotes, setDepositNotes] = useState('');
     const [editingDeposit, setEditingDeposit] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+
+    const recentDeposits = useMemo(() => {
+        return [...(depositsData || [])].sort((a, b) => {
+            const dateDiff = new Date(b.depositDate).getTime() - new Date(a.depositDate).getTime();
+            if (dateDiff !== 0) return dateDiff;
+
+            return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        });
+    }, [depositsData]);
 
     const filteredUsers = useMemo(() => {
         const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -181,7 +190,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
 
                 <div className='overflow-auto max-h-screen'>
                     <table className='table table-sm'>
-                        <thead className='sticky top-0 z-10 bg-base-300'>
+                        <thead className='sticky top-0 z-10'>
                             <tr>
                                 <th>Member</th>
                                 <th className='text-center'>Balance</th>
@@ -241,8 +250,15 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
 
                 {/* Recent Deposits */}
                 <div className='mt-6'>
-                    <h3 className='text-lg font-semibold mb-3'>Recent Deposits</h3>
-                    <div className='overflow-x-auto'>
+                    <div className='flex items-center justify-between gap-3 mb-3'>
+                        <h3 className='text-lg font-semibold'>Recent Deposits</h3>
+                        {!depositsLoading && recentDeposits.length > 0 && (
+                            <span className='text-xs font-semibold uppercase tracking-widest text-base-content/40'>
+                                {recentDeposits.length} Deposits
+                            </span>
+                        )}
+                    </div>
+                    <div className='overflow-auto max-h-96'>
                         <table className='table table-xs'>
                             <thead>
                                 <tr>
@@ -258,7 +274,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                     Array.from({ length: 5 }).map((_, index) => (
                                         <DepositRowSkeleton key={index} />
                                     ))
-                                ) : depositsData?.length ? depositsData.slice(0, 10).map((deposit) => (
+                                ) : recentDeposits.length ? recentDeposits.map((deposit) => (
                                     <tr key={deposit._id}>
                                         <td>{format(new Date(deposit.depositDate), 'dd MMM')}</td>
                                         <td>{deposit.userName}</td>
@@ -287,7 +303,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
             <AnimatePresence>
                 {showDepositModal && (
                     <div className="modal modal-open">
-                        <motion.div layout
+                        <Motion.div layout
                             initial={{ filter: "blur(20px)", y: 100 }}
                             animate={{ filter: "none", y: 0, opacity: 1 }}
                             exit={{ filter: "blur(20px)", y: 20, opacity: 0 }} 
@@ -327,7 +343,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                     Cancel
                                 </button>
                             </div>
-                        </motion.div>
+                        </Motion.div>
                         <div className="modal-backdrop" onClick={() => setShowDepositModal(false)}></div>
                     </div>
                 )
