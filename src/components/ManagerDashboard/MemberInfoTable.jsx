@@ -190,7 +190,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
 
                 <div className='overflow-auto max-h-screen'>
                     <table className='table table-sm'>
-                        <thead className='sticky top-0 z-10'>
+                        <thead className='sticky bg-base-300/50 backdrop-blur-2xl top-0 z-10'>
                             <tr>
                                 <th>Member</th>
                                 <th className='text-center'>Balance</th>

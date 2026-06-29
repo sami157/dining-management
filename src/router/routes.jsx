@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import Registration from "../pages/Registration";
 import MealSchedule from "../pages/MealSchedule";
 import UserDashboard from "../pages/UserDashboard";
+import UserComments from "../pages/UserComments";
 import UserDashboardLayout from "../layouts/UserDashboardLayout";
 import MemberManagement from "../pages/MemberManagement";
 import FundManagement from "../pages/FundManagement";
@@ -46,6 +47,10 @@ export const router = createBrowserRouter([
                     {
                         path: 'meal-sheet',
                         element: <UserDashboard showFinancialStats={false} />
+                    },
+                    {
+                        path: 'comments',
+                        element: <UserComments />
                     },
                     {
                         path: 'financial-information',

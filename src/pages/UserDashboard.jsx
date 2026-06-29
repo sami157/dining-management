@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import useAuth from '../hooks/useAuth';
 import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, Info } from 'lucide-react';
 import { getMealLabel, getMealShortLabel } from '../utils/mealTypes';
+import { buildMealRegistrationPayload } from '../utils/mealRegistration';
 
 
 const getToday = () => {
@@ -138,12 +139,13 @@ const UserDashboard = ({ showFinancialStats = true }) => {
             canRegister: meal.canRegister,
             registrationId: meal.registrationId,
             weight: meal.weight,
-            numberOfMeals: meal.numberOfMeals || 1
+            numberOfMeals: meal.numberOfMeals || 1,
+            comment: meal.comment || ''
         };
     };
 
     // Toggle Handlers (For the grid boxes)
-    const handleMealClick = async (date, mealType, status) => {
+    const handleMealClick = async (date, mealType, status, comment = '') => {
         setRequested(true)
         if (!status.available) {
             setRequested(false)
@@ -177,7 +179,11 @@ const UserDashboard = ({ showFinancialStats = true }) => {
 
         const dateStr = format(date, 'yyyy-MM-dd');
         toast.promise(
-            axiosSecure.post('/users/meals/register', { date: dateStr, mealType, numberOfMeals: 1 }).then(() => {
+            axiosSecure.post('/users/meals/register', buildMealRegistrationPayload({
+                date: dateStr,
+                mealType,
+                numberOfMeals: 1
+            }, comment)).then(() => {
                 refetch();
                 refetchCount();
                 setRequested(false)
@@ -543,7 +549,6 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                                 {['morning', 'evening', 'night'].map((mealType) => {
                                     const status = getMealStatus(selectedDate, mealType);
                                     if (!status.available) return null;
-
                                     return (
                                         <div
                                             key={mealType}
@@ -576,9 +581,10 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                                                     </div>
                                                 ) : (
                                                     <div className="text-center py-1">
-                                                        <p className=" text-base-content/30 uppercase font-bold tracking-widest">No Menu Set</p>
+                                                        <p className="text-base-content/30 uppercase font-bold tracking-widest">No Menu Set</p>
                                                     </div>
                                                 )}
+
                                             </div>
                                         </div>
                                     );

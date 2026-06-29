@@ -11,6 +11,7 @@ import Loading from '../components/Loading';
 import { getMealShortLabel } from '../utils/mealTypes';
 import useRole from '../hooks/useRole';
 import { ROLES, isSuperAdminRole } from '../utils/roles';
+import { buildMealRegistrationPayload } from '../utils/mealRegistration';
 
 const MotionDiv = motion.div;
 
@@ -266,7 +267,7 @@ const MemberManagement = () => {
     return schedule?.availableMeals?.find(m => m.mealType === mealType)?.isAvailable || false;
   };
 
-  const handleMealToggle = async (userId, date, mealType) => {
+  const handleMealToggle = async (userId, date, mealType, comment = '') => {
     setRequested(true)
     const reg = getRegistration(userId, date, mealType);
     const available = isMealAvailable(date, mealType);
@@ -286,7 +287,12 @@ const MemberManagement = () => {
       );
     } else {
       toast.promise(
-        axiosSecure.post('/users/meals/register', { userId, date: format(date, 'yyyy-MM-dd'), mealType, numberOfMeals: 1 }).then(() => {
+        axiosSecure.post('/users/meals/register', buildMealRegistrationPayload({
+          userId,
+          date: format(date, 'yyyy-MM-dd'),
+          mealType,
+          numberOfMeals: 1
+        }, comment)).then(() => {
           refetch()
           setRequested(false)
         }),
