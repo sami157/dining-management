@@ -102,8 +102,11 @@ const UserComments = () => {
                             <tbody>
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan={4} className="text-center py-10">
-                                            Loading...
+                                        <td colSpan={4} className="py-12 text-center">
+                                            <div className="flex flex-col items-center gap-2 opacity-40">
+                                                <MessageSquareText size={40} />
+                                                <p className="text-sm font-semibold skeleton skeleton-text uppercase tracking-widest">Loading Comments...</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 ) : rows.length ? rows.map((row) => (

@@ -56,7 +56,7 @@ const formatDateTime = (value) => {
     });
 };
 
-const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing, finalizationData, finalizedByName }) => {
+const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing, finalizationData, finalizedByName, mosqueFeeSum }) => {
     const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
     const balance = totalDeposit - totalExpenses;
     const uniqueEmailCount = new Set(depositsData?.map(item => item.userEmail)).size;
@@ -102,6 +102,7 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                         <SummaryRow label="Total Expense" value={currency(totalExpenses)} icon={TrendingDown} status="negative" />
                         <SummaryRow label="Net Balance" value={currency(balance)} icon={Wallet} status={balance >= 0 ? 'positive' : 'negative'} />
                         <SummaryRow label="Fixed Deposits" value={currency(totalFixedDeposit)} icon={BanknoteArrowUp} />
+                        <SummaryRow label="Total Mosque Fee" value={currency(mosqueFeeSum)} icon={BanknoteArrowUp} />
                         <SummaryRow
                             label={monthFinalized ? 'Finalized Meal Rate' : 'Running Meal Rate'}
                             value={currency(monthFinalized ? finalizationData?.mealRate : mealRate)}
