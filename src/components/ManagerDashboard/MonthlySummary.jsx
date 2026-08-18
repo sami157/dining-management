@@ -1,5 +1,6 @@
 import React from 'react';
 import { BanknoteArrowUp, CalendarCheck, CheckCircle2, Landmark, LockKeyhole, TrendingDown, TrendingUp, UserCheck, UsersRound, Wallet, Zap } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const currency = (value) => `Tk ${Number(value || 0).toLocaleString(undefined, {
     maximumFractionDigits: 2
@@ -56,7 +57,7 @@ const formatDateTime = (value) => {
     });
 };
 
-const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing, finalizationData, finalizedByName, mosqueFeeSum }) => {
+const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, undoFinalization, canManageFinalization, finalizationActionLoading, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing, finalizationData, finalizedByName, mosqueFeeSum }) => {
     const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
     const balance = totalDeposit - totalExpenses;
     const uniqueEmailCount = new Set(depositsData?.map(item => item.userEmail)).size;
@@ -69,6 +70,39 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
     const totalMemberBalances = pickFirstValue(finalizationData, ['totalMemberBalances', 'totalMemberBalance', 'totalBalancesAfterFinalization', 'totalMemberBalancesAfterFinalization'])
         ?? memberDetails.reduce((sum, member) => sum + (Number(member.newBalance) || 0), 0);
     const finalizedAt = pickFirstValue(finalizationData, ['finalizedAt', 'finalizedDate', 'createdAt']);
+    const showFinalizeButton = canManageFinalization && !monthFinalized;
+    const showUndoButton = canManageFinalization && monthFinalized;
+
+    const showUndoConfirmation = () => {
+        toast.custom((t) => (
+            <div className='flex flex-col gap-4 bg-base-100 drop-shadow-2xl p-4 rounded-2xl border border-base-300'>
+                <div>
+                    <p className='font-medium'>Undo finalization for this month?</p>
+                    <p className='text-sm text-base-content/60 mt-1'>This will reopen the current month&apos;s finance records.</p>
+                </div>
+                <div className='flex justify-end gap-2 items-center'>
+                    <button
+                        className='btn btn-sm btn-ghost'
+                        onClick={() => toast.dismiss(t.id)}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        className='btn btn-sm btn-error text-error-content'
+                        onClick={async () => {
+                            toast.dismiss(t.id);
+                            await undoFinalization();
+                        }}
+                    >
+                        Undo Finalization
+                    </button>
+                </div>
+            </div>
+        ), {
+            duration: 8000,
+            style: { padding: 0, background: 'transparent', boxShadow: 'none' }
+        });
+    };
 
     return (
         <section className="rounded-lg border border-base-300 px-4 py-3">
@@ -77,20 +111,34 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                     <h2 className="text-sm font-bold tracking-tight">Monthly Summary</h2>
                     <p className="text-xs text-base-content/50 mt-0.5">Live finance overview for the selected month.</p>
                 </div>
-                <button
-                    onClick={finalizeMonth}
-                    disabled={monthFinalized || isLoading}
-                    className="btn btn-sm btn-primary disabled:btn-ghost disabled:text-base-content/40"
-                >
-                    {isLoading ? (
-                        <span className="loading loading-spinner loading-xs" />
-                    ) : monthFinalized ? (
-                        <LockKeyhole size={16} />
-                    ) : (
-                        <CheckCircle2 size={16} />
-                    )}
-                    {monthFinalized ? 'Finalized' : 'Finalize'}
-                </button>
+                {showFinalizeButton && (
+                    <button
+                        onClick={finalizeMonth}
+                        disabled={isLoading || finalizationActionLoading}
+                        className="btn btn-sm btn-primary"
+                    >
+                        {finalizationActionLoading ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <CheckCircle2 size={16} />
+                        )}
+                        Finalize
+                    </button>
+                )}
+                {showUndoButton && (
+                    <button
+                        onClick={showUndoConfirmation}
+                        disabled={isLoading || finalizationActionLoading}
+                        className="btn btn-sm btn-error"
+                    >
+                        {finalizationActionLoading ? (
+                            <span className="loading loading-spinner loading-xs" />
+                        ) : (
+                            <LockKeyhole size={16} />
+                        )}
+                        Undo Finalization
+                    </button>
+                )}
             </div>
 
             <div className="divide-y divide-base-300">

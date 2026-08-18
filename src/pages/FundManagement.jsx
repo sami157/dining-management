@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
@@ -9,10 +9,12 @@ import MonthlyExpense from '../components/ManagerDashboard/MonthlyExpense';
 
 const FundManagement = () => {
   const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
   const currentCalendarMonth = format(new Date(), 'yyyy-MM');
   const [selectedYear, setSelectedYear] = useState(currentMonth.split('-')[0]);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth.split('-')[1]);
+  const [isFinalizationSubmitting, setIsFinalizationSubmitting] = useState(false);
 
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
@@ -80,6 +82,7 @@ const FundManagement = () => {
   });
 
   const monthFinalized = finalizationData?.isFinalized || false;
+  const isCurrentMonth = currentMonth === currentCalendarMonth;
 
   const { data: mealRateData, isLoading: mealRateLoading, isFetching: mealRateFetching } = useQuery({
     queryKey: ['runningMealRate', currentMonth],
@@ -87,10 +90,10 @@ const FundManagement = () => {
       const response = await axiosSecure.get(`/stats/meal-rate?month=${currentMonth}&date=${format(new Date(), 'yyyy-MM-dd')}`);
       return response.data;
     },
-    enabled: currentMonth === currentCalendarMonth && !finalizationLoading && !monthFinalized,
+    enabled: isCurrentMonth && !finalizationLoading && !monthFinalized,
   });
 
-  const runningMealRate = currentMonth === currentCalendarMonth
+  const runningMealRate = isCurrentMonth
     ? finalizationData?.isFinalized
       ? finalizationData?.mealRate?.toFixed(2) || '0.00'
       : mealRateData?.mealRate?.toFixed(2) || '0.00'
@@ -134,22 +137,47 @@ const FundManagement = () => {
     || finalizedByUser?.email
     || finalizedById;
 
+  const refreshFinanceMonthData = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['finalization', currentMonth] }),
+      queryClient.invalidateQueries({ queryKey: ['runningMealRate', currentMonth] }),
+      queryClient.invalidateQueries({ queryKey: ['deposits', currentMonth] }),
+      queryClient.invalidateQueries({ queryKey: ['expenses', currentMonth] }),
+      queryClient.invalidateQueries({ queryKey: ['allBalances'] }),
+    ]);
+  };
+
   const finalizeMonth = async () => {
     toast.promise(
       async () => {
+        setIsFinalizationSubmitting(true);
         await axiosSecure.post('/finance/finalize', { month: currentMonth });
-        refetchExpenses();
-        refetchDeposits();
+        await refreshFinanceMonthData();
       },
       {
         loading: 'Finalizing month...',
         success: 'Month finalized successfully',
         error: 'Failed to finalize month'
       }
-    );
+    ).finally(() => setIsFinalizationSubmitting(false));
   };
 
-  const mealRateCardLoading = currentMonth === currentCalendarMonth && !monthFinalized && (finalizationLoading || mealRateLoading);
+  const undoFinalization = async () => {
+    toast.promise(
+      async () => {
+        setIsFinalizationSubmitting(true);
+        await axiosSecure.delete(`/finance/finalization/${currentMonth}`);
+        await refreshFinanceMonthData();
+      },
+      {
+        loading: 'Undoing finalization...',
+        success: 'Month finalization undone successfully',
+        error: 'Failed to undo finalization',
+      }
+    ).finally(() => setIsFinalizationSubmitting(false));
+  };
+
+  const mealRateCardLoading = isCurrentMonth && !monthFinalized && (finalizationLoading || mealRateLoading);
   const mealRateCardRefreshing = mealRateFetching && !mealRateCardLoading;
   const summaryLoading = depositsLoading || expensesLoading || usersLoading || finalizationLoading;
   const summaryRefreshing = depositsFetching || expensesFetching || usersFetching || finalizationFetching;
@@ -211,7 +239,7 @@ const FundManagement = () => {
 
         <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-5 items-start'>
           <div className='flex flex-col gap-5'>
-            <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} totalFixedDeposit={amount} mealRate={runningMealRate} isLoading={summaryLoading} isRefreshing={summaryRefreshing} mealRateLoading={mealRateCardLoading} mealRateRefreshing={mealRateCardRefreshing} finalizationData={finalizationData} finalizedByName={finalizedByName} mosqueFeeSum={mosqueFeeSum} />
+            <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} undoFinalization={undoFinalization} canManageFinalization={isCurrentMonth} finalizationActionLoading={isFinalizationSubmitting} totalFixedDeposit={amount} mealRate={runningMealRate} isLoading={summaryLoading} isRefreshing={summaryRefreshing} mealRateLoading={mealRateCardLoading} mealRateRefreshing={mealRateCardRefreshing} finalizationData={finalizationData} finalizedByName={finalizedByName} mosqueFeeSum={mosqueFeeSum} />
             <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} isLoading={expenseLoading} isRefreshing={expenseRefreshing} />
           </div>
           <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} refetchBalances={refetchBalances} currentMonth={currentMonth} isLoading={memberTableLoading} isRefreshing={memberTableRefreshing} depositsLoading={depositsLoading} />
