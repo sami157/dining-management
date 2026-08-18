@@ -7,6 +7,7 @@ import { UserSearch, ArrowRightLeft, Utensils } from 'lucide-react';
 import GeneralInfo from './GeneralInfo';
 import { getMealShortLabel } from '../utils/mealTypes';
 import { isAdminRole } from '../utils/roles';
+import CountUp from 'react-countup';
 
 export const MealSheet = () => {
     const axiosSecure = useAxiosSecure()
@@ -167,7 +168,12 @@ export const MealSheet = () => {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>
                                                     ) : (
-                                                        <span className=" font-bold text-lg rounded-md">{mealTotals?.morning}</span>
+                                                        <span className=" font-bold text-lg rounded-md">
+                                                            <CountUp
+                                                                delay={2}
+                                                                end={mealTotals?.morning}
+                                                            />
+                                                        </span>
                                                     )
                                                 }
                                             </div>
@@ -178,7 +184,12 @@ export const MealSheet = () => {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>
                                                     ) : (
-                                                        <span className=" font-bold text-lg rounded-md">{mealTotals?.evening}</span>
+                                                        <span className=" font-bold text-lg rounded-md">
+                                                            <CountUp
+                                                                delay={1}
+                                                                end={mealTotals?.evening}
+                                                            />
+                                                        </span>
                                                     )
                                                 }
                                             </div>
@@ -189,7 +200,13 @@ export const MealSheet = () => {
                                                     registrationsLoading || usersLoading ? (
                                                         <span className="h-6 w-6 bg-base-200/40 rounded-md p-1 animate-wiggle"></span>
                                                     ) : (
-                                                        <span className=" font-bold text-lg rounded-md">{mealTotals?.night}</span>
+                                                        <span className=" font-bold text-lg rounded-md">
+                                                            <CountUp
+                                                                delay={0}
+                                                                duration={3}
+                                                                end={mealTotals?.night}
+                                                            />
+                                                        </span>
                                                     )
                                                 }
                                             </div>

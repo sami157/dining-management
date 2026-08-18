@@ -21,6 +21,7 @@
     "lucide-react": "^0.575.0",
     "motion": "^12.35.1",
     "react": "^19.2.0",
+    "react-countup": "^6.5.3",
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.69.0",
