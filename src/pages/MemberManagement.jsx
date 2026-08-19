@@ -12,6 +12,7 @@ import { getMealShortLabel } from '../utils/mealTypes';
 import useRole from '../hooks/useRole';
 import { ROLES, isSuperAdminRole } from '../utils/roles';
 import { buildMealRegistrationPayload } from '../utils/mealRegistration';
+import CountUp from 'react-countup'
 
 const MotionDiv = motion.div;
 
@@ -360,7 +361,13 @@ const MemberManagement = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <span className='text-sm font-semibold opacity-40 uppercase tracking-widest'>
-          <span className='font-black text-lg'>{filteredUsers.length}</span> Members
+          <span className='font-black text-lg'>
+            <CountUp
+              end={filteredUsers.length}
+              delay={0.2}
+              duration={3}
+            />
+          </span> Members
         </span>
       </div>
 
