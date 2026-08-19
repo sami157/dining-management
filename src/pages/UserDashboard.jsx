@@ -7,6 +7,7 @@ import useAuth from '../hooks/useAuth';
 import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, Info } from 'lucide-react';
 import { getMealLabel, getMealShortLabel } from '../utils/mealTypes';
 import { buildMealRegistrationPayload } from '../utils/mealRegistration';
+import CountUp from 'react-countup';
 
 
 const getToday = () => {
@@ -192,24 +193,6 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                 loading: 'Registering...',
                 success: 'Registered',
                 error: 'Failed to register'
-            }
-        );
-    };
-
-    const handleBulkToggle = async () => {
-        setRequested(true)
-        toast.promise(
-            async () => {
-                const response = await axiosSecure.post(`/users/meals/bulk-register?month=${monthString}`);
-                refetch()
-                refetchCount();
-                setRequested(false)
-                return response.data;
-            },
-            {
-                loading: 'Processing...',
-                success: (data) => data.message,
-                error: 'Failed to toggle meals'
             }
         );
     };
@@ -428,11 +411,16 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                                     <tr className='bg-base-300'>
                                         <th className='text-center'>Date</th>
                                         <th className='text-center'>
-                                            <div className="inline-flex items-baseline justify-center gap-1 whitespace-nowrap">
+                                            <div className="inline-flex items-center justify-center gap-1 whitespace-nowrap">
                                                 <span>Meals</span>
-                                                <span className="text-[10px] font-black text-base-content/50">
-                                                    ({countLoading ? '...' : mealCountData?.totalMeals || 0})
-                                                </span>
+                                                <div className="font-black">
+                                                    <CountUp
+                                                    className='px-1.5 py-1 bg-primary rounded-md text-primary-content'
+                                                        end={mealCountData?.totalMeals || 0}
+                                                        duration={1}
+                                                        decimals={2}
+                                                    />
+                                                </div>
                                             </div>
                                         </th>
                                         <th className='text-center'>Action</th>
