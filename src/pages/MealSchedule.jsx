@@ -115,7 +115,7 @@ const MealSchedule = () => {
                 ) : schedules && schedules.length > 0 ? (
                     <div className='grid grid-cols-1 md:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500'>
                         {schedules.map((schedule, index) => (
-                            <div key={schedule._id || index} className="group">
+                            <div key={schedule._id || index} className="group h-full">
                                 <MealCard
                                     schedule={schedule}
                                     onUpdate={handleUpdateSchedule}
