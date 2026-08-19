@@ -56,11 +56,11 @@ const MealCard = ({ schedule, onUpdate, onDelete }) => {
     const displayMeals = isEditing ? editedSchedule.availableMeals : schedule.availableMeals;
 
     return (
-        <div className={`group flex h-full min-h-[560px] flex-col overflow-hidden bg-base-100 rounded-2xl border transition-all duration-200 
+        <div className={`group flex h-full min-h-140 flex-col overflow-hidden bg-base-100 rounded-2xl border transition-all duration-200 
             ${isEditing ? 'border-primary shadow-2xl ring-1 ring-primary/20' : 'border-base-300'}`}>
 
             {/* Top Header: Date and Actions */}
-            <div className='flex min-h-[76px] items-start justify-between p-4 border-b border-base-200 bg-base-50/30'>
+            <div className='flex min-h-19 items-start justify-between p-4 border-b border-base-200 bg-base-50/30'>
                 <div>
                     <div className='flex gap-2'>
                         <h2 className='font-bold text-base md:text-lg'>

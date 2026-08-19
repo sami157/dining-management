@@ -88,7 +88,7 @@ const MealSchedule = () => {
                 </div>
 
                 {/* Navigation Card */}
-                <div className='bg-base-200/50 rounded-2xl p-2 flex items-center justify-between border border-base-300'>
+                <div className='rounded-2xl p-2 max-w-100 mx-auto gap-4 flex items-center justify-center'>
                     <button onClick={handlePreviousWeek} className='btn btn-ghost btn-circle sm:btn-md'>
                         <ChevronLeft size={20} />
                     </button>
