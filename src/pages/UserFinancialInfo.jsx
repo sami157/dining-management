@@ -5,6 +5,7 @@ import { BanknoteArrowUp, ChevronLeft, ChevronRight, HandCoins, TrendingDown, Tr
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import useAuth from '../hooks/useAuth';
 import useAxiosSecure from '../hooks/useAxiosSecure';
+import CountUp from 'react-countup';
 
 const currency = (value) => `Tk ${Number(value || 0).toLocaleString(undefined, {
     minimumFractionDigits: Number(value || 0) % 1 !== 0 ? 2 : 0
@@ -24,9 +25,9 @@ const InfoListItem = ({ label, value, icon, status, isLoading }) => {
                     Loading
                 </p>
             ) : (
-                <p className={`text-sm font-semibold text-right ${status === 'negative' ? 'text-error' : status === 'positive' ? 'text-success' : 'text-base-content'}`}>
+                <div className={`text-sm font-semibold text-right ${status === 'negative' ? 'text-error' : status === 'positive' ? 'text-success' : 'text-base-content'}`}>
                     {value}
-                </p>
+                </div>
             )}
         </div>
     );
@@ -56,7 +57,14 @@ const BalanceSummary = ({ label, value, statusText, isNegative }) => {
                     <p className="text-xs font-bold uppercase tracking-widest text-base-content/50 mb-2">
                         {label}
                     </p>
-                    <p className={`text-3xl font-bold tracking-tight ${isNegative ? 'text-error' : 'text-success'}`}>{value}</p>
+                    <div className={`text-3xl font-bold tracking-tight ${isNegative ? 'text-error' : 'text-success'}`}>
+                        <CountUp
+                            end={value}
+                            duration={value/2000}
+                            decimals={2}
+                            prefix="Tk. "
+                        />
+                    </div>
                 </div>
                 <p className="text-xs text-base-content/50">
                     {statusText}
@@ -253,7 +261,7 @@ const UserFinancialInfo = () => {
 
     const dataLoading = finalizationLoading || depositLoading || userBalanceLoading || userDataLoading || countLoading;
     const balance = finalizationData?.newBalance ?? userBalanceData?.balance ?? 0;
-    const previousBalance = Number(finalizationData?.previousBalance ?? 0);
+    const initialBalance = Number(finalizationData?.previousBalance ?? 0) - Number(finalizationData?.totalDeposits ?? 0);
     const userId = userData?._id?.toString?.() || userData?._id;
     const trendPoints = (finalizationsData || [])
         .filter((record) => record.month < currentCalendarMonth)
@@ -303,58 +311,56 @@ const UserFinancialInfo = () => {
                     </div>
                 </div>
 
-                {finalizationData && (
-                    <BalanceSummary
-                        label="Previous Month Balance"
-                        value={currency(previousBalance)}
-                        statusText={`Carried from ${format(subMonths(currentMonth, 1), 'MMMM yyyy')}`}
-                        isNegative={previousBalance < 0}
-                    />
-                )}
-
-                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-5 lg:items-start">
+                <div className={`grid grid-cols-1 gap-5 ${!finalizationData && isCurrentMonth ? 'lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start' : ''}`}>
                     <div className="flex flex-col gap-5">
                         <InfoListSection
                             title="Monthly Summary"
-                            description="Basic charges and activity for the selected month."
+                            description="Deposits, meals, charges, and balances for the selected month."
                         >
                             <InfoListItem label="Fixed Deposit" value={currency(userData?.fixedDeposit)} icon={BanknoteArrowUp} isLoading={dataLoading} />
-                            <InfoListItem label="Mosque Fee" value={currency(userData?.mosqueFee)} icon={HandCoins} status="negative" isLoading={dataLoading} />
+                            {finalizationData && (
+                                <InfoListItem
+                                    label="Initial Balance"
+                                    value={currency(initialBalance)}
+                                    icon={Wallet}
+                                    status={initialBalance < 0 ? 'negative' : 'positive'}
+                                    isLoading={dataLoading}
+                                />
+                            )}
                             <InfoListItem
                                 label="Monthly Deposit"
-                                value={currency(depositData?.deposit)}
+                                value={depositData?.deposit}
                                 icon={TrendingUp}
                                 status={(depositData?.deposit || 0) <= 0 ? 'negative' : 'positive'}
                                 isLoading={dataLoading}
                             />
                             <InfoListItem label="Total Meals" value={mealCountData?.totalMeals || 0} icon={Utensils} isLoading={dataLoading} />
+                            {finalizationData && (
+                                <>
+                                    <InfoListItem label="Meal Rate" value={currency(finalizationData?.mealRate)} icon={Zap} isLoading={dataLoading} />
+                                    <InfoListItem label="Meal Cost" value={currency(finalizationData?.mealCost)} icon={TrendingDown} status="negative" isLoading={dataLoading} />
+                                </>
+                            )}
+                            <InfoListItem label="Mosque Fee" value={currency(userData?.mosqueFee)} icon={HandCoins} status="negative" isLoading={dataLoading} />
+                            {finalizationData && (
+                                <InfoListItem
+                                    label="Closing Balance"
+                                    value={currency(balance)}
+                                    icon={Wallet}
+                                    status={balance < 0 ? 'negative' : 'positive'}
+                                    isLoading={dataLoading}
+                                />
+                            )}
                         </InfoListSection>
 
                         {!finalizationData && (
                             <BalanceSummary
                                 label="Current Balance"
-                                value={currency(balance)}
+                                value={balance}
                                 isNegative={balance < 0}
                             />
                         )}
                     </div>
-
-                    {finalizationData && (
-                        <InfoListSection
-                            title="Finalized Information"
-                            description="Calculated after the month is closed by management."
-                        >
-                            <InfoListItem label="Meal Rate" value={currency(finalizationData?.mealRate)} icon={Zap} isLoading={dataLoading} />
-                            <InfoListItem label="Meal Cost" value={currency(finalizationData?.mealCost)} icon={TrendingDown} status="negative" isLoading={dataLoading} />
-                            <InfoListItem
-                                label="Closing Balance"
-                                value={currency(balance)}
-                                icon={Wallet}
-                                status={balance < 0 ? 'negative' : 'positive'}
-                                isLoading={dataLoading}
-                            />
-                        </InfoListSection>
-                    )}
 
                     {!finalizationData && isCurrentMonth && (
                         <BalanceTrend points={trendPointsWithCurrent} isLoading={finalizationsLoading || userDataLoading || userBalanceLoading} />

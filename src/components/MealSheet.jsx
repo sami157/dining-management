@@ -171,6 +171,7 @@ export const MealSheet = () => {
                                                         <span className=" font-bold text-lg rounded-md">
                                                             <CountUp
                                                                 delay={2}
+                                                                duration={2}
                                                                 end={mealTotals?.morning}
                                                             />
                                                         </span>
@@ -187,6 +188,7 @@ export const MealSheet = () => {
                                                         <span className=" font-bold text-lg rounded-md">
                                                             <CountUp
                                                                 delay={1}
+                                                                duration={2}
                                                                 end={mealTotals?.evening}
                                                             />
                                                         </span>
@@ -203,7 +205,7 @@ export const MealSheet = () => {
                                                         <span className=" font-bold text-lg rounded-md">
                                                             <CountUp
                                                                 delay={0}
-                                                                duration={3}
+                                                                duration={2}
                                                                 end={mealTotals?.night}
                                                             />
                                                         </span>
