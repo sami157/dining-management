@@ -121,28 +121,21 @@ const Navbar = () => {
                                         <p className="text-xs hover:bg-transparent font-bold truncate cursor-default">{user.email}</p>
                                     </li>
                                     {isAdminRole(role) && (
-                                        <AnimatePresence>
-                                            <motion.li onClick={closeDropdown}
-                                                initial={{ x: -20 }}
-                                                animate={{ x: 0 }}
-                                                exit={{ x: 10 }}
-                                            >
-                                                <NavLink viewTransition to="/admin-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
-                                                    <Settings size={18} /> Manager Dashboard
-                                                </NavLink>
-                                            </motion.li>
-                                        </AnimatePresence>
+                                        <motion.li onClick={closeDropdown}
+                                            initial={{ x: -20 }}
+                                            animate={{ x: 0 }}
+                                            exit={{ x: 10 }}
+                                        >
+                                            <NavLink viewTransition to="/admin-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
+                                                <Settings size={18} /> Manager Dashboard
+                                            </NavLink>
+                                        </motion.li>
                                     )}
                                     <li onClick={closeDropdown}>
                                         <NavLink viewTransition to="/user-dashboard" onClick={() => setVisible(false)} className="py-3 rounded-lg">
                                             <LayoutDashboard size={18} /> User Dashboard
                                         </NavLink>
                                     </li>
-                                    {/* <li>
-                                        <NavLink to="/user-profile" onClick={closeDropdown} className="py-3 rounded-xl">
-                                            <UserCog size={18} /> Profile
-                                        </NavLink>
-                                    </li> */}
                                     <div className="divider px-2 my-1"></div>
                                     <li>
                                         <button onClick={logOut} className="text-error py-3 rounded-xl hover:bg-error/10">
@@ -161,7 +154,7 @@ const Navbar = () => {
             </nav>
 
             {(isAdminDashboard || isUserDashboard) && dashboardMenuOpen && (
-                <div className='md:hidden fixed inset-0 z-[70]'>
+                <div className='md:hidden fixed inset-0 z-70'>
                     <button
                         type='button'
                         className='absolute inset-0 bg-black/50'

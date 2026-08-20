@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { addMonths, format, subMonths } from 'date-fns';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import MemberInfoTable from '../components/ManagerDashboard/MemberInfoTable';
@@ -12,35 +13,17 @@ const FundManagement = () => {
   const queryClient = useQueryClient();
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
   const currentCalendarMonth = format(new Date(), 'yyyy-MM');
-  const [selectedYear, setSelectedYear] = useState(currentMonth.split('-')[0]);
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth.split('-')[1]);
   const [isFinalizationSubmitting, setIsFinalizationSubmitting] = useState(false);
 
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
-  const monthOptions = [
-    { value: '01', label: 'January' },
-    { value: '02', label: 'February' },
-    { value: '03', label: 'March' },
-    { value: '04', label: 'April' },
-    { value: '05', label: 'May' },
-    { value: '06', label: 'June' },
-    { value: '07', label: 'July' },
-    { value: '08', label: 'August' },
-    { value: '09', label: 'September' },
-    { value: '10', label: 'October' },
-    { value: '11', label: 'November' },
-    { value: '12', label: 'December' },
-  ];
+  const shiftMonth = (shift) => {
+    setCurrentMonth((previousMonth) => {
+      const previousDate = new Date(`${previousMonth}-01`);
+      const nextDate = shift === 'previous'
+        ? subMonths(previousDate, 1)
+        : addMonths(previousDate, 1);
 
-  const handleYearChange = (year) => {
-    setSelectedYear(year);
-    setCurrentMonth(`${year}-${selectedMonth}`);
-  };
-
-  const handleMonthChange = (month) => {
-    setSelectedMonth(month);
-    setCurrentMonth(`${selectedYear}-${month}`);
+      return format(nextDate, 'yyyy-MM');
+    });
   };
 
   const { data: usersData, isLoading: usersLoading, isFetching: usersFetching } = useQuery({
@@ -181,8 +164,8 @@ const FundManagement = () => {
   const mealRateCardRefreshing = mealRateFetching && !mealRateCardLoading;
   const summaryLoading = depositsLoading || expensesLoading || usersLoading || finalizationLoading;
   const summaryRefreshing = depositsFetching || expensesFetching || usersFetching || finalizationFetching;
-  const memberTableLoading = usersLoading || balancesLoading || depositsLoading;
-  const memberTableRefreshing = usersFetching || balancesFetching || depositsFetching;
+  const memberTableLoading = usersLoading || balancesLoading || depositsLoading || finalizationLoading;
+  const memberTableRefreshing = usersFetching || balancesFetching || depositsFetching || finalizationFetching;
   const expenseLoading = expensesLoading;
   const expenseRefreshing = expensesFetching;
 
@@ -197,52 +180,40 @@ const FundManagement = () => {
             </p>
           </div>
 
-          <div className='flex gap-3'>
-            <div>
-              <label className='label py-1'>
-                <span className='label-text text-xs'>Year</span>
-              </label>
-              <select
-                value={selectedYear}
-                onChange={(e) => handleYearChange(e.target.value)}
-                className='select select-bordered select-sm'
-              >
-                {yearOptions.map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className='label py-1'>
-                <span className='label-text text-xs'>Month</span>
-              </label>
-              <select
-                value={selectedMonth}
-                onChange={(e) => handleMonthChange(e.target.value)}
-                className='select select-bordered select-sm'
-              >
-                {monthOptions.map(month => (
-                  <option key={month.value} value={month.value}>{month.label}</option>
-                ))}
-              </select>
-            </div>
+          <div className='flex items-center justify-between border border-base-300/70 p-2 rounded-lg max-w-md mx-auto w-full lg:w-72'>
+            <button
+              onClick={() => shiftMonth('previous')}
+              className='p-1.5 cursor-pointer hover:bg-base-200 rounded-full transition-all active:scale-95'
+              aria-label='Previous month'
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <h2 className='text-sm md:text-base font-bold uppercase px-6'>
+              {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}
+            </h2>
+            <button
+              onClick={() => shiftMonth('next')}
+              className='p-1.5 cursor-pointer hover:bg-base-200 rounded-full transition-all active:scale-95'
+              aria-label='Next month'
+            >
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
 
-        {(summaryRefreshing || memberTableRefreshing || expenseRefreshing) && !summaryLoading && !memberTableLoading && !expenseLoading && (
+        {/* {(summaryRefreshing || memberTableRefreshing || expenseRefreshing) && !summaryLoading && !memberTableLoading && !expenseLoading && (
           <div className='flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-base-content/50'>
             <span className='loading loading-spinner loading-xs text-primary'></span>
             Updating
           </div>
-        )}
+        )} */}
 
         <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-5 items-start'>
           <div className='flex flex-col gap-5'>
             <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} undoFinalization={undoFinalization} canManageFinalization={isCurrentMonth} finalizationActionLoading={isFinalizationSubmitting} totalFixedDeposit={amount} mealRate={runningMealRate} isLoading={summaryLoading} isRefreshing={summaryRefreshing} mealRateLoading={mealRateCardLoading} mealRateRefreshing={mealRateCardRefreshing} finalizationData={finalizationData} finalizedByName={finalizedByName} mosqueFeeSum={mosqueFeeSum} />
             <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} isLoading={expenseLoading} isRefreshing={expenseRefreshing} />
           </div>
-          <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} refetchBalances={refetchBalances} currentMonth={currentMonth} isLoading={memberTableLoading} isRefreshing={memberTableRefreshing} depositsLoading={depositsLoading} />
+          <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} finalizationData={finalizationData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} refetchBalances={refetchBalances} currentMonth={currentMonth} isLoading={memberTableLoading} isRefreshing={memberTableRefreshing} depositsLoading={depositsLoading} />
         </div>
       </div>
     </div>

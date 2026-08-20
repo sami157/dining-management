@@ -40,15 +40,34 @@ const DepositRowSkeleton = () => (
     </tr>
 );
 
-const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized, refetchDeposits, refetchBalances, currentMonth, isLoading, isRefreshing, depositsLoading }) => {
+const depositMonthOptions = [
+    { value: '01', label: 'January' },
+    { value: '02', label: 'February' },
+    { value: '03', label: 'March' },
+    { value: '04', label: 'April' },
+    { value: '05', label: 'May' },
+    { value: '06', label: 'June' },
+    { value: '07', label: 'July' },
+    { value: '08', label: 'August' },
+    { value: '09', label: 'September' },
+    { value: '10', label: 'October' },
+    { value: '11', label: 'November' },
+    { value: '12', label: 'December' },
+];
+
+const MemberInfoTable = ({ usersData, depositsData, balancesData, finalizationData, monthFinalized, refetchDeposits, refetchBalances, currentMonth, isLoading, isRefreshing, depositsLoading }) => {
     const axiosSecure = useAxiosSecure();
     const queryClient = useQueryClient();
+    const currentYear = new Date().getFullYear();
+    const defaultDepositMonth = format(new Date(), 'yyyy-MM');
     const [showDepositModal, setShowDepositModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [depositAmount, setDepositAmount] = useState(0);
+    const [depositMonth, setDepositMonth] = useState(defaultDepositMonth);
     const [depositNotes, setDepositNotes] = useState('');
     const [editingDeposit, setEditingDeposit] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const selectedDepositMonth = (depositMonth || defaultDepositMonth).split('-')[1];
 
     const recentDeposits = useMemo(() => {
         return [...(depositsData || [])].sort((a, b) => {
@@ -59,11 +78,46 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
         });
     }, [depositsData]);
 
+    const displayUsers = useMemo(() => {
+        if (monthFinalized) {
+            const usersById = new Map(
+                (usersData || []).map(user => [user._id?.toString(), user])
+            );
+
+            return (finalizationData?.memberDetails || [])
+                .map((member) => {
+                    const currentUser = usersById.get(member.userId?.toString());
+
+                    return {
+                        ...currentUser,
+                        _id: member.userId,
+                        name: member.userName || currentUser?.name || 'Unknown member',
+                        room: currentUser?.room || '',
+                        finalizedBalance: Number(member.newBalance) || 0,
+                        finalizedDeposit: Number(member.totalDeposits) || 0,
+                        isFinalizedSnapshot: true,
+                    };
+                })
+                .sort((firstUser, secondUser) => {
+                    if (!firstUser.room && !secondUser.room) return 0;
+                    if (!firstUser.room) return 1;
+                    if (!secondUser.room) return -1;
+
+                    return String(firstUser.room).localeCompare(String(secondUser.room), undefined, {
+                        numeric: true,
+                        sensitivity: 'base',
+                    });
+                });
+        }
+
+        return usersData || [];
+    }, [finalizationData, monthFinalized, usersData]);
+
     const filteredUsers = useMemo(() => {
         const normalizedSearch = searchTerm.trim().toLowerCase();
-        if (!normalizedSearch) return usersData || [];
+        if (!normalizedSearch) return displayUsers;
 
-        return (usersData || []).filter(user => {
+        return displayUsers.filter(user => {
             const buildingRoom = `${user.building?.slice(0, 1) || ''}-${user.room || ''}`.toLowerCase();
 
             return (
@@ -73,7 +127,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                 buildingRoom.includes(normalizedSearch)
             );
         });
-    }, [searchTerm, usersData]);
+    }, [displayUsers, searchTerm]);
 
     // Open deposit modal
     const openDepositModal = (user, existingDeposit = null) => {
@@ -81,10 +135,12 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
         if (existingDeposit) {
             setEditingDeposit(existingDeposit);
             setDepositAmount(existingDeposit.amount);
+            setDepositMonth(existingDeposit.month || currentMonth);
             setDepositNotes(existingDeposit.notes);
         } else {
             setEditingDeposit(null);
             setDepositAmount('');
+            setDepositMonth(defaultDepositMonth);
             setDepositNotes('');
         }
         setShowDepositModal(true);
@@ -97,6 +153,11 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
             return;
         }
 
+        if (!depositMonth) {
+            toast.error('Please select a month');
+            return;
+        }
+
         try {
             if (editingDeposit) {
                 // Update existing deposit
@@ -104,6 +165,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                     async () => {
                         await axiosSecure.put(`/finance/deposits/${editingDeposit._id}`, {
                             amount: parseFloat(depositAmount),
+                            month: depositMonth,
                             notes: depositNotes
                         });
                         setShowDepositModal(false);
@@ -123,7 +185,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                         await axiosSecure.post('/finance/deposits/add', {
                             userId: selectedUser._id.toString(),
                             amount: parseFloat(depositAmount),
-                            month: currentMonth,
+                            month: depositMonth,
                             notes: depositNotes
                         });
                         setShowDepositModal(false);
@@ -145,8 +207,16 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
 
     // Get user balance
     const getUserBalance = (userId) => {
-        const balance = balancesData?.find(b => b.userId === userId);
-        return balance?.balance || 0;
+        if (monthFinalized) {
+            const finalizedMember = finalizationData?.memberDetails?.find(
+                member => member.userId?.toString() === userId?.toString()
+            );
+
+            if (finalizedMember) return Number(finalizedMember.newBalance) || 0;
+        }
+
+        const balance = balancesData?.find(b => b.userId?.toString() === userId?.toString());
+        return Number(balance?.balance) || 0;
     };
 
     // Delete deposit
@@ -204,8 +274,12 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                     <MemberRowSkeleton key={index} />
                                 ))
                             ) : filteredUsers.length ? filteredUsers.map((user) => {
-                                const userDeposits = depositsData?.filter(d => d.userId === user._id.toString()) || [];
-                                const monthlyDeposits = userDeposits.reduce((sum, d) => sum + d.amount, 0);
+                                const userDeposits = user.isFinalizedSnapshot
+                                    ? []
+                                    : depositsData?.filter(d => d.userId?.toString() === user._id?.toString()) || [];
+                                const monthlyDeposits = user.isFinalizedSnapshot
+                                    ? user.finalizedDeposit
+                                    : userDeposits.reduce((sum, d) => sum + d.amount, 0);
 
                                 return (
                                     <tr key={user._id}>
@@ -313,6 +387,24 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                             </h3>
 
                             <div className='flex flex-col gap-3'>
+                                <div className='grid grid-cols-2 gap-3'>
+                                <div>
+                                    <label className='label'>Month</label>
+                                    <select
+                                        value={selectedDepositMonth}
+                                        onChange={(e) => {
+                                            const depositYear = depositMonth?.split('-')[0] || String(currentYear);
+                                            setDepositMonth(`${depositYear}-${e.target.value}`);
+                                        }}
+                                        className='select select-bordered w-full'
+                                        aria-label='Deposit month'
+                                    >
+                                        {depositMonthOptions.map((month) => (
+                                            <option key={month.value} value={month.value}>{month.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
                                 <div>
                                     <label className='label'>Amount (৳)</label>
                                     <input
@@ -322,6 +414,7 @@ const MemberInfoTable = ({ usersData, depositsData, balancesData, monthFinalized
                                         className='input input-bordered w-full'
                                         placeholder='Enter amount'
                                     />
+                                </div>
                                 </div>
 
                                 <div>
