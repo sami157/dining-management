@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import { format, subMonths } from 'date-fns';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { MonthlySummaryHistory } from '../components/ManagerDashboard/MonthlySummaryHistory';
 
@@ -25,9 +25,74 @@ const Section = ({ title, description, children }) => (
   </section>
 );
 
+const CategorySkeleton = () => (
+  <div className='flex items-center justify-between gap-4 py-3 animate-pulse'>
+    <div className='skeleton h-4 w-24'></div>
+    <div className='skeleton h-4 w-16'></div>
+  </div>
+);
+
+const ExpenseLogSkeleton = () => (
+  <div className='flex gap-3 py-2 justify-between animate-pulse'>
+    <div className='flex flex-col gap-2 min-w-0'>
+      <div className='skeleton h-3 w-28'></div>
+      <div className='skeleton h-3 w-40'></div>
+    </div>
+    <div className='skeleton h-4 w-16'></div>
+  </div>
+);
+
+const MemberDetailsSkeleton = () => (
+  <Section
+    title='Member Details'
+    description='Finalized member meal cost, fees, deposits, and balances.'
+  >
+    <div className='mb-4 flex flex-col md:flex-row gap-3 items-center md:justify-between'>
+      <div className='skeleton h-10 w-full sm:max-w-sm rounded-md'></div>
+      <div className='skeleton h-5 w-24'></div>
+    </div>
+    <div className='space-y-3'>
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className='flex items-center justify-between gap-4 animate-pulse'>
+          <div className='skeleton h-4 w-32'></div>
+          <div className='grid grid-cols-3 sm:grid-cols-6 gap-3 w-3/4'>
+            {Array.from({ length: 6 }).map((__, valueIndex) => (
+              <div key={valueIndex} className='skeleton h-4 w-full'></div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </Section>
+);
+
+const HistoryReportSkeleton = ({ showMemberDetails }) => (
+  <>
+    <div className='grid grid-cols-1 lg:grid-cols-2 gap-5 items-start'>
+      <div className='flex flex-col gap-5 min-w-0'>
+        <MonthlySummaryHistory isLoading />
+
+        <Section title='Expenses by Category' description='Category totals for this finalized month.'>
+          <div className='divide-y divide-base-300'>
+            {Array.from({ length: 3 }).map((_, index) => <CategorySkeleton key={index} />)}
+          </div>
+        </Section>
+      </div>
+
+      <Section title='Expense Log' description='Individual expense records for audit review.'>
+        <div className='divide-y divide-base-300'>
+          {Array.from({ length: 5 }).map((_, index) => <ExpenseLogSkeleton key={index} />)}
+        </div>
+      </Section>
+    </div>
+
+    {showMemberDetails && <MemberDetailsSkeleton />}
+  </>
+);
+
 const PreviousData = () => {
   const axiosSecure = useAxiosSecure();
-  const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [currentMonth, setCurrentMonth] = useState(format(subMonths(new Date(), 1), 'yyyy-MM'));
   const [memberSearchTerm, setMemberSearchTerm] = useState('');
 
   const [selectedYear, setSelectedYear] = useState(currentMonth.split('-')[0]);
@@ -61,7 +126,7 @@ const PreviousData = () => {
     setCurrentMonth(`${selectedYear}-${month}`);
   };
 
-  const { data: finalizationData } = useQuery({
+  const { data: finalizationData, isLoading: finalizationLoading, isFetching: finalizationFetching } = useQuery({
     queryKey: ['finalization', currentMonth],
     queryFn: async () => {
       const response = await axiosSecure.get(`/finance/finalization/${currentMonth}`);
@@ -71,7 +136,7 @@ const PreviousData = () => {
 
   const monthFinalized = finalizationData?.isFinalized || false;
 
-  const { data: depositsData } = useQuery({
+  const { data: depositsData, isLoading: depositsLoading, isFetching: depositsFetching } = useQuery({
     queryKey: ['deposits', currentMonth],
     queryFn: async () => {
       const response = await axiosSecure.get(`/finance/deposits?month=${currentMonth}`);
@@ -79,7 +144,7 @@ const PreviousData = () => {
     },
   });
 
-  const { data: expensesData } = useQuery({
+  const { data: expensesData, isLoading: expensesLoading, isFetching: expensesFetching } = useQuery({
     queryKey: ['expenses', currentMonth],
     queryFn: async () => {
       const [year, month] = currentMonth.split('-');
@@ -98,7 +163,7 @@ const PreviousData = () => {
     return acc;
   }, {}) || {};
 
-  const { data: usersData } = useQuery({
+  const { data: usersData, isLoading: usersLoading, isFetching: usersFetching } = useQuery({
     queryKey: ['allUsers'],
     queryFn: async () => {
       const response = await axiosSecure.get('/users');
@@ -117,6 +182,9 @@ const PreviousData = () => {
     || finalizedByUser?.name
     || finalizedByUser?.email
     || finalizedById;
+
+  const reportLoading = finalizationLoading || (monthFinalized && (depositsLoading || expensesLoading || usersLoading));
+  const reportRefreshing = finalizationFetching || depositsFetching || expensesFetching || usersFetching;
 
   const memberDetails = finalizationData?.memberDetails || [];
   const normalizedMemberSearch = memberSearchTerm.trim().toLowerCase();
@@ -143,7 +211,12 @@ const PreviousData = () => {
       <div className='max-w-7xl mx-auto flex flex-col gap-5'>
         <div className='flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4'>
           <div>
-            <h1 className='text-2xl font-bold tracking-tight'>Previous Data</h1>
+            <div className='flex items-center gap-4'>
+              <h1 className='text-2xl font-bold tracking-tight'>Previous Data</h1>
+              {reportRefreshing && !reportLoading && monthFinalized && (
+                <span className='loading loading-spinner loading-xs text-primary'></span>
+              )}
+            </div>
             <p className='text-sm text-base-content/50'>Review finalized monthly finance history and member balances.</p>
           </div>
 
@@ -180,7 +253,13 @@ const PreviousData = () => {
           </div>
         </div>
 
-        {!monthFinalized ? (
+
+
+        {reportLoading ? (
+          <HistoryReportSkeleton
+            showMemberDetails={finalizationLoading || Boolean(finalizationData?.memberDetails?.length)}
+          />
+        ) : !monthFinalized ? (
           <div className='rounded-lg border border-dashed border-base-300 px-4 py-10 text-center'>
             <p className='text-sm font-semibold'>No finalized data found for {format(new Date(`${currentMonth}-01`), 'MMMM yyyy')}</p>
             <p className='text-xs text-base-content/50 mt-1'>Previous data is available after management finalizes a month.</p>
@@ -194,6 +273,7 @@ const PreviousData = () => {
                   depositsData={depositsData}
                   finalizationData={finalizationData}
                   finalizedByName={finalizedByName}
+                  isLoading={false}
                 />
 
                 <Section title='Expenses by Category' description='Category totals for this finalized month.'>
@@ -280,68 +360,68 @@ const PreviousData = () => {
                     </thead>
                     <tbody>
                       {filteredMemberDetails.length ? filteredMemberDetails.map((member) => (
-                          <tr key={member.userId}>
-                            <td className='font-semibold wrap-break-word whitespace-normal'>{member.userName}</td>
-                            <td className='text-center wrap-break-word'>{member.totalMeals}</td>
-                            <td className='text-right text-success wrap-break-word'>{currency(member.totalDeposits)}</td>
-                            <td className='text-right text-error wrap-break-word'>{currency(member.mealCost)}</td>
-                            <td className='text-right text-error wrap-break-word'>{currency(member.mosqueFee)}</td>
-                            <td className={`text-right wrap-break-word ${member.previousBalance >= 0 ? 'text-success' : 'text-error'}`}>
-                              {currency(member.previousBalance)}
-                            </td>
-                            <td className={`text-right font-bold wrap-break-word ${member.newBalance >= 0 ? 'text-success' : 'text-error'}`}>
-                              {currency(member.newBalance)}
-                            </td>
-                          </tr>
-                        )) : (
-                          <tr>
-                            <td colSpan={7} className='py-8 text-center text-sm text-base-content/50'>No members found.</td>
-                          </tr>
-                        )}
+                        <tr key={member.userId}>
+                          <td className='font-semibold wrap-break-word whitespace-normal'>{member.userName}</td>
+                          <td className='text-center wrap-break-word'>{member.totalMeals}</td>
+                          <td className='text-right text-success wrap-break-word'>{currency(member.totalDeposits)}</td>
+                          <td className='text-right text-error wrap-break-word'>{currency(member.mealCost)}</td>
+                          <td className='text-right text-error wrap-break-word'>{currency(member.mosqueFee)}</td>
+                          <td className={`text-right wrap-break-word ${member.previousBalance >= 0 ? 'text-success' : 'text-error'}`}>
+                            {currency(member.previousBalance)}
+                          </td>
+                          <td className={`text-right font-bold wrap-break-word ${member.newBalance >= 0 ? 'text-success' : 'text-error'}`}>
+                            {currency(member.newBalance)}
+                          </td>
+                        </tr>
+                      )) : (
+                        <tr>
+                          <td colSpan={7} className='py-8 text-center text-sm text-base-content/50'>No members found.</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
 
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden'>
                   {filteredMemberDetails.length ? filteredMemberDetails.map((member) => (
-                      <article key={member.userId} className='rounded-xl bg-base-200 p-3'>
-                        <div className='flex items-start justify-between mb-2 gap-3'>
-                          <p className='text-lg font-bold wrap-break-word min-w-0'>{member.userName}</p>
+                    <article key={member.userId} className='rounded-xl bg-base-200 p-3'>
+                      <div className='flex items-start justify-between mb-2 gap-3'>
+                        <p className='text-lg font-bold wrap-break-word min-w-0'>{member.userName}</p>
+                      </div>
+                      <dl className='grid grid-cols-3 gap-x-6 gap-y-2 text-sm'>
+                        <div>
+                          <dt className='text-base-content/50'>Meals</dt>
+                          <dd className='font-medium'>{member.totalMeals}</dd>
                         </div>
-                        <dl className='grid grid-cols-3 gap-x-6 gap-y-2 text-sm'>
-                          <div>
-                            <dt className='text-base-content/50'>Meals</dt>
-                            <dd className='font-medium'>{member.totalMeals}</dd>
-                          </div>
-                          <div>
-                            <dt className='text-base-content/50'>Deposits</dt>
-                            <dd className='font-medium text-success'>{currency(member.totalDeposits)}</dd>
-                          </div>
-                          <div>
-                            <dt className='text-base-content/50'>Meal Cost</dt>
-                            <dd className='font-medium text-error'>{currency(member.mealCost)}</dd>
-                          </div>
-                          <div>
-                            <dt className='text-base-content/50'>Mosque Fee</dt>
-                            <dd className='font-medium text-error'>{currency(member.mosqueFee)}</dd>
-                          </div>
-                          <div>
-                            <dt className='text-base-content/50'>Prev. Balance</dt>
-                            <dd className={`font-medium ${member.previousBalance >= 0 ? 'text-success' : 'text-error'}`}>
-                              {currency(member.previousBalance)}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className='text-base-content/50'>New Balance</dt>
-                            <dd className={`font-bold ${member.newBalance >= 0 ? 'text-success' : 'text-error'}`}>
-                              {currency(member.newBalance)}
-                            </dd>
-                          </div>
-                        </dl>
-                      </article>
-                    )) : (
-                      <p className='col-span-full py-8 text-center text-sm text-base-content/50'>No members found.</p>
-                    )}
+                        <div>
+                          <dt className='text-base-content/50'>Deposits</dt>
+                          <dd className='font-medium text-success'>{currency(member.totalDeposits)}</dd>
+                        </div>
+                        <div>
+                          <dt className='text-base-content/50'>Meal Cost</dt>
+                          <dd className='font-medium text-error'>{currency(member.mealCost)}</dd>
+                        </div>
+                        <div>
+                          <dt className='text-base-content/50'>Mosque Fee</dt>
+                          <dd className='font-medium text-error'>{currency(member.mosqueFee)}</dd>
+                        </div>
+                        <div>
+                          <dt className='text-base-content/50'>Prev. Balance</dt>
+                          <dd className={`font-medium ${member.previousBalance >= 0 ? 'text-success' : 'text-error'}`}>
+                            {currency(member.previousBalance)}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className='text-base-content/50'>New Balance</dt>
+                          <dd className={`font-bold ${member.newBalance >= 0 ? 'text-success' : 'text-error'}`}>
+                            {currency(member.newBalance)}
+                          </dd>
+                        </div>
+                      </dl>
+                    </article>
+                  )) : (
+                    <p className='col-span-full py-8 text-center text-sm text-base-content/50'>No members found.</p>
+                  )}
                 </div>
               </Section>
             )}
