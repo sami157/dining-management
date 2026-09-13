@@ -301,7 +301,7 @@ const MealCard = ({
                                         </div>
                                     ) : (
                                         <div className='text-center text-base-content/80 bangla-text'>
-                                            {meal.menu || <span className="text-base-content/30 italic">মেন্যু পেন্ডিং</span>}
+                                            {meal.menu || <span className="text-base-content/30 italic py-2">মেন্যু পেন্ডিং</span>}
                                         </div>
                                     )}
                                 </div>
