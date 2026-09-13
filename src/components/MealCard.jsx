@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { format } from 'date-fns';
-import { Check, UsersRound, X, Edit2, Trash2, XCircle, Gauge } from 'lucide-react';
+import { Check, UsersRound, X, Edit2, Trash2, XCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import CountUp from 'react-countup';
 import { getMealLabel } from '../utils/mealTypes';
@@ -179,11 +179,11 @@ const MealCard = ({
                 <div className='flex gap-1'>
                     {isEditing ? (
                         <>
-                            <button onClick={handleCancel} className='hover:bg-base-300 border border-base-200 cursor-pointer p-2 rounded-lg text-error'>
-                                <X size={18} />
+                            <button onClick={handleCancel} className='hover:bg-base-200 cursor-pointer p-2 rounded-lg'>
+                                Cancel
                             </button>
-                            <button onClick={handleSave} className='hover:bg-base-300 border border-base-200 cursor-pointer p-2 rounded-lg'>
-                                <Check size={18} />
+                            <button onClick={handleSave} className='hover:bg-base-200 text-primary font-black cursor-pointer p-2 rounded-lg'>
+                                Save
                             </button>
                         </>
                     ) : (
@@ -208,13 +208,13 @@ const MealCard = ({
                     >
                         <div className='p-3'>
                             <div className='flex justify-between text-sm items-center'>
-                                <div className='flex min-w-0 items-center gap-2'>
+                                <div className='flex min-w-0 items-center gap-1'>
                                     <span className={`font-bold uppercase tracking-widest ${meal?.isAvailable ? 'text-primary' : 'text-base-content/40'}`}>
                                         {getMealLabel(meal.mealType)}
                                     </span>
                                     {meal?.isAvailable && (
                                         <span
-                                            className='inline-flex items-center gap-1 text-xs font-bold bg-base-100 px-2 py-1.5 drop-shadow-2xl rounded-lg text-base-content/60'
+                                            className='inline-flex items-center gap-1 text-xs font-bold bg-base-100 px-2 py-1 drop-shadow-2xl rounded-lg text-base-content/60'
                                             aria-label={registrationsLoading
                                                 ? 'Loading registered meal count'
                                                 : registrationsError
@@ -237,9 +237,10 @@ const MealCard = ({
                                     )}
                                 </div>
                                 {meal?.isAvailable && !isEditing ? (
-                                    <div className='font-black flex items-center gap-1'>
-                                        <Gauge size={16}></Gauge>
-                                        <span>
+                                    <div className='flex items-end gap-1'>
+                                        {/* <Gauge size={16}/> */}
+                                        x
+                                        <span className='font-black '>
                                             {meal?.weight}
                                         </span>
 
@@ -251,12 +252,12 @@ const MealCard = ({
                                         title='Restore meal'
                                         disabled={pendingMealType === meal.mealType}
                                         onClick={() => handleMealRestore(meal.mealType)}
-                                        className='btn btn-ghost btn-sm font-black ml-auto text-success hover:bg-success/10'
+                                        className='font-black hover:text-success p-2 bg-base-100 drop-shadow-2xl rounded-lg cursor-pointer'
                                     >
                                         {pendingMealType === meal.mealType ? (
                                             <span className='loading loading-spinner loading-xs' />
                                         ) : (
-                                            <Check size={18} />
+                                                <span>Add</span>
                                         )}
                                     </button>
                                 ) : null}
@@ -271,16 +272,16 @@ const MealCard = ({
                                                 placeholder="Menu details..."
                                                 value={meal.menu || ''}
                                                 onChange={(e) => handleMenuChange(meal.mealType, e.target.value)}
-                                                className='input input-sm input-bordered h-10 w-full focus:input-primary'
+                                                className='input h-9 w-full focus:input-primary'
                                             />
                                             <div className="flex w-full items-center gap-2">
-                                                <span className="text-[10px] font-bold text-base-content/40 uppercase">Weight:</span>
+                                                <span className="text-sm font-bold text-base-content/40 uppercase">Weight:</span>
                                                 <input
                                                     type="number"
                                                     step="0.1"
                                                     value={meal.weight || 1}
                                                     onChange={(e) => handleWeightChange(meal.mealType, e.target.value)}
-                                                    className='input input-sm input-bordered h-10 w-24'
+                                                    className='input h-9 w-24'
                                                 />
                                                 <button
                                                     type='button'
@@ -288,12 +289,12 @@ const MealCard = ({
                                                     title='Delete meal'
                                                     disabled={pendingMealType === meal.mealType}
                                                     onClick={() => handleMealDelete(meal.mealType)}
-                                                    className='btn btn-ghost btn-sm btn-square ml-auto text-error hover:bg-error/10'
+                                                    className='ml-auto text-error cursor-pointer'
                                                 >
                                                     {pendingMealType === meal.mealType ? (
                                                         <span className='loading loading-spinner loading-xs' />
                                                     ) : (
-                                                        <Trash2 size={16} />
+                                                        <span className='p-2 text-error font-bold bg-base-100 drop-shadow-2xl rounded-lg'>Delete</span>
                                                     )}
                                                 </button>
                                             </div>
