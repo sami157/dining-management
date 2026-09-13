@@ -158,7 +158,7 @@ export const MealSheet = () => {
                     <div className='flex justify-between items-center'>
                         <div className='flex gap-2 items-center'>
                             <Utensils className="text-primary" size={40} />
-                            <div className='text-3xl min-w-60 font-black flex flex-col uppercase tracking-tight'>
+                            <div className='text-2xl sm:text-3xl min-w-60 font-black flex flex-col uppercase tracking-tight'>
                                 Daily Meal Sheet
                                 <p className='text-xs text-base-content/40 font-black uppercase transition-all tracking-tight'>
                                     {format(day, 'EEEE, MMMM dd, yyyy')}

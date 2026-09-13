@@ -12,15 +12,17 @@ const MotionDiv = motion.div;
 const upcomingMealCardVariants = {
     hidden: {
         opacity: 0,
-        y: 24,
+        y: -30,
+        scale: 0.9
     },
     visible: (index = 0) => ({
         opacity: 1,
         y: 0,
+        scale: 1,
         transition: {
-            duration: 0.4,
-            ease: 'easeOut',
-            delay: index * 0.12,
+            // duration: 0.4,
+            // ease: 'easeOut',
+            delay: index * 0.05,
         },
     }),
 };
@@ -100,7 +102,7 @@ const UpcomingMeals = () => {
                                     custom={index}
                                     initial="hidden"
                                     whileInView="visible"
-                                    viewport={{ once: true, amount: 0.2 }}
+                                    viewport={{ once: true, amount: 0 }}
                                 >
                                     <UpcomingMealCard
                                         date={date}
