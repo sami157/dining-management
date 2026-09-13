@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import { useQuery } from '@tanstack/react-query';
 import { format, addDays, startOfWeek, endOfWeek } from 'date-fns';
@@ -20,6 +20,36 @@ const MealSchedule = () => {
         },
     });
 
+    const {
+        data: registrations,
+        isLoading: registrationsLoading,
+        isError: registrationsError,
+        refetch: refetchRegistrations
+    } = useQuery({
+        queryKey: ['weekRegistrations', currentWeekStart],
+        queryFn: async () => {
+            const response = await axiosSecure.get(`/managers/registrations?startDate=${format(currentWeekStart, 'yyyy-MM-dd')}&endDate=${format(weekEnd, 'yyyy-MM-dd')}`);
+            return response.data.registrations;
+        },
+    });
+
+    const registrationCounts = useMemo(() => {
+        return (registrations || []).reduce((counts, registration) => {
+            const dateKey = format(new Date(registration.date), 'yyyy-MM-dd');
+            const key = `${dateKey}:${registration.mealType}`;
+            const mealCount = registration.numberOfMeals === undefined || registration.numberOfMeals === null
+                ? 1
+                : Number(registration.numberOfMeals);
+
+            counts[key] = (counts[key] || 0) + (Number.isFinite(mealCount) ? mealCount : 1);
+            return counts;
+        }, {});
+    }, [registrations]);
+
+    const refetchScheduleData = async () => {
+        await Promise.all([refetch(), refetchRegistrations()]);
+    };
+
     const handlePreviousWeek = () => setCurrentWeekStart(prev => addDays(prev, -7));
     const handleNextWeek = () => setCurrentWeekStart(prev => addDays(prev, 7));
     
@@ -30,7 +60,7 @@ const MealSchedule = () => {
                     startDate: format(currentWeekStart, 'yyyy-MM-dd'),
                     endDate: format(weekEnd, 'yyyy-MM-dd')
                 });
-                refetch();
+                await refetchScheduleData();
             },
             {
                 loading: 'Generating schedules...',
@@ -41,10 +71,10 @@ const MealSchedule = () => {
     }
 
     const handleUpdateSchedule = async (scheduleId, updateData) => {
-        toast.promise(
+        return toast.promise(
             async () => {
                 await axiosSecure.put(`/managers/schedules/${scheduleId}`, updateData);
-                await refetch();
+                await refetchScheduleData();
             },
             {
                 loading: 'Updating...',
@@ -57,7 +87,7 @@ const MealSchedule = () => {
         toast.promise(
             async () => {
                 await axiosSecure.delete(`/managers/schedules/${scheduleId}`);
-                await refetch();
+                await refetchScheduleData();
             },
             {
                 loading: 'Deleting...',
@@ -120,6 +150,9 @@ const MealSchedule = () => {
                                     schedule={schedule}
                                     onUpdate={handleUpdateSchedule}
                                     onDelete={handleDeleteSchedule}
+                                    registrationCounts={registrationCounts}
+                                    registrationsLoading={registrationsLoading}
+                                    registrationsError={registrationsError}
                                 />
                             </div>
                         ))}
