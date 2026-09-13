@@ -8,6 +8,34 @@ import GeneralInfo from './GeneralInfo';
 import { getMealShortLabel } from '../utils/mealTypes';
 import { isAdminRole } from '../utils/roles';
 import CountUp from 'react-countup';
+import { motion } from 'motion/react';
+
+const MotionTbody = motion.tbody;
+const MotionTr = motion.tr;
+
+const mealSheetListVariants = {
+    hidden: {},
+    visible: {
+        transition: {
+            staggerChildren: 0.05,
+        },
+    },
+};
+
+const mealSheetRowVariants = {
+    hidden: {
+        opacity: 0,
+        y: 10,
+    },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.25,
+            ease: 'easeOut',
+        },
+    },
+};
 
 export const MealSheet = () => {
     const axiosSecure = useAxiosSecure()
@@ -130,9 +158,9 @@ export const MealSheet = () => {
                     <div className='flex justify-between items-center'>
                         <div className='flex gap-2 items-center'>
                             <Utensils className="text-primary" size={40} />
-                            <div className='text-xl min-w-60 font-black italic flex flex-col uppercase tracking-tighter'>
+                            <div className='text-3xl min-w-60 font-black flex flex-col uppercase tracking-tight'>
                                 Daily Meal Sheet
-                                <p className='text-xs text-base-content/40 font-black uppercase transition-all tracking-widest'>
+                                <p className='text-xs text-base-content/40 font-black uppercase transition-all tracking-tight'>
                                     {format(day, 'EEEE, MMMM dd, yyyy')}
                                 </p>
                             </div>
@@ -232,11 +260,21 @@ export const MealSheet = () => {
                                         <SkeletonRow />
                                     </>
                                 ) : (
-                                    <tbody className='text-sm'>
+                                    <MotionTbody
+                                        key={todayStr}
+                                        className='text-sm'
+                                        variants={mealSheetListVariants}
+                                        initial='hidden'
+                                        animate='visible'
+                                    >
                                         {
                                             filteredUsers?.length > 0 ? (
                                                 filteredUsers.map(user => (
-                                                    <tr key={user._id} className='group'>
+                                                    <MotionTr
+                                                        key={user._id}
+                                                        className='group'
+                                                        variants={mealSheetRowVariants}
+                                                    >
                                                         <td className='text-center'>
                                                             <span className='rounded text-xs tracking-tighter text-center'>
                                                                 {
@@ -256,7 +294,7 @@ export const MealSheet = () => {
                                                                 <MealBox userId={user._id} mealType='night' />
                                                             </div>
                                                         </td>
-                                                    </tr>
+                                                    </MotionTr>
                                                 ))
                                             ) : (
                                                 <tr>
@@ -268,7 +306,7 @@ export const MealSheet = () => {
                                                     </td>
                                                 </tr>
                                             )}
-                                    </tbody>
+                                    </MotionTbody>
                                 )
                             }
                         </table>

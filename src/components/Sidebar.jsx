@@ -25,7 +25,7 @@ const Sidebar = ({ onNavigate }) => {
           <LayoutDashboard size={24} className='text-primary' />
         </div>
         <div className='flex flex-col'>
-          <span className='font-black tracking-tighter text-xl leading-none italic uppercase'>Admin</span>
+          <span className='font-black tracking-tighter text-xl leading-none uppercase'>Admin</span>
           <span className='text-[10px] font-bold uppercase tracking-[0.2em] opacity-40'>Management</span>
         </div>
       </div>

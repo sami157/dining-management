@@ -32,7 +32,7 @@ export const UserMonthlyStats = ({ finalizationData, finalizationLoading }) => {
         <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center gap-3 px-2">
                 <TrendingUp size={20} className="text-primary" />
-                <h2 className='text-xl font-black uppercase tracking-tighter italic'>Monthly Summary</h2>
+                <h2 className='text-xl font-black uppercase tracking-tighter'>Monthly Summary</h2>
             </div>
 
             <div className='bg-base-100 rounded-2xl p-4 sm:p-4 space-y-6'>

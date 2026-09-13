@@ -17,7 +17,7 @@ const UserSidebar = ({ onNavigate }) => {
                     <ClipboardList size={24} />
                 </div>
                 <div className="flex flex-col">
-                    <span className="font-black tracking-tighter text-xl leading-none italic uppercase">User</span>
+                    <span className="font-black tracking-tighter text-xl leading-none uppercase">User</span>
                     <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Dashboard</span>
                 </div>
             </div>

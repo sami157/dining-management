@@ -5,6 +5,25 @@ import { ChevronLeft, ChevronRight, CalendarDays, LayoutGrid } from 'lucide-reac
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import UpcomingMealCard from '../components/UpcomingMealCard';
 import useAuth from '../hooks/useAuth';
+import { motion } from 'motion/react';
+
+const MotionDiv = motion.div;
+
+const upcomingMealCardVariants = {
+    hidden: {
+        opacity: 0,
+        y: 24,
+    },
+    visible: (index = 0) => ({
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.4,
+            ease: 'easeOut',
+            delay: index * 0.12,
+        },
+    }),
+};
 
 const UpcomingMeals = () => {
     const axiosSecure = useAxiosSecure();
@@ -69,19 +88,27 @@ const UpcomingMeals = () => {
 
                 <main className="relative min-h-[50vh]">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {weekDates.map((date) => {
+                        {weekDates.map((date, index) => {
                             const key = format(date, 'yyyy-MM-dd');
                             const schedule = scheduleMap[key];
 
                             return (
-                                <div key={key} className="h-full">
+                                <MotionDiv
+                                    key={key}
+                                    className="h-full"
+                                    variants={upcomingMealCardVariants}
+                                    custom={index}
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true, amount: 0.2 }}
+                                >
                                     <UpcomingMealCard
                                         date={date}
                                         schedule={schedule}
                                         dataLoading={dataLoading}
                                         refetch={refetch}
                                     />
-                                </div>
+                                </MotionDiv>
                             );
                         })}
                     </div>

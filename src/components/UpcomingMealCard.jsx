@@ -7,6 +7,46 @@ import useAxiosSecure from '../hooks/useAxiosSecure';
 import { buildMealRegistrationPayload } from '../utils/mealRegistration';
 import { getMealLabel } from '../utils/mealTypes';
 import MealCommentModal from './MealCommentModal';
+import { AnimatePresence, motion } from 'motion/react';
+
+const MotionDiv = motion.div;
+const loadingMealTypes = ['morning', 'evening', 'night'];
+
+const upcomingMealVariants = {
+    hidden: {
+        opacity: 0,
+    },
+    visible: (index = 0) => ({
+        opacity: 1,
+        transition: {
+            duration: 0.3,
+            ease: 'easeOut',
+            delay: index * 0.1,
+        },
+    }),
+};
+
+const loadingMealVariants = {
+    hidden: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+    },
+    visible: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+    },
+    exit: {
+        opacity: 0,
+        y: -10,
+        scale: 0.96,
+        transition: {
+            duration: 0.2,
+            ease: 'easeInOut',
+        },
+    },
+};
 
 const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
     const axiosSecure = useAxiosSecure();
@@ -18,7 +58,11 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
     const meals = schedule?.meals || [];
     const dateStr = format(date, 'yyyy-MM-dd');
     const mealRows = dataLoading
-        ? Array.from({ length: 3 }, (_, index) => ({ mealType: `loading-${index}`, isLoading: true }))
+        ? loadingMealTypes.map((mealType) => ({
+            key: `loading-${mealType}`,
+            mealType,
+            isLoading: true,
+        }))
         : meals;
 
     const handleMealAction = async (meal, comment = '') => {
@@ -118,12 +162,12 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
     if (loading) return null;
 
     return (
-        <div className={`h-full mx-auto md:w-100 bg-base-100 border ${isToday ? 'border-primary border-dashed' : 'border-base-300'} rounded-xl overflow-hidden transition-all duration-500 ease-in-out`}>
-            <div className="p-4 flex flex-col h-full">
+        <div className={`h-full mx-auto md:w-100 bg-base-100 border ${isToday ? 'border-primary border-dashed' : 'border-base-300'} rounded-2xl overflow-hidden transition-all duration-500 ease-in-out`}>
+            <div className="p-5 flex flex-col h-full">
                 <div className="mb-4">
                     <div className="flex justify-between items-start">
                         <div>
-                            <h2 className={`text-2xl font-black tracking-tighter italic uppercase ${isToday ? 'text-primary' : ''}`}>
+                            <h2 className={`text-2xl font-black tracking-tighter uppercase ${isToday ? 'text-primary' : ''}`}>
                                 {format(date, 'EEEE')}
                             </h2>
                             <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">
@@ -138,34 +182,45 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                     </div>
                 </div>
 
-                <div className="grow space-y-3" aria-label={dataLoading ? 'Loading upcoming meals' : undefined}>
-                    {mealRows.length > 0 ? (
-                        mealRows.map((meal, index) => {
-                            const isLoadingMeal = Boolean(meal.isLoading);
-                            const isReg = meal.isRegistered;
-                            const mealCardClass = isLoadingMeal
-                                ? 'bg-base-200 border-base-300 border-dashed border'
-                                : !meal.isAvailable
-                                    ? 'bg-none border-dashed border-base-300 border'
-                                    : isReg
-                                        ? 'bg-primary/10 border-primary/30'
-                                        : 'bg-base-200 border-base-300';
-                            const rowRequestId = meal.registrationId || meal.mealType;
-                            const rowIsLoading = requestedMealId === rowRequestId;
+                <div
+                    key={dateStr}
+                    className="grow space-y-3"
+                    aria-label={dataLoading ? 'Loading upcoming meals' : undefined}
+                >
+                    <AnimatePresence mode="popLayout">
+                        {mealRows.length > 0 ? (
+                            mealRows.map((meal, index) => {
+                                const isLoadingMeal = Boolean(meal.isLoading);
+                                const isReg = meal.isRegistered;
+                                const mealCardClass = isLoadingMeal
+                                    ? 'bg-base-200 border-base-300 border-dashed border'
+                                    : !meal.isAvailable
+                                        ? 'bg-none border-dashed border-base-300 border'
+                                        : isReg
+                                            ? 'bg-primary/10 border-primary/30'
+                                            : 'bg-base-200 border-base-300';
+                                const rowRequestId = meal.registrationId || meal.mealType;
+                                const rowIsLoading = requestedMealId === rowRequestId;
 
-                            return (
-                                <div
-                                    key={meal.mealType ?? index}
-                                    className={`relative min-h-32 group rounded-lg transition-all duration-300 overflow-hidden ${mealCardClass}`}
-                                >
+                                return (
+                                    <MotionDiv
+                                        key={meal.key ?? meal.mealType ?? index}
+                                        className={`relative min-h-32 group rounded-lg transition-all duration-300 overflow-hidden ${mealCardClass}`}
+                                        variants={isLoadingMeal ? loadingMealVariants : upcomingMealVariants}
+                                        custom={index}
+                                        initial={isLoadingMeal ? false : 'hidden'}
+                                        animate="visible"
+                                        exit={isLoadingMeal ? 'exit' : undefined}
+                                        layout
+                                    >
                                     <div className="p-4">
                                         <div className="flex mb-4 justify-between items-center">
                                             <div className="flex items-center">
                                                 <div className="flex flex-col items-start">
-                                                    <h3 className={`font-bold uppercase tracking-wide text-sm flex items-center gap-2 ${isLoadingMeal ? 'skeleton skeleton-text w-32' : ''}`}>
-                                                        {isLoadingMeal ? 'Meal Type' : getMealLabel(meal.mealType)}
+                                                    <h3 className={`font-bold uppercase tracking-wide text-sm flex items-center gap-2`}>
+                                                        {getMealLabel(meal.mealType)}
                                                     </h3>
-                                                    <div>
+                                                    <motion.div layout>
                                                         {isLoadingMeal ? (
                                                             <span className="skeleton skeleton-text text-xs font-bold opacity-40 w-20">Weight</span>
                                                         ) : (
@@ -175,7 +230,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                                                 </span>
                                                             )
                                                         )}
-                                                    </div>
+                                                    </motion.div>
                                                 </div>
                                             </div>
 
@@ -250,7 +305,7 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
 
                                         <div className="bangla-text p-2 text-sm rounded-lg font-medium text-center leading-relaxed">
                                             {isLoadingMeal ? (
-                                                <p className="skeleton skeleton-text text-sm w-11/12 mx-auto">Menu</p>
+                                                <p className="skeleton skeleton-text mx-auto">Menu</p>
                                             ) : (
                                                 meal.menu || (
                                                     <span className="text-base-content/25">
@@ -260,15 +315,19 @@ const UpcomingMealCard = ({ date, schedule = {}, dataLoading, refetch }) => {
                                             )}
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <div className="flex flex-col items-center justify-center py-10 opacity-20 italic space-y-2">
-                            <Utensils size={32} strokeWidth={1} />
-                            <p className="text-xs font-bold uppercase tracking-widest">Kitchen Closed</p>
-                        </div>
-                    )}
+                                    </MotionDiv>
+                                );
+                            })
+                        ) : (
+                            <div
+                                key="empty"
+                                className="flex flex-col items-center justify-center py-10 opacity-20 italic space-y-2"
+                            >
+                                <Utensils size={32} strokeWidth={1} />
+                                <p className="text-xs font-bold uppercase tracking-widest">Kitchen Closed</p>
+                            </div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
             <MealCommentModal

@@ -347,7 +347,7 @@ const MemberManagement = () => {
           <span className='px-4 font-bold text-sm uppercase tracking-wide'>{format(currentWeekStart, 'dd MMM')} - {format(weekEnd, 'dd MMM')}</span>
           <button onClick={() => setCurrentWeekStart(prev => addDays(prev, 7))} className='p-2 hover:bg-base-300 rounded-lg transition-all'><ChevronRight size={20} /></button>
         </div>
-        <h1 className='text-2xl font-black italic tracking-tight flex items-center gap-2'>
+        <h1 className='text-2xl font-black tracking-tight flex items-center gap-2'>
           <MdAdminPanelSettings className='text-primary' /> MEMBER MANAGEMENT
         </h1>
       </div>
