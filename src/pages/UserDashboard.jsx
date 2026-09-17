@@ -4,7 +4,7 @@ import { format, addMonths, subMonths, lastDayOfMonth, startOfMonth, eachDayOfIn
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import toast from 'react-hot-toast';
 import useAuth from '../hooks/useAuth';
-import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Utensils, Wallet, Plus, Minus, PenLine, BanknoteArrowUp, HandCoins, SquareCheckBig, Info, ShieldBan } from 'lucide-react';
 import { getMealLabel, getMealShortLabel } from '../utils/mealTypes';
 import { buildMealRegistrationPayload } from '../utils/mealRegistration';
 import CountUp from 'react-countup';
@@ -205,9 +205,28 @@ const UserDashboard = ({ showFinancialStats = true }) => {
             return response.data;
         },
         onSuccess: async (data) => {
-            toast.success(data.message || 'Meal default updated');
+            if (data.user?.mealDefault) {
+                const registeredCount = data.registeredCount || 0;
+                const mealLabel = registeredCount === 1 ? 'meal' : 'meals';
+                toast.success(registeredCount
+                    ? `Auto-register enabled. Registered ${registeredCount} upcoming ${mealLabel}`
+                    : 'Auto-register enabled');
+            } else {
+                toast(
+                    <span>
+                        Auto-register <span className='text-error font-bold'>disabled</span>
+                    </span>,
+                    {
+                        icon: <ShieldBan className='text-error size-5' />,
+                    }
+                );
+            }
             queryClient.setQueryData(['userData', user?.email], data.user);
             queryClient.setQueryData(['userProfile'], data.user);
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ['userMeals'] }),
+                queryClient.invalidateQueries({ queryKey: ['userMealsData'] })
+            ]);
             setOptimisticMealDefault(null);
         },
         onError: (error) => {
@@ -371,24 +390,25 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                 </div>
 
                 <div className='grid-cols-1 w-[94vw] md:w-2/5'>
-                    <div className='flex flex-col gap-4 justify-center items-center'>
-                        <div className='space-y-4 p-3 bg-base-200 rounded-lg'>
-                            <div className="flex items-center max-w-70 justify-between gap-4">
-                                <div>
-                                    <p className="text-sm font-bold uppercase">Auto Register</p>
-                                    <p className="text-xs text-base-content/50">
-                                        Get automatically registered for offered meals
-                                    </p>
+                    <div className='flex flex-col justify-center items-center'>
+                        <div className='px-10 py-4 mask-b-from-80% mask-b-to-100%'>
+                            <div className={`space-y-4 p-3 bg-base-200 drop-shadow-2xl ${mealDefault && 'drop-shadow-primary/20'}  mb-4 rounded-lg`}>
+                                <div className="flex items-center max-w-70 justify-between gap-4">
+                                    <div>
+                                        <p className="text-sm font-bold uppercase">Auto Register</p>
+                                        <p className="text-xs text-base-content/50">
+                                            Get automatically registered for offered meals
+                                        </p>
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        className="toggle toggle-primary"
+                                        checked={mealDefault}
+                                        onChange={handleMealDefaultChange}
+                                        disabled={userDataLoading || updateMealDefault.isPending}
+                                    />
                                 </div>
-                                <input
-                                    type="checkbox"
-                                    className="toggle toggle-primary"
-                                    checked={mealDefault}
-                                    onChange={handleMealDefaultChange}
-                                    disabled={userDataLoading || updateMealDefault.isPending}
-                                />
-                            </div>
-                            {/* <div className="w-full flex items-center justify-between gap-4">
+                                {/* <div className="w-full flex items-center justify-between gap-4">
                                 <div>
                                     <p className="text-sm font-black uppercase tracking-widest">Bulk Register</p>
                                     <p className="text-xs text-base-content/50">
@@ -404,18 +424,19 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                                     Register
                                 </button>
                             </div> */}
+                            </div>
                         </div>
-                        <div className="overflow-x-auto h-[60vh] mask-b-from-98% mask-b-to-100%">
+                        <div className="overflow-auto h-[60vh] mask-b-from-98% mask-b-to-100%">
                             <table className="table table-xs table-pin-rows">
                                 <thead>
                                     <tr className='bg-base-300'>
-                                        <th className='text-center'>Date</th>
-                                        <th className='text-center'>
+                                        <th className='text-center py-3'>Date</th>
+                                        <th className='text-center py-3'>
                                             <div className="inline-flex items-center justify-center gap-1 whitespace-nowrap">
                                                 <span>Meals</span>
                                                 <div className="font-black">
                                                     <CountUp
-                                                    className='px-1.5 py-1 bg-primary rounded-md text-primary-content'
+                                                        className='px-1.5 py-1 bg-primary rounded-md text-primary-content'
                                                         end={mealCountData?.totalMeals || 0}
                                                         duration={1}
                                                         decimals={2}
@@ -423,7 +444,7 @@ const UserDashboard = ({ showFinancialStats = true }) => {
                                                 </div>
                                             </div>
                                         </th>
-                                        <th className='text-center'>Action</th>
+                                        <th className='text-center py-3'>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
