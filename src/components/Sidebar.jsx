@@ -5,6 +5,7 @@ import {
   Users2,
   Landmark,
   History,
+  Activity,
   LayoutDashboard,
   ChevronRight
 } from 'lucide-react'
@@ -15,6 +16,7 @@ const Sidebar = ({ onNavigate }) => {
     { to: '/admin-dashboard/member-management', label: 'Members', icon: Users2 },
     { to: '/admin-dashboard/fund-management', label: 'Funds', icon: Landmark },
     { to: '/admin-dashboard/history', label: 'Previous Data', icon: History },
+    { to: '/admin-dashboard/activity-log', label: 'Activity Logs', icon: Activity },
   ]
 
   return (

@@ -1,12 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router';
-import { ChevronRight, ClipboardList, TrendingUp, UserRound, MessageSquareText } from 'lucide-react';
+import { Activity, ChevronRight, ClipboardList, TrendingUp, UserRound, MessageSquareText } from 'lucide-react';
 
 const navItems = [
     { to: '/user-dashboard/meal-sheet', label: 'Meal Sheet', icon: ClipboardList },
     { to: '/user-dashboard/financial-information', label: 'Finance', icon: TrendingUp },
     { to: '/user-dashboard/profile', label: 'Profile', icon: UserRound },
     { to: '/user-dashboard/comments', label: 'Comments', icon: MessageSquareText },
+    { to: '/user-dashboard/activity-log', label: 'Activity Log', icon: Activity },
 ];
 
 const UserSidebar = ({ onNavigate }) => {

@@ -17,6 +17,7 @@ import PreviousData from "../pages/PreviousData";
 import { UserProfile } from "../pages/UserProfile";
 import UserFinancialInfo from "../pages/UserFinancialInfo";
 import AdminRoute from "../components/AdminRoute";
+import ActivityLog from "../components/ActivityLog";
 
 export const router = createBrowserRouter([
     {
@@ -60,6 +61,10 @@ export const router = createBrowserRouter([
                         path: 'profile',
                         element: <UserProfile />
                     },
+                    {
+                        path: 'activity-log',
+                        element: <ActivityLog mode="user" />
+                    },
                 ]
             },
             {
@@ -89,6 +94,10 @@ export const router = createBrowserRouter([
                     {
                         path: 'history',
                         element: <PreviousData />
+                    },
+                    {
+                        path: 'activity-log',
+                        element: <ActivityLog mode="manager" />
                     },
                 ]
             },

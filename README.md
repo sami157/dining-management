@@ -16,6 +16,7 @@ This application is built with React and Vite and communicates with the companio
 - Upcoming meal overview
 - Profile management
 - Meal totals, deposits, balances, and finalized financial information
+- Personal meal registration and deregistration activity history
 
 ### Administrators
 
@@ -27,6 +28,7 @@ This application is built with React and Vite and communicates with the companio
 - Deposit and expense management
 - Meal-rate and monthly financial finalization
 - Historical finalized-month data
+- User activity-log review for administrators
 
 ## Technology
 
@@ -61,8 +63,8 @@ The application entry point is `src/main.jsx`. It wraps the router with `QueryCl
 | Area | Routes |
 | --- | --- |
 | Public | `/`, `/login`, `/register` |
-| Member dashboard | `/user-dashboard`, `/user-dashboard/meal-sheet`, `/user-dashboard/comments`, `/user-dashboard/financial-information`, `/user-dashboard/profile` |
-| Admin dashboard | `/admin-dashboard/meal-schedule`, `/admin-dashboard/fund-management`, `/admin-dashboard/member-management`, `/admin-dashboard/history` |
+| Member dashboard | `/user-dashboard`, `/user-dashboard/meal-sheet`, `/user-dashboard/comments`, `/user-dashboard/financial-information`, `/user-dashboard/profile`, `/user-dashboard/activity-log` |
+| Admin dashboard | `/admin-dashboard/meal-schedule`, `/admin-dashboard/fund-management`, `/admin-dashboard/member-management`, `/admin-dashboard/history`, `/admin-dashboard/activity-log` |
 
 Member routes require authentication. Admin routes additionally require an administrative role returned by the backend.
 

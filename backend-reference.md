@@ -38,6 +38,7 @@ Date formats used by the API:
 | `GET` | `/users` | No token enforced by route | List users. Supports filters. |
 | `GET` | `/users/get-role/:email` | No | Get active user's role by email. |
 | `GET` | `/users/check-user/:email` | No | Check whether an active user exists for an email. |
+| `GET` | `/users/activity-logs` | Authenticated user; admins may view all logs or select a user | Get paginated meal registration and deregistration logs. |
 
 ### User Request Details
 
@@ -106,6 +107,50 @@ Query params:
 - `includeInactive=true`: include deactivated users
 
 Example: `/users?role=member&department=CSE&includeInactive=true`
+
+### `GET /users/activity-logs`
+
+Without `userId`, regular users receive only their own logs, while `admin` and `super_admin` users receive logs for all users. Admins and super admins may provide `userId` to inspect one user's logs, including inactive users.
+
+Query params: `userId` (optional), `startDate`/`endDate` (optional inclusive `YYYY-MM-DD` log-time filters in `Asia/Dhaka`), `page` (default `1`), and `limit` (default `25`, maximum `100`).
+
+Response shape:
+
+```json
+{
+  "userId": "USER_ID_OR_NULL",
+  "page": 1,
+  "limit": 25,
+  "total": 1,
+  "totalPages": 1,
+  "startDate": null,
+  "endDate": null,
+  "logs": [
+    {
+      "_id": "LOG_ID",
+      "schemaVersion": 1,
+      "action": "meal_registered",
+      "source": "self",
+      "targetUserId": "USER_ID",
+      "actorUserId": "USER_ID",
+      "actor": { "type": "user", "userId": "USER_ID", "name": "Member Name", "email": "member@example.com" },
+      "target": { "userId": "USER_ID", "name": "Member Name", "email": "member@example.com" },
+      "payload": {
+        "registrationId": "REGISTRATION_ID",
+        "mealDate": "2026-04-08T00:00:00.000Z",
+        "mealType": "night",
+        "numberOfMeals": 1,
+        "trigger": "direct"
+      },
+      "createdAt": "2026-04-08T05:00:00.000Z"
+    }
+  ]
+}
+```
+
+For an admin or super admin all-users request, `userId` is `null`. For a regular user request without `userId`, or an admin request with a selected `userId`, it contains the scoped user ID.
+
+Current actions are `meal_registered` and `meal_deregistered`. `source` is `self`, `other_user`, or `auto`; future event-specific fields should remain under `payload`.
 
 ## Meals
 
