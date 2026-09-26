@@ -156,21 +156,22 @@ const ActivityEntry = ({ log, isOwnView }) => {
                         <p className="font-bold">{payload.numberOfMeals || 1}</p>
                     </div>
                 </div>
-                <div className="min-w-0 flex-1">
-
+                <div className="w-full">
                     {isKnownMealEvent ? (
-                        <div className="">
-                            <div className="flex items-center text-sm gap-2 p-1">
-                                <CalendarDays size={14} aria-hidden="true" />
-                                <p>{formatMealDate(payload.mealDate)}</p>
-                            </div>
-                            <div className="flex items-center text-sm gap-2 p-1">
-                                <Utensils size={14} aria-hidden="true" />
-                                <p>{titleCase(payload.mealType)}</p>
+                        <div className="w-full">
+                            <div className='flex items-center justify-between'>
+                                <div className="flex items-center text-sm gap-2 p-1">
+                                    <CalendarDays size={14} aria-hidden="true" />
+                                    <p>{formatMealDate(payload.mealDate)}</p>
+                                </div>
+                                <div className="flex items-center text-sm gap-2 p-1">
+                                    <Utensils size={14} aria-hidden="true" />
+                                    <p>{titleCase(payload.mealType)}</p>
+                                </div>
                             </div>
                             {payload.trigger && (
-                                <div className="rounded-xl bg-base-300/50 mt-1 p-2 transition-colors">
-                                    <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest opacity-55">
+                                <div className="rounded-xl w-full bg-base-300/50 mt-2 p-2 transition-colors">
+                                    <p className="flex items-center gap-1.5 text-xs tracking-widest opacity-55">
                                         <Zap size={13} aria-hidden="true" />
                                         Trigger
                                     </p>
