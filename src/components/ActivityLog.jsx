@@ -9,8 +9,11 @@ import {
     ChevronLeft,
     ChevronRight,
     CircleAlert,
+    Clock3,
     Filter,
+    Hash,
     RotateCcw,
+    Utensils,
     UserRound,
     UsersRound,
     Zap,
@@ -83,28 +86,30 @@ const titleCase = value => String(value || '')
     .replace(/_/g, ' ')
     .replace(/\b\w/g, character => character.toUpperCase());
 
-const getSourceLabel = (log, isOwnView) => {
+const getSourceLabel = (log) => {
     if (log.source === 'auto') return 'Automatic registration';
-    if (log.source === 'self') return isOwnView ? 'By me' : 'By the user';
+    if (log.source === 'self') return null;
     return 'By another user';
 };
 
 const getActionMeta = action => {
     if (action === 'meal_registered') {
         return {
-            label: 'Meal registered',
+            label: 'Registration',
             icon: CircleCheck,
             color: 'text-success',
-            badge: 'badge-success'
+            badge: 'badge-success',
+            iconSurface: 'text-success'
         };
     }
 
     if (action === 'meal_deregistered') {
         return {
-            label: 'Meal deregistered',
+            label: 'Cancellation',
             icon: Ban,
             color: 'text-error',
-            badge: 'badge-error'
+            badge: 'badge-error',
+            iconSurface: 'text-error'
         };
     }
 
@@ -112,7 +117,8 @@ const getActionMeta = action => {
         label: titleCase(action || 'Unknown activity'),
         icon: CircleAlert,
         color: 'text-warning',
-        badge: 'badge-warning'
+        badge: 'badge-warning',
+        iconSurface: 'bg-warning/10 text-warning ring-warning/20'
     };
 };
 
@@ -121,66 +127,85 @@ const ActivityEntry = ({ log, isOwnView }) => {
     const Icon = meta.icon;
     const payload = log.payload || {};
     const isKnownMealEvent = log.action === 'meal_registered' || log.action === 'meal_deregistered';
+    const sourceLabel = getSourceLabel(log, isOwnView);
+    const hasActorOrTarget = log.target?.name
+        || (log.actor?.type === 'user' && log.actor?.name)
+        || log.actor?.type === 'system';
 
     return (
-        <article className="rounded-2xl">
-            <div className="flex items-start gap-3">
-                <div className={`mt-0.5 ${meta.color}`}>
-                    <Icon size={18} strokeWidth={2.5} />
+        <article className="group overflow-hidden rounded-2xl bg-base-100 transition-all duration-200 p-4">
+            <div className="flex flex-col items-start gap-2">
+                <div className='flex items-start w-full justify-between gap-2'>
+                    <div className='flex items-center gap-2'>
+                        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
+                                <h3 className={`font-bold ${meta.iconSurface} uppercase`}>{meta.label}</h3>
+                                <p className="mt-1 inline-flex items-center gap-1.5 text-xs opacity-55">
+                                    <Clock3 size={13} aria-hidden="true" />
+                                    {formatDateTime(log.createdAt)}
+                                </p>
+                            </div>
+                            {sourceLabel && (
+                                <span className={`badge badge-sm ${meta.badge} badge-outline w-fit shrink-0 font-bold uppercase tracking-wide`}>
+                                    {sourceLabel}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                    <div className='px-2 py-1 text-xs rounded-md bg-base-300'>
+                        <p className="font-bold">{payload.numberOfMeals || 1}</p>
+                    </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <h3 className="font-black tracking-tight">{meta.label}</h3>
-                            <p className="mt-0.5 text-xs opacity-55">{formatDateTime(log.createdAt)}</p>
-                        </div>
-                        <span className={`badge badge-sm ${meta.badge} badge-outline w-fit font-bold uppercase tracking-wide`}>
-                            {getSourceLabel(log, isOwnView)}
-                        </span>
-                    </div>
 
                     {isKnownMealEvent ? (
-                        <div className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-                            <div className="rounded-xl bg-base-200/70 p-3">
-                                <p className="text-[10px] font-black uppercase tracking-widest opacity-45">Meal date</p>
-                                <p className="mt-1 font-bold">{formatMealDate(payload.mealDate)}</p>
+                        <div className="">
+                            <div className="flex items-center text-sm gap-2 p-1">
+                                <CalendarDays size={14} aria-hidden="true" />
+                                <p>{formatMealDate(payload.mealDate)}</p>
                             </div>
-                            <div className="rounded-xl bg-base-200/70 p-3">
-                                <p className="text-[10px] font-black uppercase tracking-widest opacity-45">Meal</p>
-                                <p className="mt-1 font-bold">{titleCase(payload.mealType)}</p>
+                            <div className="flex items-center text-sm gap-2 p-1">
+                                <Utensils size={14} aria-hidden="true" />
+                                <p>{titleCase(payload.mealType)}</p>
                             </div>
-                            <div className="rounded-xl bg-base-200/70 p-3">
-                                <p className="text-[10px] font-black uppercase tracking-widest opacity-45">Quantity</p>
-                                <p className="mt-1 font-bold">{payload.numberOfMeals || 1}</p>
-                            </div>
-                            <div className="rounded-xl bg-base-200/70 p-3">
-                                <p className="text-[10px] font-black uppercase tracking-widest opacity-45">Trigger</p>
-                                <p className="mt-1 wrap-break-words font-bold">{titleCase(payload.trigger || 'direct')}</p>
-                            </div>
+                            {payload.trigger && (
+                                <div className="rounded-xl bg-base-300/50 mt-1 p-2 transition-colors">
+                                    <p className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest opacity-55">
+                                        <Zap size={13} aria-hidden="true" />
+                                        Trigger
+                                    </p>
+                                    <p className="wrap-break-words font-bold">{titleCase(payload.trigger)}</p>
+                                </div>
+                            )}
                         </div>
                     ) : (
-                        <pre className="mt-4 max-h-40 overflow-auto rounded-xl bg-base-200 p-3 text-xs whitespace-pre-wrap wrap-break-words">
+                        <pre className="mt-4 max-w-full max-h-40 overflow-auto rounded-xl bg-base-200 p-3 text-xs whitespace-pre-wrap wrap-break-words">
                             {JSON.stringify(payload, null, 2)}
                         </pre>
                     )}
 
-                    <div className="mt-4 flex flex-col gap-1 text-xs opacity-60 sm:flex-row sm:flex-wrap sm:gap-x-5">
-                        {log.target?.name && (
-                            <span className="inline-flex items-center gap-1.5">
-                                <UserRound size={13} /> Target: {log.target.name}
-                            </span>
-                        )}
-                        {log.actor?.type === 'user' && log.actor?.name && (
-                            <span className="inline-flex items-center gap-1.5">
-                                <UsersRound size={13} /> Actor: {log.actor.name}
-                            </span>
-                        )}
-                        {log.actor?.type === 'system' && (
-                            <span className="inline-flex items-center gap-1.5">
-                                <Zap size={13} /> {log.actor.label || 'System action'}
-                            </span>
-                        )}
-                    </div>
+                    {hasActorOrTarget && (
+                        <div className="mt-4 flex flex-col gap-2 border-t border-base-200 pt-3 text-xs text-base-content/60 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
+                            {log.target?.name && (
+                                <span className="inline-flex min-w-0 items-start gap-1.5">
+                                    <UserRound className="mt-0.5 shrink-0" size={13} aria-hidden="true" />
+                                    <span className="min-w-0 break-words">Target: {log.target.name}</span>
+                                </span>
+                            )}
+                            {log.actor?.type === 'user' && log.actor?.name && (
+                                <span className="inline-flex min-w-0 items-start gap-1.5">
+                                    <UsersRound className="mt-0.5 shrink-0" size={13} aria-hidden="true" />
+                                    <span className="min-w-0 break-words">Actor: {log.actor.name}</span>
+                                </span>
+                            )}
+                            {log.actor?.type === 'system' && (
+                                <span className="inline-flex min-w-0 items-start gap-1.5">
+                                    <Zap className="mt-0.5 shrink-0" size={13} aria-hidden="true" />
+                                    <span className="min-w-0 break-words">{log.actor.label || 'System action'}</span>
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </article>
@@ -282,7 +307,7 @@ const ActivityLog = ({ mode = 'user' }) => {
     const errorMessage = error?.response?.data?.error || 'Failed to load activity logs.';
 
     return (
-        <div className="mx-auto w-[94vw] max-w-7xl p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto w-[98vw] max-w-7xl p-4 sm:p-6 lg:p-8">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <div className="flex items-center gap-2 text-primary">
@@ -305,12 +330,12 @@ const ActivityLog = ({ mode = 'user' }) => {
                 <div className="mb-4 flex items-center gap-2 text-sm font-black uppercase tracking-widest opacity-70">
                     <Filter size={16} /> Filters
                 </div>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="flex flex-col sm:flex-row items-center justify-start gap-2">
                     {isManagerMode && (
-                        <div className="form-control md:col-span-1">
+                        <div className="form-control w-full sm:w-60">
                             <span className="label-text mb-2 text-xs font-black uppercase tracking-widest opacity-60">User</span>
                             <select
-                                className="select h-12 w-full"
+                                className="select border-0 w-full"
                                 value={selectedUserId}
                                 onChange={event => {
                                     setPage(1);
@@ -338,7 +363,7 @@ const ActivityLog = ({ mode = 'user' }) => {
                         </div>
                     )}
                     <div
-                        className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${isManagerMode ? 'md:col-span-2' : 'md:col-span-3'}`}
+                        className={`flex flex-col sm:flex-row w-full sm:w-fit gap-2`}
                         ref={calendarPopoverRef}
                     >
                         {[
@@ -350,7 +375,7 @@ const ActivityLog = ({ mode = 'user' }) => {
                                 <div className="relative">
                                     <button
                                         type="button"
-                                        className="input input-bordered flex h-12 w-full items-center justify-start gap-3 text-left font-semibold"
+                                        className="input border-0 flex h-10 w-full sm:w-fit items-center justify-start gap-3 text-left font-semibold"
                                         onClick={() => setCalendarOpen(current => current === datePicker.key ? null : datePicker.key)}
                                         aria-expanded={calendarOpen === datePicker.key}
                                         aria-haspopup="dialog"
@@ -415,7 +440,7 @@ const ActivityLog = ({ mode = 'user' }) => {
                 </div>
             ) : (
                 <>
-                    <div className="space-y-3">
+                    <div className="grid sm:grid-cols-3 gap-4">
                         {logs.map(log => <ActivityEntry key={log._id} log={log} isOwnView={isOwnView} />)}
                     </div>
                     <div className="mt-4 flex flex-col gap-3 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between">
