@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { addMonths, format, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useAxiosSecure from '../hooks/useAxiosSecure';
+import useRole from '../hooks/useRole';
+import { isAdminRole } from '../utils/roles';
 import toast from 'react-hot-toast';
 import MemberInfoTable from '../components/ManagerDashboard/MemberInfoTable';
 import MonthlySummary from '../components/ManagerDashboard/MonthlySummary';
@@ -11,6 +13,7 @@ import MonthlyExpense from '../components/ManagerDashboard/MonthlyExpense';
 const FundManagement = () => {
   const axiosSecure = useAxiosSecure();
   const queryClient = useQueryClient();
+  const { role, roleLoading } = useRole();
   const [currentMonth, setCurrentMonth] = useState(format(new Date(), 'yyyy-MM'));
   const currentCalendarMonth = format(new Date(), 'yyyy-MM');
   const [isFinalizationSubmitting, setIsFinalizationSubmitting] = useState(false);
@@ -66,6 +69,25 @@ const FundManagement = () => {
 
   const monthFinalized = finalizationData?.isFinalized || false;
   const isCurrentMonth = currentMonth === currentCalendarMonth;
+
+  const {
+    data: finalizationsData,
+    isLoading: finalizationsLoading,
+    isFetching: finalizationsFetching,
+    isError: finalizationsError,
+  } = useQuery({
+    queryKey: ['finalizations'],
+    queryFn: async () => {
+      const response = await axiosSecure.get('/finance/finalizations');
+      return response.data.finalizations || [];
+    },
+  });
+
+  const hasLaterFinalization = (finalizationsData || []).some(
+    (finalization) => finalization?.month && finalization.month > currentMonth
+  );
+  const finalizationHistoryReady = !finalizationsLoading && !finalizationsError;
+  const canManageFinalization = !roleLoading && isAdminRole(role);
 
   const { data: mealRateData, isLoading: mealRateLoading, isFetching: mealRateFetching } = useQuery({
     queryKey: ['runningMealRate', currentMonth],
@@ -127,6 +149,7 @@ const FundManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['deposits', currentMonth] }),
       queryClient.invalidateQueries({ queryKey: ['expenses', currentMonth] }),
       queryClient.invalidateQueries({ queryKey: ['allBalances'] }),
+      queryClient.invalidateQueries({ queryKey: ['finalizations'] }),
     ]);
   };
 
@@ -162,8 +185,17 @@ const FundManagement = () => {
 
   const mealRateCardLoading = isCurrentMonth && !monthFinalized && (finalizationLoading || mealRateLoading);
   const mealRateCardRefreshing = mealRateFetching && !mealRateCardLoading;
-  const summaryLoading = depositsLoading || expensesLoading || usersLoading || finalizationLoading;
-  const summaryRefreshing = depositsFetching || expensesFetching || usersFetching || finalizationFetching;
+  const summaryLoading = depositsLoading
+    || expensesLoading
+    || usersLoading
+    || finalizationLoading
+    || finalizationsLoading
+    || roleLoading;
+  const summaryRefreshing = depositsFetching
+    || expensesFetching
+    || usersFetching
+    || finalizationFetching
+    || finalizationsFetching;
   const memberTableLoading = usersLoading || balancesLoading || depositsLoading || finalizationLoading;
   const memberTableRefreshing = usersFetching || balancesFetching || depositsFetching || finalizationFetching;
   const expenseLoading = expensesLoading;
@@ -210,7 +242,7 @@ const FundManagement = () => {
 
         <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-5 items-start'>
           <div className='flex flex-col gap-5'>
-            <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} undoFinalization={undoFinalization} canManageFinalization={isCurrentMonth} finalizationActionLoading={isFinalizationSubmitting} totalFixedDeposit={amount} mealRate={runningMealRate} isLoading={summaryLoading} isRefreshing={summaryRefreshing} mealRateLoading={mealRateCardLoading} mealRateRefreshing={mealRateCardRefreshing} finalizationData={finalizationData} finalizedByName={finalizedByName} mosqueFeeSum={mosqueFeeSum} />
+            <MonthlySummary totalExpenses={totalExpenses} depositsData={depositsData} monthFinalized={monthFinalized} finalizeMonth={finalizeMonth} undoFinalization={undoFinalization} canManageFinalization={canManageFinalization} hasLaterFinalization={hasLaterFinalization} finalizationHistoryReady={finalizationHistoryReady} finalizationActionLoading={isFinalizationSubmitting} totalFixedDeposit={amount} mealRate={runningMealRate} isLoading={summaryLoading} isRefreshing={summaryRefreshing} mealRateLoading={mealRateCardLoading} mealRateRefreshing={mealRateCardRefreshing} finalizationData={finalizationData} finalizedByName={finalizedByName} mosqueFeeSum={mosqueFeeSum} />
             <MonthlyExpense expensesData={expensesData} expensesByCategory={expensesByCategory} monthFinalized={monthFinalized} refetchExpenses={refetchExpenses} isLoading={expenseLoading} isRefreshing={expenseRefreshing} />
           </div>
           <MemberInfoTable usersData={usersData} balancesData={balancesData} depositsData={depositsData} finalizationData={finalizationData} monthFinalized={monthFinalized} refetchDeposits={refetchDeposits} refetchBalances={refetchBalances} currentMonth={currentMonth} isLoading={memberTableLoading} isRefreshing={memberTableRefreshing} depositsLoading={depositsLoading} />
