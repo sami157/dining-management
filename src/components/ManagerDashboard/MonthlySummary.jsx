@@ -57,7 +57,7 @@ const formatDateTime = (value) => {
     });
 };
 
-const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, undoFinalization, canManageFinalization, hasLaterFinalization, finalizationHistoryReady, finalizationActionLoading, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, mealRateRefreshing, finalizationData, finalizedByName, mosqueFeeSum }) => {
+const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, undoFinalization, canManageFinalization, hasLaterFinalization, finalizationHistoryReady, finalizationActionLoading, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, finalizationData, finalizedByName, mosqueFeeSum }) => {
     const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
     const balance = totalDeposit - totalExpenses;
     const uniqueEmailCount = new Set(depositsData?.map(item => item.userEmail)).size;
@@ -133,7 +133,7 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                     <button
                         onClick={showUndoConfirmation}
                         disabled={isLoading || finalizationActionLoading}
-                        className="btn btn-sm btn-error"
+                        className="btn bg-error text-base-100"
                     >
                         {finalizationActionLoading ? (
                             <span className="loading loading-spinner loading-xs" />
@@ -160,7 +160,7 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
                             value={currency(monthFinalized ? finalizationData?.mealRate : mealRate)}
                             icon={Zap}
                             isLoading={mealRateLoading}
-                            helper={mealRateRefreshing ? 'Updating' : null}
+                            // helper={null}
                         />
                         <SummaryRow label="Deposit Received Count" value={`${uniqueEmailCount} People`} icon={UsersRound} />
                         {monthFinalized && (

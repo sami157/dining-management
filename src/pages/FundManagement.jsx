@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { addMonths, format, subMonths } from 'date-fns';
+import { addMonths, format, lastDayOfMonth, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useAxiosSecure from '../hooks/useAxiosSecure';
 import useRole from '../hooks/useRole';
@@ -69,6 +69,13 @@ const FundManagement = () => {
 
   const monthFinalized = finalizationData?.isFinalized || false;
   const isCurrentMonth = currentMonth === currentCalendarMonth;
+  const isHistoricalMonth = currentMonth < currentCalendarMonth;
+  const selectedMonthDate = new Date(`${currentMonth}-01T00:00:00`);
+  const mealRateAsOfDate = isCurrentMonth
+    ? format(new Date(), 'yyyy-MM-dd')
+    : isHistoricalMonth
+      ? format(lastDayOfMonth(selectedMonthDate), 'yyyy-MM-dd')
+      : null;
 
   const {
     data: finalizationsData,
@@ -90,19 +97,19 @@ const FundManagement = () => {
   const canManageFinalization = !roleLoading && isAdminRole(role);
 
   const { data: mealRateData, isLoading: mealRateLoading, isFetching: mealRateFetching } = useQuery({
-    queryKey: ['runningMealRate', currentMonth],
+    queryKey: ['runningMealRate', currentMonth, mealRateAsOfDate],
     queryFn: async () => {
-      const response = await axiosSecure.get(`/stats/meal-rate?month=${currentMonth}&date=${format(new Date(), 'yyyy-MM-dd')}`);
+      const response = await axiosSecure.get(`/stats/meal-rate?month=${currentMonth}&date=${mealRateAsOfDate}`);
       return response.data;
     },
-    enabled: isCurrentMonth && !finalizationLoading && !monthFinalized,
+    enabled: Boolean(mealRateAsOfDate) && !finalizationLoading && !monthFinalized,
   });
 
-  const runningMealRate = isCurrentMonth
-    ? finalizationData?.isFinalized
-      ? finalizationData?.mealRate?.toFixed(2) || '0.00'
-      : mealRateData?.mealRate?.toFixed(2) || '0.00'
-    : '0.00';
+  const runningMealRate = finalizationData?.isFinalized
+    ? finalizationData?.mealRate?.toFixed(2) || '0.00'
+    : mealRateAsOfDate
+      ? mealRateData?.mealRate?.toFixed(2) || '0.00'
+      : '0.00';
 
   const { data: depositsData, isLoading: depositsLoading, isFetching: depositsFetching, refetch: refetchDeposits } = useQuery({
     queryKey: ['deposits', currentMonth],
@@ -183,7 +190,9 @@ const FundManagement = () => {
     ).finally(() => setIsFinalizationSubmitting(false));
   };
 
-  const mealRateCardLoading = isCurrentMonth && !monthFinalized && (finalizationLoading || mealRateLoading);
+  const mealRateCardLoading = Boolean(mealRateAsOfDate)
+    && !monthFinalized
+    && (finalizationLoading || mealRateLoading);
   const mealRateCardRefreshing = mealRateFetching && !mealRateCardLoading;
   const summaryLoading = depositsLoading
     || expensesLoading
@@ -232,13 +241,6 @@ const FundManagement = () => {
             </button>
           </div>
         </div>
-
-        {/* {(summaryRefreshing || memberTableRefreshing || expenseRefreshing) && !summaryLoading && !memberTableLoading && !expenseLoading && (
-          <div className='flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-base-content/50'>
-            <span className='loading loading-spinner loading-xs text-primary'></span>
-            Updating
-          </div>
-        )} */}
 
         <div className='grid grid-cols-1 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-5 items-start'>
           <div className='flex flex-col gap-5'>
