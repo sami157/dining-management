@@ -57,7 +57,7 @@ const formatDateTime = (value) => {
     });
 };
 
-const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, undoFinalization, canManageFinalization, hasLaterFinalization, finalizationHistoryReady, finalizationActionLoading, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, finalizationData, finalizedByName, mosqueFeeSum }) => {
+const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeMonth, undoFinalization, canManageFinalization, hasLaterFinalization, finalizationHistoryReady, finalizationActionLoading, totalFixedDeposit, mealRate, isLoading, isRefreshing, mealRateLoading, finalizationData, finalizedByName, mosqueFeeSum, isCurrentMonth }) => {
     const totalDeposit = depositsData?.reduce((sum, d) => sum + d.amount, 0) || 0;
     const balance = totalDeposit - totalExpenses;
     const uniqueEmailCount = new Set(depositsData?.map(item => item.userEmail)).size;
@@ -75,7 +75,7 @@ const MonthlySummary = ({ totalExpenses, depositsData, monthFinalized, finalizeM
         && finalizationHistoryReady
         && !hasLaterFinalization;
     const showFinalizeButton = canShowFinalizationActions && !monthFinalized;
-    const showUndoButton = canShowFinalizationActions && monthFinalized;
+    const showUndoButton = canShowFinalizationActions && monthFinalized && isCurrentMonth;
 
     const showUndoConfirmation = () => {
         toast.custom((t) => (
