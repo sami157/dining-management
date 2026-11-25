@@ -84,39 +84,42 @@ const UserEditModal = ({ user, onClose, onSave, onGenerateRecoveryCode, canGener
               >
                 <option value={ROLES.MEMBER}>Member</option>
                 <option value={ROLES.ADMIN}>Admin</option>
-                <option value={ROLES.SUPER_ADMIN}>Super Admin</option>
+                {/* <option value={ROLES.SUPER_ADMIN}>Super Admin</option> */}
               </select>
             </div>
 
-            <div className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-black uppercase text-[10px] opacity-70">Fixed Deposit (৳)</span>
-              </label>
-              <input
-                type="number"
-                className="input input-bordered w-full font-bold focus:outline-primary"
-                value={fixedDeposit}
-                min={0}
-                onChange={e => setFixedDeposit(e.target.value)}
-              />
+            <div className='flex items-center gap-4 justify-between'>
+              <div className="form-control w-full">
+                <label className="label py-1">
+                  <span className="label-text font-black uppercase text-[10px] opacity-70">Fixed Deposit (৳)</span>
+                </label>
+                <input
+                  type="number"
+                  className="input input-bordered w-full font-bold focus:outline-primary"
+                  value={fixedDeposit}
+                  min={0}
+                  onChange={e => setFixedDeposit(e.target.value)}
+                />
+              </div>
+
+              <div className="form-control w-full">
+                <label className="label py-1">
+                  <span className="label-text font-black uppercase text-[10px] opacity-70">Mosque Fee (৳)</span>
+                </label>
+                <input
+                  type="number"
+                  className="input input-bordered w-full font-bold focus:outline-primary"
+                  value={mosqueFee}
+                  min={0}
+                  onChange={e => setMosqueFee(e.target.value)}
+                />
+              </div>
             </div>
 
-            <div className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-black uppercase text-[10px] opacity-70">Mosque Fee (৳)</span>
-              </label>
-              <input
-                type="number"
-                className="input input-bordered w-full font-bold focus:outline-primary"
-                value={mosqueFee}
-                min={0}
-                onChange={e => setMosqueFee(e.target.value)}
-              />
-            </div>
           </div>
 
           {canGenerateRecoveryCode && (
-            <div className="mt-6 rounded-xl border border-base-300 bg-base-200/70 p-4">
+            <div className="mt-4 rounded-xl bg-base-200 p-4">
               <div className="flex flex-col gap-3">
                 <div>
                   <h4 className="text-sm font-black uppercase tracking-wide">Password Recovery</h4>
@@ -148,20 +151,20 @@ const UserEditModal = ({ user, onClose, onSave, onGenerateRecoveryCode, canGener
             </div>
           )}
 
-          <div className="modal-action mt-8 flex flex-col-reverse sm:flex-row gap-2">
-            <button
+          <div className="modal-action mt-4 flex flex-col-reverse sm:flex-row gap-2">
+            {/* <button
               className="btn btn-ghost w-full sm:w-auto font-bold uppercase"
               onClick={onClose}
               disabled={saving}
             >
               Cancel
-            </button>
+            </button> */}
             <button
-              className="btn btn-primary w-full sm:flex-1 font-black shadow-lg shadow-primary/20"
+              className="btn btn-primary font-black"
               onClick={handleSave}
               disabled={saving}
             >
-              {saving ? <span className="loading loading-spinner loading-sm" /> : 'SAVE UPDATES'}
+              {saving ? <span className="loading loading-spinner loading-sm" /> : 'SAVE'}
             </button>
           </div>
         </MotionDiv>
