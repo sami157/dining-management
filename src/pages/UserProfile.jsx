@@ -190,9 +190,9 @@ export const UserProfile = () => {
 
                     </fieldset>
 
-                    <section className="mt-6 rounded-xl bg-base-200/40 p-4 md:p-5">
+                    <div className="mt-6 rounded-xl bg-base-200/40 p-4 md:p-5">
                         <div className="mb-4">
-                            <label className="label cursor-pointer items-start justify-start gap-3 mb-2">
+                            <div className="flex cursor-pointer items-start justify-start gap-3 mb-2">
                                 <input
                                     {...register('mealSummaryEmailOptIn')}
                                     type="checkbox"
@@ -200,12 +200,12 @@ export const UserProfile = () => {
                                     disabled={!isEditing || updateProfile.isPending}
                                 />
                                 <div>
-                                    <span className="font-semibold">I want daily meal summary emails</span>
+                                    <span className="font-semibold">Daily Meal Summary Email</span>
                                     <p className="text-xs italic text-base-content/60 mt-1">
                                         Get tomorrow’s availability, registration status, and menu for breakfast, lunch, and dinner
                                     </p>
                                 </div>
-                            </label>
+                            </div>
                         </div>
 
                         <div>
@@ -234,7 +234,7 @@ export const UserProfile = () => {
                             </p>
                             {errors.mealSummaryEmail && <p className="text-error text-sm mt-1">{errors.mealSummaryEmail.message}</p>}
                         </div>
-                    </section>
+                    </div>
 
                     {isEditing && (
                         <div className="flex justify-end gap-2 mt-6">
