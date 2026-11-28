@@ -68,9 +68,13 @@ Required: `name`, `mobile`, `email`.
   "room": "101",
   "mobile": "01700000000",
   "designation": "Student",
-  "department": "CSE"
+  "department": "CSE",
+  "mealSummaryEmail": "member-summary@example.com",
+  "mealSummaryEmailOptIn": true
 }
 ```
+
+`mealSummaryEmail` is a custom delivery address, separate from the login email. `mealSummaryEmailOptIn` defaults to `false`. Enabling it requires a valid custom address; address changes do not require verification. Set the opt-in to `false` to stop future summaries.
 
 `PUT /users/role/:userId`
 
@@ -151,6 +155,29 @@ Response shape:
 For an admin or super admin all-users request, `userId` is `null`. For a regular user request without `userId`, or an admin request with a selected `userId`, it contains the scoped user ID.
 
 Current actions are `meal_registered` and `meal_deregistered`. `source` is `self`, `other_user`, or `auto`; future event-specific fields should remain under `payload`.
+
+## Notifications
+
+| Method | Route | Auth | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/notifications/next-day-meal-summary` | No | Send next-day summaries to active users who opted in. |
+
+The request is bodyless and accepts no date or recipient parameters. No internal scheduler is configured; an external caller invokes the route when delivery should run. The target date is tomorrow in `Asia/Dhaka`, matched using the backend's UTC-midnight date key. Each email uses the saved custom delivery address, never the login email. Messages contain all three meals, availability/registration status, quantity when registered, menu, and explicit holiday/unpublished/unavailable/menu-not-set states.
+
+Response `200` contains aggregate counts only:
+
+```json
+{
+  "targetDate": "2026-11-29",
+  "attempted": 8,
+  "sent": 7,
+  "failed": 0,
+  "unknown": 1,
+  "skipped": 2
+}
+```
+
+Each opted-in user has at most one attempt for a target date. Repeated calls skip previously attempted recipients, including failed or uncertain sends; `skipped` also includes invalid saved addresses. `unknown` means the SMTP outcome could not be confirmed. Missing SMTP configuration returns `503`; batch setup or data errors return `500`.
 
 ## Meals
 

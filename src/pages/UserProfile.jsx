@@ -39,6 +39,8 @@ export const UserProfile = () => {
                 room: userData.room || '',
                 designation: userData.designation || '',
                 department: userData.department || '',
+                mealSummaryEmail: userData.mealSummaryEmail || '',
+                mealSummaryEmailOptIn: userData.mealSummaryEmailOptIn === true,
             });
         }
     }, [reset, userData]);
@@ -52,6 +54,8 @@ export const UserProfile = () => {
                 room: formData.room,
                 designation: formData.designation,
                 department: formData.department,
+                mealSummaryEmail: formData.mealSummaryEmail,
+                mealSummaryEmailOptIn: formData.mealSummaryEmailOptIn === true,
             };
 
             const response = await axiosSecure.put('/users/profile', payload);
@@ -63,8 +67,8 @@ export const UserProfile = () => {
             await queryClient.invalidateQueries({ queryKey: ['userProfile'] });
             await queryClient.invalidateQueries({ queryKey: ['userData'] });
         },
-        onError: () => {
-            toast.error('Failed to update profile');
+        onError: (error) => {
+            toast.error(error.response?.data?.error || 'Failed to update profile');
         }
     });
 
@@ -81,6 +85,8 @@ export const UserProfile = () => {
                 room: userData.room || '',
                 designation: userData.designation || '',
                 department: userData.department || '',
+                mealSummaryEmail: userData.mealSummaryEmail || '',
+                mealSummaryEmailOptIn: userData.mealSummaryEmailOptIn === true,
             });
         }
         setIsEditing(false);
@@ -92,8 +98,8 @@ export const UserProfile = () => {
                 <div className="mb-5 flex items-start justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-black uppercase tracking-tight">Profile</h1>
-                        <p className="text-sm text-base-content/50">
-                            {isEditing ? 'Update your member information.' : 'View your member information.'}
+                        <p className="text-sm italic text-base-content/50">
+                            Your Information
                         </p>
                     </div>
 
@@ -184,16 +190,62 @@ export const UserProfile = () => {
 
                     </fieldset>
 
+                    <section className="mt-6 rounded-xl bg-base-200/40 p-4 md:p-5">
+                        <div className="mb-4">
+                            <label className="label cursor-pointer items-start justify-start gap-3 mb-2">
+                                <input
+                                    {...register('mealSummaryEmailOptIn')}
+                                    type="checkbox"
+                                    className="checkbox checkbox-primary"
+                                    disabled={!isEditing || updateProfile.isPending}
+                                />
+                                <div>
+                                    <span className="font-semibold">I want daily meal summary emails</span>
+                                    <p className="text-xs italic text-base-content/60 mt-1">
+                                        Get tomorrow’s availability, registration status, and menu for breakfast, lunch, and dinner
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div>
+                            <span htmlFor="mealSummaryEmail" className="mb-2 text-sm">Delivery email</span>
+                            <input
+                                {...register('mealSummaryEmail', {
+                                    validate: (value, values) => {
+                                        const normalized = value?.trim() || '';
+                                        if (values.mealSummaryEmailOptIn && !normalized) {
+                                            return 'Enter a delivery email before opting in';
+                                        }
+                                        if (!normalized) return true;
+                                        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized) || 'Enter a valid email address';
+                                    }
+                                })}
+                                id="mealSummaryEmail"
+                                type="email"
+                                autoComplete="off"
+                                maxLength={254}
+                                className="input mt-1 w-full"
+                                placeholder="name@example.com"
+                                disabled={!isEditing || updateProfile.isPending}
+                            />
+                            <p className="text-xs text-base-content/60 mt-2">
+                                This address is used only for meal summaries. It can be same or different from your login email
+                            </p>
+                            {errors.mealSummaryEmail && <p className="text-error text-sm mt-1">{errors.mealSummaryEmail.message}</p>}
+                        </div>
+                    </section>
+
                     {isEditing && (
-                    <div className="flex justify-end gap-2 mt-6">
-                        <button type="button" className="btn btn-ghost" onClick={handleCancel} disabled={updateProfile.isPending}>
-                            <X size={16} />
-                            Cancel
-                        </button>
-                        <button type="submit" className="btn btn-primary" disabled={isLoading || updateProfile.isPending || !isDirty}>
-                            {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
-                        </button>
-                    </div>
+                        <div className="flex justify-end gap-2 mt-6">
+                            <button type="button" className="btn btn-ghost" onClick={handleCancel} disabled={updateProfile.isPending}>
+                                <X size={16} />
+                                Cancel
+                            </button>
+                            <button type="submit" className="btn btn-primary" disabled={isLoading || updateProfile.isPending || !isDirty}>
+                                {updateProfile.isPending ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
                     )}
                 </form>
             </div>

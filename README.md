@@ -14,7 +14,8 @@ This application is built with React and Vite and communicates with the companio
 - Meal quantity updates, cancellations, and comments
 - Default meal preferences
 - Upcoming meal overview
-- Profile management
+- Profile management, including a separate opt-in delivery address for next-day meal summary emails
+- Optional next-day meal summary email preferences
 - Meal totals, deposits, balances, and finalized financial information
 - Personal meal registration and deregistration activity history
 
